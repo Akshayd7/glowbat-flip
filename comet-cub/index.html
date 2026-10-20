@@ -268,6 +268,7 @@
 </head>
 <body>
 
+  <button id="mute-btn" aria-label="Mute" style="position:fixed;top:12px;right:12px;z-index:50;width:44px;height:44px;border-radius:50%;border:2px solid #f5c542;background:rgba(10,20,50,.75);color:#f5c542;font-size:20px;cursor:pointer;pointer-events:auto">&#128266;</button>
   <canvas id="game-canvas"></canvas>
 
   <!-- HUD -->
@@ -304,7 +305,7 @@
   <!-- Game Over Screen -->
   <div id="gameover-screen" class="overlay hidden">
     <div class="panel">
-      <h1 class="game-title" style="font-size: 32px;">JOURNEY PAUSED</h1>
+      <h1 class="game-title" style="font-size: 32px;">GAME OVER</h1>
       <p class="subtitle" style="margin-bottom: 10px;">The twilight lanterns await your return</p>
       <div class="stats-grid">
         <div class="stat-box">
@@ -925,16 +926,62 @@
         }
       }
 
+      // --- AUDIO (WebAudio, mute persisted) ---
+      let muted = false;
+      try { muted = localStorage.getItem('cometcub_mute') === '1'; } catch (e) {}
+      let actx = null, musicTimer = null, mStep = 0;
+      function ensureAudio() {
+        if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+        if (actx && actx.state === 'suspended') actx.resume();
+      }
+      function tone(f, d, type, vol, when) {
+        if (muted || !actx) return;
+        const t = actx.currentTime + (when || 0);
+        const o = actx.createOscillator(), g = actx.createGain();
+        o.type = type || 'sine'; o.frequency.setValueAtTime(f, t);
+        g.gain.setValueAtTime(vol || 0.08, t);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+        o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + d + 0.02);
+      }
+      function sfx(k) {
+        if (k === 'jump') { tone(380, 0.15, 'square', 0.05); tone(620, 0.12, 'square', 0.04, 0.06); }
+        else if (k === 'coin') { tone(988, 0.08, 'triangle', 0.08); tone(1318, 0.14, 'triangle', 0.08, 0.07); }
+        else if (k === 'over') { tone(300, 0.25, 'sawtooth', 0.07); tone(180, 0.45, 'sawtooth', 0.07, 0.2); }
+        else if (k === 'slide') { tone(220, 0.14, 'sine', 0.06); }
+      }
+      const SCALE = [262, 330, 392, 523, 392, 330, 294, 392];
+      function musicStart() {
+        if (musicTimer) return;
+        musicTimer = setInterval(() => {
+          if (gameState !== 'PLAYING') return;
+          tone(SCALE[mStep % 8] / 2, 0.45, 'sine', 0.035);
+          if (mStep % 2 === 0) tone(SCALE[(mStep + 3) % 8], 0.3, 'triangle', 0.02);
+          mStep++;
+        }, 380);
+      }
+      const muteBtn = document.getElementById('mute-btn');
+      function paintMute() { muteBtn.innerHTML = muted ? '&#128263;' : '&#128266;'; }
+      paintMute();
+      muteBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); ensureAudio(); muted = !muted; paintMute();
+        try { localStorage.setItem('cometcub_mute', muted ? '1' : '0'); } catch (er) {}
+      });
+      muteBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
+      muteBtn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+      window.addEventListener('pointerdown', ensureAudio, { once: false });
+
       function startGame() {
         resetWorld();
         gameState = 'PLAYING';
         startScreen.classList.add('hidden');
         gameoverScreen.classList.add('hidden');
         hud.classList.add('visible');
+        ensureAudio(); musicStart();
       }
 
       function triggerGameOver() {
         gameState = 'GAMEOVER';
+        sfx('over');
         hud.classList.remove('visible');
 
         const totalScore = Math.floor(distanceScore) + shardCount * 25;
@@ -968,6 +1015,7 @@
           isSliding = false;
           slideTimer = 0;
           velocityY = JUMP_VELOCITY;
+          sfx('jump');
         }
       }
 
@@ -1210,7 +1258,7 @@
 
               if (dx < 0.85 && dy < 0.95 && dz < 0.85) {
                 shard.collected = true;
-                shardCount++;
+                shardCount++; sfx("coin");
                 scene.remove(shard.mesh);
                 activeShards.splice(i, 1);
                 continue;
