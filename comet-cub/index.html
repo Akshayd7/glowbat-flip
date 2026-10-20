@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Comet Cub - 3D Endless Runner</title>
+  <style>
+    :root {
+      --navy-dark: #070b19;
+      --navy-mid: #111a3a;
+      --gold-bright: #ffd766;
+      --gold-warm: #ffaa33;
+      --gold-glow: rgba(255, 215, 102, 0.45);
+      --text-light: #f4f6ff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--navy-dark);
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text-light);
+      touch-action: none;
+    }
+
+    #game-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+    }
+
+    /* HUD */
+    #hud {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      z-index: 10;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+
+    #hud.visible {
+      opacity: 1;
+    }
+
+    .hud-card {
+      background: rgba(11, 17, 42, 0.72);
+      border: 1.5px solid rgba(255, 215, 102, 0.45);
+      border-radius: 16px;
+      padding: 8px 16px;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), 0 0 12px rgba(255, 215, 102, 0.15);
+    }
+
+    .hud-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--gold-bright);
+      opacity: 0.85;
+      font-weight: 700;
+    }
+
+    .hud-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: #ffffff;
+      text-shadow: 0 0 10px var(--gold-glow);
+      line-height: 1.15;
+    }
+
+    .shard-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .shard-icon {
+      width: 16px;
+      height: 16px;
+      background: var(--gold-bright);
+      transform: rotate(45deg);
+      box-shadow: 0 0 8px var(--gold-bright);
+      display: inline-block;
+    }
+
+    /* Overlay Screens */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      background: radial-gradient(circle at center, rgba(17, 26, 58, 0.55) 0%, rgba(7, 11, 25, 0.88) 100%);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+
+    .overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .panel {
+      width: 100%;
+      max-width: 360px;
+      background: linear-gradient(160deg, rgba(19, 30, 68, 0.92) 0%, rgba(9, 14, 34, 0.96) 100%);
+      border: 2px solid var(--gold-bright);
+      border-radius: 26px;
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 28px var(--gold-glow);
+      position: relative;
+    }
+
+    .crest {
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #fff6d1 0%, var(--gold-bright) 45%, var(--gold-warm) 100%);
+      box-shadow: 0 0 24px var(--gold-bright);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .crest::after {
+      content: '';
+      width: 22px;
+      height: 22px;
+      background: var(--navy-dark);
+      transform: rotate(45deg);
+      border-radius: 3px;
+    }
+
+    h1.game-title {
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      color: var(--gold-bright);
+      text-shadow: 0 0 18px rgba(255, 215, 102, 0.65), 0 3px 0 #7a4b0c;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #c5d1ff;
+      margin-bottom: 24px;
+      line-height: 1.4;
+    }
+
+    .controls-guide {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 26px;
+      text-align: left;
+      background: rgba(7, 11, 25, 0.55);
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 215, 102, 0.22);
+      font-size: 12px;
+      color: #dbe3ff;
+    }
+
+    .controls-guide div span {
+      color: var(--gold-bright);
+      font-weight: 700;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 20px 0 26px;
+    }
+
+    .stat-box {
+      background: rgba(7, 11, 25, 0.65);
+      border: 1px solid rgba(255, 215, 102, 0.35);
+      border-radius: 14px;
+      padding: 12px 10px;
+    }
+
+    .stat-box.full {
+      grid-column: span 2;
+      background: rgba(255, 215, 102, 0.1);
+      border-color: var(--gold-bright);
+    }
+
+    .stat-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--gold-bright);
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .stat-num {
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 0 12px var(--gold-glow);
+    }
+
+    .btn-gold {
+      width: 100%;
+      padding: 16px 24px;
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--navy-dark);
+      background: linear-gradient(180deg, #ffe694 0%, #ffbb42 100%);
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #9e600c, 0 0 24px rgba(255, 215, 102, 0.6);
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+
+    .btn-gold:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #9e600c, 0 0 16px rgba(255, 215, 102, 0.5);
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
+    .pulse {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="game-canvas"></canvas>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="hud-card">
+      <div class="hud-label">Score</div>
+      <div class="hud-value" id="hud-score">0</div>
+    </div>
+    <div class="hud-card">
+      <div class="hud-label">Star Shards</div>
+      <div class="hud-value shard-row">
+        <span class="shard-icon"></span>
+        <span id="hud-coins">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Start Screen -->
+  <div id="start-screen" class="overlay">
+    <div class="panel">
+      <div class="crest"></div>
+      <h1 class="game-title">COMET CUB</h1>
+      <p class="subtitle">Guide the glowing celestial fox cub across the lantern-lit twilight skyway.</p>
+      <div class="controls-guide">
+        <div><span>Swipe L / R</span> : Switch Lane</div>
+        <div><span>Swipe Up</span> : Jump Low Wall</div>
+        <div><span>Swipe Down</span> : Slide Beam</div>
+        <div><span>Star Shards</span> : +25 Bonus</div>
+      </div>
+      <button id="start-btn" class="btn-gold pulse">Tap to Run</button>
+    </div>
+  </div>
+
+  <!-- Game Over Screen -->
+  <div id="gameover-screen" class="overlay hidden">
+    <div class="panel">
+      <h1 class="game-title" style="font-size: 32px;">JOURNEY PAUSED</h1>
+      <p class="subtitle" style="margin-bottom: 10px;">The twilight lanterns await your return</p>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-title">Score</div>
+          <div class="stat-num" id="final-score">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-title">Shards</div>
+          <div class="stat-num" id="final-coins">0</div>
+        </div>
+        <div class="stat-box full">
+          <div class="stat-title">Best Score</div>
+          <div class="stat-num" id="best-score">0</div>
+        </div>
+      </div>
+      <button id="restart-btn" class="btn-gold pulse">Run Again</button>
+    </div>
+  </div>
+
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      // --- STORAGE & CONSTANTS ---
+      const STORAGE_KEY = 'cometcub_v1';
+      const LANE_WIDTH = 2.3;
+      const LANES = [-LANE_WIDTH, 0, LANE_WIDTH];
+
+      const BASE_SPEED = 14.5;
+      const MAX_SPEED = 30.0;
+      const SPEED_ACCEL = 0.26; // units per second squared
+
+      const GRAVITY = -38.0;
+      const JUMP_VELOCITY = 14.2;
+      const SLIDE_DURATION = 0.62;
+
+      // Saved Data
+      let bestScore = 0;
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          bestScore = Number(parsed.bestScore) || 0;
+        }
+      } catch (e) {
+        bestScore = 0;
+      }
+
+      // DOM Elements
+      const canvas = document.getElementById('game-canvas');
+      const hud = document.getElementById('hud');
+      const hudScore = document.getElementById('hud-score');
+      const hudCoins = document.getElementById('hud-coins');
+      const startScreen = document.getElementById('start-screen');
+      const gameoverScreen = document.getElementById('gameover-screen');
+      const finalScoreEl = document.getElementById('final-score');
+      const finalCoinsEl = document.getElementById('final-coins');
+      const bestScoreEl = document.getElementById('best-score');
+      const startBtn = document.getElementById('start-btn');
+      const restartBtn = document.getElementById('restart-btn');
+
+      // --- THREE.JS SCENE SETUP ---
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+      const scene = new THREE.Scene();
+
+      // Colors for Twilight -> Starry Night transition
+      const colorTwilightSky = new THREE.Color(0x1b2956);
+      const colorNightSky = new THREE.Color(0x050814);
+      const colorTwilightFog = new THREE.Color(0x27386e);
+      const colorNightFog = new THREE.Color(0x080d21);
+
+      scene.background = colorTwilightSky.clone();
+      scene.fog = new THREE.FogExp2(colorTwilightFog.clone(), 0.017);
+
+      const camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.1, 140);
+      camera.position.set(0, 4.3, 6.8);
+      camera.lookAt(0, 1.3, -6);
+
+      // --- LIGHTING ---
+      const hemiLight = new THREE.HemisphereLight(0x526db8, 0x0c1229, 0.85);
+      scene.add(hemiLight);
+
+      const dirLight = new THREE.DirectionalLight(0xffdf9e, 0.9);
+      dirLight.position.set(12, 24, 14);
+      dirLight.castShadow = true;
+      dirLight.shadow.mapSize.width = 1024;
+      dirLight.shadow.mapSize.height = 1024;
+      dirLight.shadow.camera.near = 1;
+      dirLight.shadow.camera.far = 65;
+      const d = 16;
+      dirLight.shadow.camera.left = -d;
+      dirLight.shadow.camera.right = d;
+      dirLight.shadow.camera.top = d;
+      dirLight.shadow.camera.bottom = -d;
+      scene.add(dirLight);
+
+      // Warm ambient lantern fill
+      const lanternAmbient = new THREE.PointLight(0xffaa33, 1.1, 35);
+      lanternAmbient.position.set(0, 4, -8);
+      scene.add(lanternAmbient);
+
+      // --- SHARED MATERIALS ---
+      const matStoneMain = new THREE.MeshStandardMaterial({
+        color: 0x162247,
+        roughness: 0.75,
+        metalness: 0.15
+      });
+      const matStoneTrim = new THREE.MeshStandardMaterial({
+        color: 0x26386e,
+        roughness: 0.6,
+        metalness: 0.25
+      });
+      const matGoldTrim = new THREE.MeshStandardMaterial({
+        color: 0xffcf5c,
+        emissive: 0x996200,
+        emissiveIntensity: 0.45,
+        roughness: 0.3,
+        metalness: 0.7
+      });
+      const matLanternPost = new THREE.MeshStandardMaterial({
+        color: 0x0b1024,
+        roughness: 0.8
+      });
+      const matLanternPaper = new THREE.MeshStandardMaterial({
+        color: 0xffe484,
+        emissive: 0xffa824,
+        emissiveIntensity: 1.0,
+        roughness: 0.2
+      });
+      const matLanternHalo = new THREE.MeshBasicMaterial({
+        color: 0xffcc55,
+        transparent: true,
+        opacity: 0.22
+      });
+
+      // --- FLOATING STONE PATH & LANTERN POSTS ---
+      const SEGMENT_LENGTH = 10;
+      const NUM_SEGMENTS = 11;
+      const pathSegments = [];
+      const lanternGlowMats = [];
+
+      function createPathSegment(zPos, hasLanterns) {
+        const group = new THREE.Group();
+        group.position.z = zPos;
+
+        // Main Stone Slab
+        const slabGeo = new THREE.BoxGeometry(7.6, 0.8, SEGMENT_LENGTH - 0.12);
+        const slab = new THREE.Mesh(slabGeo, matStoneMain);
+        slab.position.y = -0.4;
+        slab.receiveShadow = true;
+        group.add(slab);
+
+        // Side Borders
+        const borderGeo = new THREE.BoxGeometry(0.35, 0.26, SEGMENT_LENGTH - 0.12);
+        const leftBorder = new THREE.Mesh(borderGeo, matStoneTrim);
+        leftBorder.position.set(-3.75, 0.1, 0);
+        leftBorder.receiveShadow = true;
+        group.add(leftBorder);
+
+        const rightBorder = new THREE.Mesh(borderGeo, matStoneTrim);
+        rightBorder.position.set(3.75, 0.1, 0);
+        rightBorder.receiveShadow = true;
+        group.add(rightBorder);
+
+        // Golden Lane Divider Strips
+        const stripGeo = new THREE.BoxGeometry(0.08, 0.04, SEGMENT_LENGTH - 0.4);
+        const stripL = new THREE.Mesh(stripGeo, matGoldTrim);
+        stripL.position.set(-LANE_WIDTH * 0.5, 0.01, 0);
+        group.add(stripL);
+
+        const stripR = new THREE.Mesh(stripGeo, matGoldTrim);
+        stripR.position.set(LANE_WIDTH * 0.5, 0.01, 0);
+        group.add(stripR);
+
+        // Lantern Posts on left and right edges
+        if (hasLanterns) {
+          [-4.05, 4.05].forEach((xSide) => {
+            const postGroup = new THREE.Group();
+            postGroup.position.set(xSide, 0, 0);
+
+            // Vertical Pole
+            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, 3.6, 8), matLanternPost);
+            pole.position.y = 1.8;
+            pole.castShadow = true;
+            postGroup.add(pole);
+
+            // Top Crossbar pointing inward
+            const armDir = xSide < 0 ? 1 : -1;
+            const arm = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.09, 0.09), matLanternPost);
+            arm.position.set(armDir * 0.36, 3.55, 0);
+            postGroup.add(arm);
+
+            // Hanging Golden Paper Lantern
+            const lanternX = armDir * 0.68;
+            const lantern = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.2, 0.52, 10), matLanternPaper);
+            lantern.position.set(lanternX, 3.18, 0);
+            postGroup.add(lantern);
+
+            // Top/bottom caps of lantern
+            const capGeo = new THREE.CylinderGeometry(0.26, 0.26, 0.06, 10);
+            const capTop = new THREE.Mesh(capGeo, matLanternPost);
+            capTop.position.set(lanternX, 3.46, 0);
+            postGroup.add(capTop);
+
+            const capBot = new THREE.Mesh(capGeo, matLanternPost);
+            capBot.position.set(lanternX, 2.9, 0);
+            postGroup.add(capBot);
+
+            // Soft Glow Halo Sphere
+            const haloMat = matLanternHalo.clone();
+            lanternGlowMats.push(haloMat);
+            const halo = new THREE.Mesh(new THREE.SphereGeometry(0.68, 12, 12), haloMat);
+            halo.position.set(lanternX, 3.18, 0);
+            postGroup.add(halo);
+
+            group.add(postGroup);
+          });
+        }
+
+        scene.add(group);
+        return group;
+      }
+
+      for (let i = 0; i < NUM_SEGMENTS; i++) {
+        const z = 10 - i * SEGMENT_LENGTH;
+        pathSegments.push(createPathSegment(z, true));
+      }
+
+      // --- DRIFTING STARFIELD & DISTANT CELESTIAL SHARDS ---
+      const STAR_COUNT = 320;
+      const starGeo = new THREE.BufferGeometry();
+      const starPositions = new Float32Array(STAR_COUNT * 3);
+      for (let i = 0; i < STAR_COUNT; i++) {
+        starPositions[i * 3] = (Math.random() - 0.5) * 95;
+        starPositions[i * 3 + 1] = Math.random() * 42 - 4;
+        starPositions[i * 3 + 2] = -Math.random() * 110 + 10;
+      }
+      starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+      const starMat = new THREE.PointsMaterial({
+        color: 0xffe9a6,
+        size: 0.38,
+        transparent: true,
+        opacity: 0.45
+      });
+      const starField = new THREE.Points(starGeo, starMat);
+      scene.add(starField);
+
+      // --- COMET CUB (PLAYER MODEL) ---
+      const cubGroup = new THREE.Group();
+      scene.add(cubGroup);
+
+      const cubBodyGroup = new THREE.Group();
+      cubGroup.add(cubBodyGroup);
+
+      const matCubGold = new THREE.MeshStandardMaterial({
+        color: 0xffcc4d,
+        emissive: 0xff8811,
+        emissiveIntensity: 0.65,
+        roughness: 0.25
+      });
+      const matCubCream = new THREE.MeshStandardMaterial({
+        color: 0xfff7dc,
+        emissive: 0xffd27d,
+        emissiveIntensity: 0.75,
+        roughness: 0.2
+      });
+      const matCubDark = new THREE.MeshStandardMaterial({
+        color: 0x0b1026,
+        roughness: 0.4
+      });
+
+      // Torso
+      const torso = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.56, 1.05), matCubGold);
+      torso.position.set(0, 0.52, 0);
+      torso.castShadow = true;
+      cubBodyGroup.add(torso);
+
+      // Chest fluff
+      const chest = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.44, 0.35), matCubCream);
+      chest.position.set(0, 0.48, -0.42);
+      cubBodyGroup.add(chest);
+
+      // Head
+      const head = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.62, 0.68), matCubGold);
+      head.position.set(0, 0.96, -0.38);
+      head.castShadow = true;
+      cubBodyGroup.add(head);
+
+      // Snout
+      const snout = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.26, 0.35), matCubCream);
+      snout.position.set(0, 0.84, -0.78);
+      cubBodyGroup.add(snout);
+
+      // Nose tip
+      const nose = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.12, 0.1), matCubDark);
+      nose.position.set(0, 0.91, -0.96);
+      cubBodyGroup.add(nose);
+
+      // Ears
+      const earGeo = new THREE.ConeGeometry(0.2, 0.45, 4);
+      const earL = new THREE.Mesh(earGeo, matCubGold);
+      earL.position.set(-0.24, 1.42, -0.34);
+      earL.rotation.set(-0.15, 0.3, 0.15);
+      cubBodyGroup.add(earL);
+
+      const earR = new THREE.Mesh(earGeo, matCubGold);
+      earR.position.set(0.24, 1.42, -0.34);
+      earR.rotation.set(-0.15, -0.3, -0.15);
+      cubBodyGroup.add(earR);
+
+      // Glowing Comet Tail
+      const tailGroup = new THREE.Group();
+      tailGroup.position.set(0, 0.56, 0.48);
+      cubBodyGroup.add(tailGroup);
+
+      const tailBase = new THREE.Mesh(new THREE.ConeGeometry(0.32, 1.05, 8), matCubGold);
+      tailBase.rotation.x = Math.PI * 0.42;
+      tailBase.position.set(0, 0.1, 0.42);
+      tailGroup.add(tailBase);
+
+      const tailTip = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.65, 8), matCubCream);
+      tailTip.rotation.x = Math.PI * 0.42;
+      tailTip.position.set(0, 0.18, 0.85);
+      tailGroup.add(tailTip);
+
+      // 4 Articulated Legs
+      const legGeo = new THREE.BoxGeometry(0.18, 0.42, 0.18);
+      const legs = [];
+      const legOffsets = [
+        [-0.22, 0.22, -0.34],
+        [0.22, 0.22, -0.34],
+        [-0.22, 0.22, 0.34],
+        [0.22, 0.22, 0.34]
+      ];
+      legOffsets.forEach((pos) => {
+        const leg = new THREE.Mesh(legGeo, matCubCream);
+        leg.position.set(pos[0], pos[1], pos[2]);
+        leg.castShadow = true;
+        cubBodyGroup.add(leg);
+        legs.push(leg);
+      });
+
+      // Player Point Light
+      const cubLight = new THREE.PointLight(0xffcc55, 1.4, 9);
+      cubLight.position.set(0, 1.1, 0);
+      cubGroup.add(cubLight);
+
+      // --- GOLD SPARKLE TRAIL PARTICLES ---
+      const TRAIL_COUNT = 38;
+      const trailParticles = [];
+      const trailGeo = new THREE.OctahedronGeometry(0.11, 0);
+
+      for (let i = 0; i < TRAIL_COUNT; i++) {
+        const mat = new THREE.MeshBasicMaterial({
+          color: i % 2 === 0 ? 0xffe885 : 0xffaa33,
+          transparent: true,
+          opacity: 0
+        });
+        const mesh = new THREE.Mesh(trailGeo, mat);
+        mesh.visible = false;
+        scene.add(mesh);
+        trailParticles.push({
+          mesh,
+          life: 0,
+          maxLife: 0.45,
+          vx: 0,
+          vy: 0,
+          vz: 0
+        });
+      }
+      let trailSpawnTimer = 0;
+
+      function spawnTrailParticle() {
+        const p = trailParticles.find((item) => item.life <= 0);
+        if (!p) return;
+        p.life = p.maxLife = 0.35 + Math.random() * 0.25;
+        p.mesh.visible = true;
+        p.mesh.position.set(
+          cubGroup.position.x + (Math.random() - 0.5) * 0.45,
+          cubGroup.position.y + 0.35 + Math.random() * 0.4,
+          cubGroup.position.z + 0.65
+        );
+        const s = 0.7 + Math.random() * 0.7;
+        p.mesh.scale.set(s, s, s);
+        p.vx = (Math.random() - 0.5) * 1.4;
+        p.vy = 0.6 + Math.random() * 1.4;
+        p.vz = 3.5 + Math.random() * 2.5;
+      }
+
+      // --- OBSTACLES & STAR SHARDS ---
+      const activeObstacles = [];
+      const activeShards = [];
+
+      // Obstacle Materials
+      const matBarrierWood = new THREE.MeshStandardMaterial({
+        color: 0x2a3b75,
+        roughness: 0.55,
+        metalness: 0.2
+      });
+      const matHazardGold = new THREE.MeshStandardMaterial({
+        color: 0xffbf47,
+        emissive: 0xcc7a00,
+        emissiveIntensity: 0.55,
+        roughness: 0.3
+      });
+      const matRockBlock = new THREE.MeshStandardMaterial({
+        color: 0x18234a,
+        roughness: 0.7,
+        metalness: 0.15
+      });
+      const matShard = new THREE.MeshStandardMaterial({
+        color: 0xffe680,
+        emissive: 0xffae19,
+        emissiveIntensity: 0.9,
+        roughness: 0.15,
+        metalness: 0.8
+      });
+
+      // Create Obstacle Mesh by Type: 'barrier' (jump), 'beam' (slide), 'rock' (change lane)
+      function buildObstacleMesh(type) {
+        const group = new THREE.Group();
+
+        if (type === 'barrier') {
+          // Low hurdle barrier (~0.95m tall) - Clearable by jumping
+          const rail = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.38, 0.32), matHazardGold);
+          rail.position.y = 0.68;
+          rail.castShadow = true;
+          group.add(rail);
+
+          const postGeo = new THREE.BoxGeometry(0.24, 0.95, 0.36);
+          const leftPost = new THREE.Mesh(postGeo, matBarrierWood);
+          leftPost.position.set(-0.82, 0.475, 0);
+          leftPost.castShadow = true;
+          group.add(leftPost);
+
+          const rightPost = new THREE.Mesh(postGeo, matBarrierWood);
+          rightPost.position.set(0.82, 0.475, 0);
+          rightPost.castShadow = true;
+          group.add(rightPost);
+        } else if (type === 'beam') {
+          // Overhead hanging gate beam (bottom at y = 1.05m) - Clearable by sliding
+          const sidePillarGeo = new THREE.BoxGeometry(0.22, 2.75, 0.34);
+          const pillarL = new THREE.Mesh(sidePillarGeo, matBarrierWood);
+          pillarL.position.set(-0.92, 1.375, 0);
+          pillarL.castShadow = true;
+          group.add(pillarL);
+
+          const pillarR = new THREE.Mesh(sidePillarGeo, matBarrierWood);
+          pillarR.position.set(0.92, 1.375, 0);
+          pillarR.castShadow = true;
+          group.add(pillarR);
+
+          // Overhead crossbeam
+          const beam = new THREE.Mesh(new THREE.BoxGeometry(2.05, 1.35, 0.42), matBarrierWood);
+          beam.position.y = 1.85;
+          beam.castShadow = true;
+          group.add(beam);
+
+          // Glowing bottom warning bar
+          const trim = new THREE.Mesh(new THREE.BoxGeometry(1.98, 0.22, 0.46), matHazardGold);
+          trim.position.y = 1.15;
+          group.add(trim);
+        } else if (type === 'rock') {
+          // Tall monolith rock block (2.5m tall) - Must switch lanes
+          const mainRock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.95, 0), matRockBlock);
+          mainRock.scale.set(0.92, 1.45, 0.85);
+          mainRock.position.y = 1.15;
+          mainRock.castShadow = true;
+          group.add(mainRock);
+
+          const topRock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.58, 0), matRockBlock);
+          topRock.position.set(0.1, 2.1, -0.05);
+          topRock.castShadow = true;
+          group.add(topRock);
+
+          // Glowing gold rune ring embedded in rock
+          const rune = new THREE.Mesh(new THREE.TorusGeometry(0.58, 0.06, 6, 16), matHazardGold);
+          rune.position.set(0, 1.2, 0.38);
+          group.add(rune);
+        }
+
+        return group;
+      }
+
+      const shardGeo = new THREE.OctahedronGeometry(0.38, 0);
+
+      function spawnShard(laneIndex, yPos, zPos) {
+        const mesh = new THREE.Mesh(shardGeo, matShard);
+        mesh.position.set(LANES[laneIndex], yPos, zPos);
+        scene.add(mesh);
+        activeShards.push({
+          mesh,
+          lane: laneIndex,
+          collected: false
+        });
+      }
+
+      // Fair Procedural Row Spawner
+      let nextSpawnZ = -32;
+
+      function spawnObstacleRow(zPos) {
+        // Choose lane roles ensuring AT LEAST ONE lane is never a full rock block,
+        // and any obstacle spawned is 100% clearable via jump, slide, or lane change.
+        const lanesOrder = [0, 1, 2].sort(() => Math.random() - 0.5);
+        const patternRoll = Math.random();
+
+        const laneTypes = [null, null, null];
+
+        if (patternRoll < 0.32) {
+          // 1 obstacle, 2 open lanes
+          const types = ['barrier', 'beam', 'rock'];
+          laneTypes[lanesOrder[0]] = types[Math.floor(Math.random() * types.length)];
+        } else if (patternRoll < 0.76) {
+          // 2 obstacles, 1 completely open lane
+          const t1 = ['barrier', 'beam', 'rock'][Math.floor(Math.random() * 3)];
+          const t2 = ['barrier', 'beam', 'rock'][Math.floor(Math.random() * 3)];
+          laneTypes[lanesOrder[0]] = t1;
+          laneTypes[lanesOrder[1]] = t2;
+        } else {
+          // All 3 lanes have obstacles, but AT LEAST ONE is a jumpable barrier or slideable beam (never 3 rocks)
+          laneTypes[lanesOrder[0]] = Math.random() < 0.5 ? 'barrier' : 'beam';
+          laneTypes[lanesOrder[1]] = ['barrier', 'beam', 'rock'][Math.floor(Math.random() * 3)];
+          laneTypes[lanesOrder[2]] = ['barrier', 'beam', 'rock'][Math.floor(Math.random() * 3)];
+        }
+
+        // Instantiate obstacles
+        for (let laneIdx = 0; laneIdx < 3; laneIdx++) {
+          const type = laneTypes[laneIdx];
+          if (type) {
+            const mesh = buildObstacleMesh(type);
+            mesh.position.set(LANES[laneIdx], 0, zPos);
+            scene.add(mesh);
+            activeObstacles.push({
+              mesh,
+              lane: laneIdx,
+              type
+            });
+          }
+        }
+
+        // Spawn Golden Star Shards in a rewarding line (either an open lane, over a barrier, or under a beam)
+        const shardLaneCandidates = [0, 1, 2].filter((l) => laneTypes[l] !== 'rock');
+        if (shardLaneCandidates.length > 0 && Math.random() < 0.85) {
+          const sLane = shardLaneCandidates[Math.floor(Math.random() * shardLaneCandidates.length)];
+          const obsInLane = laneTypes[sLane];
+          const count = 3;
+          const spacing = 2.4;
+
+          for (let i = -1; i <= 1; i++) {
+            let shardY = 0.75;
+            if (i === 0 && obsInLane === 'barrier') {
+              shardY = 1.95; // Arc over barrier
+            } else if (i === 0 && obsInLane === 'beam') {
+              shardY = 0.45; // Low under hanging beam
+            }
+            spawnShard(sLane, shardY, zPos + i * spacing);
+          }
+        }
+      }
+
+      // --- GAME STATE ---
+      let gameState = 'START'; // 'START' | 'PLAYING' | 'GAMEOVER'
+      let currentLane = 1; // 0 = Left, 1 = Center, 2 = Right
+      let speed = BASE_SPEED;
+      let distanceScore = 0;
+      let shardCount = 0;
+      let runTime = 0;
+
+      // Jump & Slide Physics State
+      let playerY = 0;
+      let velocityY = 0;
+      let isJumping = false;
+      let isSliding = false;
+      let slideTimer = 0;
+
+      function resetWorld() {
+        // Clear existing obstacles & shards
+        activeObstacles.forEach((o) => scene.remove(o.mesh));
+        activeObstacles.length = 0;
+
+        activeShards.forEach((s) => scene.remove(s.mesh));
+        activeShards.length = 0;
+
+        // Reset Player
+        currentLane = 1;
+        cubGroup.position.set(0, 0, 0);
+        cubGroup.rotation.set(0, 0, 0);
+        cubBodyGroup.scale.set(1, 1, 1);
+        cubBodyGroup.position.y = 0;
+
+        playerY = 0;
+        velocityY = 0;
+        isJumping = false;
+        isSliding = false;
+        slideTimer = 0;
+
+        // Reset Metrics
+        speed = BASE_SPEED;
+        distanceScore = 0;
+        shardCount = 0;
+        runTime = 0;
+
+        hudScore.textContent = '0';
+        hudCoins.textContent = '0';
+
+        // Pre-populate initial obstacles ahead
+        nextSpawnZ = -28;
+        for (let i = 0; i < 6; i++) {
+          spawnObstacleRow(nextSpawnZ);
+          nextSpawnZ -= 17;
+        }
+      }
+
+      function startGame() {
+        resetWorld();
+        gameState = 'PLAYING';
+        startScreen.classList.add('hidden');
+        gameoverScreen.classList.add('hidden');
+        hud.classList.add('visible');
+      }
+
+      function triggerGameOver() {
+        gameState = 'GAMEOVER';
+        hud.classList.remove('visible');
+
+        const totalScore = Math.floor(distanceScore) + shardCount * 25;
+        if (totalScore > bestScore) {
+          bestScore = totalScore;
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({ bestScore }));
+          } catch (e) {}
+        }
+
+        finalScoreEl.textContent = totalScore.toLocaleString();
+        finalCoinsEl.textContent = shardCount.toLocaleString();
+        bestScoreEl.textContent = bestScore.toLocaleString();
+
+        gameoverScreen.classList.remove('hidden');
+      }
+
+      // --- PLAYER ACTIONS ---
+      function changeLane(dir) {
+        if (gameState !== 'PLAYING') return;
+        const target = currentLane + dir;
+        if (target >= 0 && target <= 2) {
+          currentLane = target;
+        }
+      }
+
+      function triggerJump() {
+        if (gameState !== 'PLAYING') return;
+        if (!isJumping) {
+          isJumping = true;
+          isSliding = false;
+          slideTimer = 0;
+          velocityY = JUMP_VELOCITY;
+        }
+      }
+
+      function triggerSlide() {
+        if (gameState !== 'PLAYING') return;
+        isSliding = true;
+        slideTimer = SLIDE_DURATION;
+        if (isJumping) {
+          // Fast-drop to ground if swiped down mid-air
+          velocityY = -26;
+        }
+      }
+
+      // --- INPUT LISTENERS (TOUCH SWIPES + KEYBOARD) ---
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchHandled = false;
+
+      window.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 0) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+          touchHandled = false;
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchmove', (e) => {
+        if (touchHandled || gameState !== 'PLAYING' || e.touches.length === 0) return;
+        const dx = e.touches[0].clientX - touchStartX;
+        const dy = e.touches[0].clientY - touchStartY;
+        const absX = Math.abs(dx);
+        const absY = Math.abs(dy);
+
+        // Responsive 26px swipe threshold
+        if (Math.max(absX, absY) > 26) {
+          touchHandled = true;
+          if (absX > absY) {
+            changeLane(dx > 0 ? 1 : -1);
+          } else {
+            if (dy < 0) triggerJump();
+            else triggerSlide();
+          }
+        }
+      }, { passive: true });
+
+      window.addEventListener('keydown', (e) => {
+        if (gameState !== 'PLAYING') {
+          if (e.code === 'Space' || e.code === 'Enter') {
+            startGame();
+          }
+          return;
+        }
+        switch (e.code) {
+          case 'ArrowLeft':
+          case 'KeyA':
+            e.preventDefault();
+            changeLane(-1);
+            break;
+          case 'ArrowRight':
+          case 'KeyD':
+            e.preventDefault();
+            changeLane(1);
+            break;
+          case 'ArrowUp':
+          case 'KeyW':
+          case 'Space':
+            e.preventDefault();
+            triggerJump();
+            break;
+          case 'ArrowDown':
+          case 'KeyS':
+            e.preventDefault();
+            triggerSlide();
+            break;
+        }
+      });
+
+      startBtn.addEventListener('click', startGame);
+      restartBtn.addEventListener('click', startGame);
+
+      // --- WINDOW RESIZE ---
+      function onResize() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        renderer.setSize(w, h);
+        camera.aspect = w / h;
+        // Adjust FOV slightly on narrow mobile portrait screens so all 3 lanes & lanterns stay framed
+        camera.fov = w < h ? 68 : 58;
+        camera.updateProjectionMatrix();
+      }
+      window.addEventListener('resize', onResize);
+      onResize();
+
+      // --- MAIN ANIMATION LOOP ---
+      const clock = new THREE.Clock();
+
+      function animate() {
+        requestAnimationFrame(animate);
+        const dt = Math.min(clock.getDelta(), 0.05);
+
+        if (gameState === 'PLAYING') {
+          runTime += dt;
+          speed = Math.min(MAX_SPEED, speed + SPEED_ACCEL * dt);
+          distanceScore += speed * dt * 1.2;
+
+          // Day/Twilight to Starry Night smooth progression (completes transition over ~65 seconds)
+          const nightFactor = Math.min(1, runTime / 65);
+          scene.background.lerpColors(colorTwilightSky, colorNightSky, nightFactor);
+          scene.fog.color.lerpColors(colorTwilightFog, colorNightFog, nightFactor);
+          hemiLight.intensity = 0.85 - nightFactor * 0.4;
+          dirLight.intensity = 0.9 - nightFactor * 0.45;
+          starMat.opacity = 0.4 + nightFactor * 0.6;
+
+          // Pulse lantern halos subtly
+          const haloPulse = 0.2 + Math.sin(runTime * 4.5) * 0.05 + nightFactor * 0.08;
+          for (let i = 0; i < lanternGlowMats.length; i++) {
+            lanternGlowMats[i].opacity = haloPulse;
+          }
+
+          // Smooth Horizontal Lane Interpolation
+          const targetX = LANES[currentLane];
+          const diffX = targetX - cubGroup.position.x;
+          cubGroup.position.x += diffX * Math.min(1, dt * 14);
+          cubGroup.rotation.z = -diffX * 0.18;
+          cubGroup.rotation.y = -diffX * 0.1;
+
+          // Vertical Jump Physics
+          if (isJumping) {
+            playerY += velocityY * dt;
+            velocityY += GRAVITY * dt;
+            if (playerY <= 0) {
+              playerY = 0;
+              velocityY = 0;
+              isJumping = false;
+            }
+          }
+          cubGroup.position.y = playerY;
+
+          // Slide Squat State
+          if (isSliding) {
+            slideTimer -= dt;
+            if (slideTimer <= 0) {
+              isSliding = false;
+            }
+          }
+
+          const targetScaleY = isSliding ? 0.46 : 1.0;
+          const targetScaleXZ = isSliding ? 1.18 : 1.0;
+          cubBodyGroup.scale.y += (targetScaleY - cubBodyGroup.scale.y) * Math.min(1, dt * 18);
+          cubBodyGroup.scale.x += (targetScaleXZ - cubBodyGroup.scale.x) * Math.min(1, dt * 18);
+          cubBodyGroup.scale.z += (targetScaleXZ - cubBodyGroup.scale.z) * Math.min(1, dt * 18);
+
+          // Running Gait & Tail Animation
+          const stride = runTime * speed * 1.45;
+          if (!isJumping && !isSliding) {
+            cubBodyGroup.position.y = Math.abs(Math.sin(stride)) * 0.12;
+            legs[0].rotation.x = Math.sin(stride) * 0.65;
+            legs[1].rotation.x = -Math.sin(stride) * 0.65;
+            legs[2].rotation.x = -Math.sin(stride) * 0.65;
+            legs[3].rotation.x = Math.sin(stride) * 0.65;
+          } else {
+            cubBodyGroup.position.y = 0;
+          }
+          tailGroup.rotation.y = Math.sin(runTime * 10) * 0.25;
+          tailGroup.rotation.x = Math.cos(runTime * 8) * 0.12;
+
+          // Move Path Segments & Recycle
+          for (let i = 0; i < pathSegments.length; i++) {
+            const seg = pathSegments[i];
+            seg.position.z += speed * dt;
+            if (seg.position.z > 15) {
+              seg.position.z -= NUM_SEGMENTS * SEGMENT_LENGTH;
+            }
+          }
+
+          // Drift Stars Forward
+          const posArr = starGeo.attributes.position.array;
+          for (let i = 0; i < STAR_COUNT; i++) {
+            posArr[i * 3 + 2] += speed * 0.22 * dt;
+            if (posArr[i * 3 + 2] > 12) {
+              posArr[i * 3 + 2] = -98;
+              posArr[i * 3] = (Math.random() - 0.5) * 95;
+            }
+          }
+          starGeo.attributes.position.needsUpdate = true;
+
+          // Spawn New Obstacles Ahead
+          nextSpawnZ += speed * dt;
+          const dynamicSpacing = Math.max(15.5, 19.5 - (speed - BASE_SPEED) * 0.2);
+          while (nextSpawnZ > -85) {
+            spawnObstacleRow(nextSpawnZ - dynamicSpacing);
+            nextSpawnZ -= dynamicSpacing;
+          }
+
+          // Update Obstacles & Check Collisions
+          for (let i = activeObstacles.length - 1; i >= 0; i--) {
+            const obs = activeObstacles[i];
+            obs.mesh.position.z += speed * dt;
+
+            // Collision check near player Z = 0
+            const dz = Math.abs(obs.mesh.position.z - cubGroup.position.z);
+            const dx = Math.abs(obs.mesh.position.x - cubGroup.position.x);
+
+            if (dz < 0.62 && dx < 0.72) {
+              if (obs.type === 'barrier') {
+                // Clearable if player jumped high enough
+                if (playerY < 0.68) {
+                  triggerGameOver();
+                  break;
+                }
+              } else if (obs.type === 'beam') {
+                // Clearable if player is sliding and close to the ground
+                if (!isSliding || playerY > 0.35) {
+                  triggerGameOver();
+                  break;
+                }
+              } else if (obs.type === 'rock') {
+                // Full-lane obstacle
+                triggerGameOver();
+                break;
+              }
+            }
+
+            if (obs.mesh.position.z > 12) {
+              scene.remove(obs.mesh);
+              activeObstacles.splice(i, 1);
+            }
+          }
+
+          // Update Star Shards & Collect
+          for (let i = activeShards.length - 1; i >= 0; i--) {
+            const shard = activeShards[i];
+            shard.mesh.position.z += speed * dt;
+            shard.mesh.rotation.y += 3.2 * dt;
+
+            if (!shard.collected) {
+              const dx = Math.abs(shard.mesh.position.x - cubGroup.position.x);
+              const dy = Math.abs(shard.mesh.position.y - (cubGroup.position.y + 0.6));
+              const dz = Math.abs(shard.mesh.position.z - cubGroup.position.z);
+
+              if (dx < 0.85 && dy < 0.95 && dz < 0.85) {
+                shard.collected = true;
+                shardCount++;
+                scene.remove(shard.mesh);
+                activeShards.splice(i, 1);
+                continue;
+              }
+            }
+
+            if (shard.mesh.position.z > 12) {
+              scene.remove(shard.mesh);
+              activeShards.splice(i, 1);
+            }
+          }
+
+          // Update HUD
+          const currentTotalScore = Math.floor(distanceScore) + shardCount * 25;
+          hudScore.textContent = currentTotalScore.toLocaleString();
+          hudCoins.textContent = shardCount.toLocaleString();
+        } else {
+          // Idle gentle animation on Start / GameOver screen
+          const idleTime = clock.getElapsedTime();
+          cubBodyGroup.position.y = Math.sin(idleTime * 3) * 0.06;
+          tailGroup.rotation.y = Math.sin(idleTime * 4) * 0.2;
+        }
+
+        // Update Gold Sparkle Trail Particles
+        trailSpawnTimer += dt;
+        if (trailSpawnTimer > 0.03) {
+          trailSpawnTimer = 0;
+          spawnTrailParticle();
+        }
+
+        for (let i = 0; i < TRAIL_COUNT; i++) {
+          const p = trailParticles[i];
+          if (p.life > 0) {
+            p.life -= dt;
+            if (p.life <= 0) {
+              p.mesh.visible = false;
+            } else {
+              p.mesh.position.x += p.vx * dt;
+              p.mesh.position.y += p.vy * dt;
+              p.mesh.position.z += p.vz * dt;
+              p.mesh.rotation.x += 4 * dt;
+              p.mesh.rotation.y += 4 * dt;
+              const ratio = p.life / p.maxLife;
+              p.mesh.material.opacity = ratio * 0.85;
+              p.mesh.scale.setScalar(ratio * 0.9);
+            }
+          }
+        }
+
+        renderer.render(scene, camera);
+      }
+
+      resetWorld();
+      animate();
+    })();
+  </script>
+</body>
+</html>
