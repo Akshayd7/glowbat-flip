@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Comet Cub - 3D Endless Runner</title>
+  <title>Comet Cub - Version 6</title>
   <style>
     :root {
       --navy-dark: #070b19;
@@ -27,7 +27,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: linear-gradient(180deg,#6fb4ff,#3b3f9e);
+      background-color: var(--navy-dark);
       font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       color: var(--text-light);
       touch-action: none;
@@ -43,16 +43,44 @@
       z-index: 1;
     }
 
+    /* Top Right Round Mute Button */
+    #mute-btn {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: rgba(11, 17, 42, 0.82);
+      border: 2px solid var(--gold-bright);
+      color: var(--gold-bright);
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 35;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45), 0 0 12px var(--gold-glow);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      transition: transform 0.12s ease;
+    }
+
+    #mute-btn:active {
+      transform: scale(0.92);
+    }
+
     /* HUD */
     #hud {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
-      padding: 18px 20px;
+      padding: 16px 74px 16px 16px;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+      gap: 8px;
       z-index: 10;
       pointer-events: none;
       opacity: 0;
@@ -63,27 +91,34 @@
       opacity: 1;
     }
 
+    .hud-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
     .hud-card {
-      background: rgba(11, 17, 42, 0.72);
+      background: rgba(11, 17, 42, 0.75);
       border: 1.5px solid rgba(255, 215, 102, 0.45);
-      border-radius: 16px;
-      padding: 8px 16px;
+      border-radius: 14px;
+      padding: 6px 13px;
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), 0 0 12px rgba(255, 215, 102, 0.15);
     }
 
     .hud-label {
-      font-size: 10px;
+      font-size: 9px;
       text-transform: uppercase;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.4px;
       color: var(--gold-bright);
-      opacity: 0.85;
+      opacity: 0.88;
       font-weight: 700;
     }
 
     .hud-value {
-      font-size: 24px;
+      font-size: 20px;
       font-weight: 800;
       color: #ffffff;
       text-shadow: 0 0 10px var(--gold-glow);
@@ -93,16 +128,48 @@
     .shard-row {
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
     }
 
     .shard-icon {
-      width: 16px;
-      height: 16px;
+      width: 13px;
+      height: 13px;
       background: var(--gold-bright);
       transform: rotate(45deg);
       box-shadow: 0 0 8px var(--gold-bright);
       display: inline-block;
+    }
+
+    #lives-display {
+      letter-spacing: 2px;
+      color: #ff6b8b;
+      text-shadow: 0 0 10px rgba(255, 107, 139, 0.65);
+    }
+
+    #zone-banner {
+      position: fixed;
+      top: 82px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(11, 17, 42, 0.88);
+      border: 1.5px solid var(--gold-bright);
+      border-radius: 999px;
+      padding: 6px 20px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold-bright);
+      box-shadow: 0 0 20px var(--gold-glow);
+      z-index: 12;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      white-space: nowrap;
+    }
+
+    #zone-banner.show {
+      opacity: 1;
     }
 
     /* Overlay Screens */
@@ -117,10 +184,10 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 24px;
+      padding: 18px;
       background: radial-gradient(circle at center, rgba(17, 26, 58, 0.55) 0%, rgba(7, 11, 25, 0.88) 100%);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
       transition: opacity 0.35s ease, visibility 0.35s ease;
     }
 
@@ -132,65 +199,88 @@
 
     .panel {
       width: 100%;
-      max-width: 360px;
-      background: linear-gradient(160deg, rgba(19, 30, 68, 0.92) 0%, rgba(9, 14, 34, 0.96) 100%);
+      max-width: 390px;
+      background: linear-gradient(160deg, rgba(19, 30, 68, 0.94) 0%, rgba(9, 14, 34, 0.97) 100%);
       border: 2px solid var(--gold-bright);
       border-radius: 26px;
-      padding: 32px 24px;
+      padding: 24px 20px;
       text-align: center;
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 28px var(--gold-glow);
       position: relative;
     }
 
-    .crest {
-      width: 54px;
-      height: 54px;
-      margin: 0 auto 14px;
-      border-radius: 50%;
-      background: radial-gradient(circle, #fff6d1 0%, var(--gold-bright) 45%, var(--gold-warm) 100%);
-      box-shadow: 0 0 24px var(--gold-bright);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-
-    .crest::after {
-      content: '';
-      width: 22px;
-      height: 22px;
-      background: var(--navy-dark);
-      transform: rotate(45deg);
-      border-radius: 3px;
-    }
-
     h1.game-title {
-      font-size: 38px;
+      font-size: 34px;
       font-weight: 900;
       letter-spacing: 1px;
       color: var(--gold-bright);
       text-shadow: 0 0 18px rgba(255, 215, 102, 0.65), 0 3px 0 #7a4b0c;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .subtitle {
-      font-size: 14px;
+      font-size: 13px;
       color: #c5d1ff;
-      margin-bottom: 24px;
-      line-height: 1.4;
+      margin-bottom: 14px;
+      line-height: 1.35;
+    }
+
+    .section-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.6px;
+      color: var(--gold-bright);
+      margin-bottom: 8px;
+      font-weight: 800;
+    }
+
+    .animal-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .animal-btn {
+      background: rgba(7, 11, 25, 0.72);
+      border: 1.5px solid rgba(255, 215, 102, 0.28);
+      border-radius: 12px;
+      padding: 8px 4px;
+      color: #dbe3ff;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      font-size: 10px;
+      font-weight: 700;
+      transition: all 0.15s ease;
+    }
+
+    .animal-btn .icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .animal-btn.active {
+      background: rgba(255, 215, 102, 0.2);
+      border-color: var(--gold-bright);
+      color: #fff;
+      box-shadow: 0 0 12px var(--gold-glow);
+      transform: translateY(-2px);
     }
 
     .controls-guide {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 26px;
+      gap: 8px;
+      margin-bottom: 18px;
       text-align: left;
       background: rgba(7, 11, 25, 0.55);
-      padding: 12px 14px;
+      padding: 10px 12px;
       border-radius: 14px;
       border: 1px solid rgba(255, 215, 102, 0.22);
-      font-size: 12px;
+      font-size: 11px;
       color: #dbe3ff;
     }
 
@@ -202,15 +292,15 @@
     .stats-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin: 20px 0 26px;
+      gap: 10px;
+      margin: 16px 0 22px;
     }
 
     .stat-box {
       background: rgba(7, 11, 25, 0.65);
       border: 1px solid rgba(255, 215, 102, 0.35);
       border-radius: 14px;
-      padding: 12px 10px;
+      padding: 10px 8px;
     }
 
     .stat-box.full {
@@ -220,16 +310,16 @@
     }
 
     .stat-title {
-      font-size: 11px;
+      font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 1.2px;
       color: var(--gold-bright);
-      margin-bottom: 4px;
+      margin-bottom: 3px;
       font-weight: 700;
     }
 
     .stat-num {
-      font-size: 28px;
+      font-size: 26px;
       font-weight: 800;
       color: #fff;
       text-shadow: 0 0 12px var(--gold-glow);
@@ -237,8 +327,8 @@
 
     .btn-gold {
       width: 100%;
-      padding: 16px 24px;
-      font-size: 19px;
+      padding: 15px 24px;
+      font-size: 18px;
       font-weight: 800;
       letter-spacing: 1px;
       text-transform: uppercase;
@@ -268,21 +358,37 @@
 </head>
 <body>
 
-  <button id="mute-btn" aria-label="Mute" style="position:fixed;top:88px;right:16px;z-index:50;width:44px;height:44px;border-radius:50%;border:2px solid #f5c542;background:rgba(10,20,50,.75);color:#f5c542;font-size:20px;cursor:pointer;pointer-events:auto">&#128266;</button>
-  <div id="zone-banner" style="position:fixed;top:36%;left:50%;transform:translate(-50%,-50%) scale(.8);z-index:60;pointer-events:none;font-size:32px;font-weight:900;color:#fff6d1;text-shadow:0 0 18px #ffcc55,0 3px 0 #7a4b00;opacity:0;transition:opacity .3s,transform .3s;text-align:center;letter-spacing:2px;white-space:nowrap;"></div>
   <canvas id="game-canvas"></canvas>
+
+  <!-- Round Mute Button Top Right -->
+  <button id="mute-btn" aria-label="Toggle Sound" title="Toggle Sound">🔊</button>
+
+  <!-- Zone Change Banner -->
+  <div id="zone-banner">Zone 1: Enchanted Forest</div>
 
   <!-- HUD -->
   <div id="hud">
-    <div class="hud-card">
-      <div class="hud-label">Score</div>
-      <div class="hud-value" id="hud-score">0</div>
+    <div class="hud-group">
+      <div class="hud-card">
+        <div class="hud-label">Score</div>
+        <div class="hud-value" id="hud-score">0</div>
+      </div>
+      <div class="hud-card">
+        <div class="hud-label">Star Shards</div>
+        <div class="hud-value shard-row">
+          <span class="shard-icon"></span>
+          <span id="hud-coins">0</span>
+        </div>
+      </div>
     </div>
-    <div class="hud-card">
-      <div class="hud-label">Star Shards</div>
-      <div class="hud-value shard-row">
-        <span class="shard-icon"></span>
-        <span id="hud-coins">0</span>
+    <div class="hud-group">
+      <div class="hud-card">
+        <div class="hud-label">Zone</div>
+        <div class="hud-value" id="hud-zone" style="font-size: 15px;">Forest</div>
+      </div>
+      <div class="hud-card">
+        <div class="hud-label">Lives</div>
+        <div class="hud-value" id="lives-display">♥♥♥</div>
       </div>
     </div>
   </div>
@@ -290,14 +396,38 @@
   <!-- Start Screen -->
   <div id="start-screen" class="overlay">
     <div class="panel">
-      <div class="crest"></div>
       <h1 class="game-title">COMET CUB</h1>
-      <p class="subtitle">Guide the glowing celestial fox cub across the lantern-lit twilight skyway.</p>
+      <p class="subtitle">Choose your celestial spirit animal and dash across shifting realms.</p>
+
+      <div class="section-label">Select Spirit Animal</div>
+      <div class="animal-grid" id="animal-selector">
+        <button class="animal-btn active" data-species="fox">
+          <span class="icon">🦊</span>
+          <span>Fox</span>
+        </button>
+        <button class="animal-btn" data-species="rabbit">
+          <span class="icon">🐰</span>
+          <span>Rabbit</span>
+        </button>
+        <button class="animal-btn" data-species="bear">
+          <span class="icon">🐻</span>
+          <span>Bear Cub</span>
+        </button>
+        <button class="animal-btn" data-species="deer">
+          <span class="icon">🦌</span>
+          <span>Deer</span>
+        </button>
+        <button class="animal-btn" data-species="owl">
+          <span class="icon">🦉</span>
+          <span>Owl</span>
+        </button>
+      </div>
+
       <div class="controls-guide">
         <div><span>Swipe L / R</span> : Switch Lane</div>
         <div><span>Swipe Up</span> : Jump Low Wall</div>
         <div><span>Swipe Down</span> : Slide Beam</div>
-        <div><span>Star Shards</span> : +25 Bonus</div>
+        <div><span>3 Lives</span> : Shield on Hit</div>
       </div>
       <button id="start-btn" class="btn-gold pulse">Tap to Run</button>
     </div>
@@ -307,7 +437,7 @@
   <div id="gameover-screen" class="overlay hidden">
     <div class="panel">
       <h1 class="game-title" style="font-size: 32px;">GAME OVER</h1>
-      <p class="subtitle" style="margin-bottom: 10px;">The twilight lanterns await your return</p>
+      <p class="subtitle" style="margin-bottom: 8px;">The celestial path awaits your return</p>
       <div class="stats-grid">
         <div class="stat-box">
           <div class="stat-title">Score</div>
@@ -332,36 +462,55 @@
     (function () {
       'use strict';
 
-      // --- STORAGE & CONSTANTS ---
+      // --- STORAGE KEYS & CONSTANTS ---
       const STORAGE_KEY = 'cometcub_v1';
+      const MUTE_KEY = 'cometcub_mute_v1';
+      const ANIMAL_KEY = 'cometcub_animal_v1';
+
       const LANE_WIDTH = 2.3;
       const LANES = [-LANE_WIDTH, 0, LANE_WIDTH];
 
-      const BASE_SPEED = 17.5;
-      const MAX_SPEED = 34.0;
-      const SPEED_ACCEL = 0.3; // units per second squared
+      const BASE_SPEED = 14.5;
+      const MAX_SPEED = 30.0;
+      const SPEED_ACCEL = 0.26;
 
-      const GRAVITY = -34.0;
-      const JUMP_VELOCITY = 16.5;
+      const GRAVITY = -38.0;
+      const JUMP_VELOCITY = 14.2;
       const SLIDE_DURATION = 0.62;
+      const ZONE_DURATION = 22.0; // seconds per zone cycle
 
       // Saved Data
       let bestScore = 0;
+      let totalSavedCoins = 0;
+      let isMuted = false;
+      let selectedSpecies = 'fox';
+
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
           bestScore = Number(parsed.bestScore) || 0;
+          totalSavedCoins = Number(parsed.coins) || 0;
         }
-      } catch (e) {
-        bestScore = 0;
-      }
+        const savedMute = localStorage.getItem(MUTE_KEY);
+        if (savedMute !== null) {
+          isMuted = savedMute === 'true';
+        }
+        const savedAnimal = localStorage.getItem(ANIMAL_KEY);
+        if (savedAnimal && ['fox', 'rabbit', 'bear', 'deer', 'owl'].includes(savedAnimal)) {
+          selectedSpecies = savedAnimal;
+        }
+      } catch (e) {}
 
       // DOM Elements
       const canvas = document.getElementById('game-canvas');
+      const muteBtn = document.getElementById('mute-btn');
+      const zoneBanner = document.getElementById('zone-banner');
       const hud = document.getElementById('hud');
       const hudScore = document.getElementById('hud-score');
       const hudCoins = document.getElementById('hud-coins');
+      const hudZone = document.getElementById('hud-zone');
+      const livesDisplay = document.getElementById('lives-display');
       const startScreen = document.getElementById('start-screen');
       const gameoverScreen = document.getElementById('gameover-screen');
       const finalScoreEl = document.getElementById('final-score');
@@ -369,6 +518,60 @@
       const bestScoreEl = document.getElementById('best-score');
       const startBtn = document.getElementById('start-btn');
       const restartBtn = document.getElementById('restart-btn');
+      const animalButtons = document.querySelectorAll('.animal-btn');
+
+      // --- WEB AUDIO SYNTHESIZER ---
+      let audioCtx = null;
+      function initAudio() {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) audioCtx = new AudioContextClass();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      }
+
+      function playTone(freq, type, duration, vol = 0.12, slideFreq = null) {
+        if (isMuted || !audioCtx) return;
+        try {
+          const now = audioCtx.currentTime;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+          if (slideFreq) {
+            osc.frequency.exponentialRampToValueAtTime(slideFreq, now + duration);
+          }
+          gain.gain.setValueAtTime(vol, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + duration);
+        } catch (e) {}
+      }
+
+      function sfxJump() { playTone(320, 'sine', 0.18, 0.14, 620); }
+      function sfxSlide() { playTone(260, 'triangle', 0.16, 0.12, 130); }
+      function sfxLane() { playTone(420, 'sine', 0.08, 0.07, 520); }
+      function sfxShard() {
+        playTone(740, 'sine', 0.12, 0.12, 1180);
+        setTimeout(() => playTone(1180, 'sine', 0.16, 0.1, 1480), 55);
+      }
+      function sfxHit() { playTone(160, 'sawtooth', 0.32, 0.16, 65); }
+
+      function updateMuteUI() {
+        muteBtn.textContent = isMuted ? '🔇' : '🔊';
+      }
+      updateMuteUI();
+
+      muteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        isMuted = !isMuted;
+        updateMuteUI();
+        try { localStorage.setItem(MUTE_KEY, String(isMuted)); } catch (err) {}
+      });
 
       // --- THREE.JS SCENE SETUP ---
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
@@ -379,41 +582,68 @@
 
       const scene = new THREE.Scene();
 
-      // Colors for Twilight -> Starry Night transition
-      const colorTwilightSky = new THREE.Color(0x6fb4ff);
-      const colorNightSky = new THREE.Color(0x3b3f9e);
-      const colorTwilightFog = new THREE.Color(0x9fd0ff);
-      const colorNightFog = new THREE.Color(0x5a5fc0);
-
-      scene.background = colorTwilightSky.clone();
-      scene.fog = new THREE.FogExp2(colorTwilightFog.clone(), 0.010);
-
-      // --- Sky clouds drifting below and beside the track ---
-      const cloudMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.92 });
-      const cloudGroups = [];
-      for (let i = 0; i < 46; i++) {
-        const g = new THREE.Group();
-        const n = 3 + Math.floor(Math.random() * 3);
-        for (let k = 0; k < n; k++) {
-          const sp = new THREE.Mesh(new THREE.SphereGeometry(1.4 + Math.random() * 1.6, 10, 8), cloudMat);
-          sp.position.set((k - n / 2) * 1.8, Math.random() * 0.8, Math.random() * 1.2);
-          sp.scale.y = 0.6;
-          g.add(sp);
+      // 4 Distinct Zones Definition
+      const ZONES = [
+        {
+          id: 'forest',
+          name: 'Forest',
+          banner: 'Zone 1: Enchanted Forest',
+          sky: new THREE.Color(0x0c211e),
+          fog: new THREE.Color(0x13332c),
+          slab: new THREE.Color(0x1b3329),
+          trim: new THREE.Color(0x2d5442),
+          hemiSky: new THREE.Color(0x66c292),
+          particleColor: new THREE.Color(0xb8ff66) // glowing fireflies
+        },
+        {
+          id: 'desert',
+          name: 'Desert',
+          banner: 'Zone 2: Golden Dunes',
+          sky: new THREE.Color(0x361c12),
+          fog: new THREE.Color(0x592e1b),
+          slab: new THREE.Color(0x633920),
+          trim: new THREE.Color(0x8c532b),
+          hemiSky: new THREE.Color(0xffad66),
+          particleColor: new THREE.Color(0xffcc88) // drifting sand motes
+        },
+        {
+          id: 'snow',
+          name: 'Snow',
+          banner: 'Zone 3: Crystal Peaks',
+          sky: new THREE.Color(0x10233d),
+          fog: new THREE.Color(0x1d3b63),
+          slab: new THREE.Color(0x2d4c73),
+          trim: new THREE.Color(0x6394bf),
+          hemiSky: new THREE.Color(0xa6d8ff),
+          particleColor: new THREE.Color(0xffffff) // falling snowflakes
+        },
+        {
+          id: 'meadow',
+          name: 'Night Meadow',
+          banner: 'Zone 4: Starlit Meadow',
+          sky: new THREE.Color(0x09081f),
+          fog: new THREE.Color(0x141138),
+          slab: new THREE.Color(0x1c1847),
+          trim: new THREE.Color(0x352f78),
+          hemiSky: new THREE.Color(0x9b82ff),
+          particleColor: new THREE.Color(0xf7a8ff) // glowing meadow pollen/stars
         }
-        const side = Math.random() < 0.5 ? -1 : 1;
-        g.position.set(side * (7 + Math.random() * 38), -2.5 - Math.random() * 6, -130 + Math.random() * 140);
-        scene.add(g);
-        cloudGroups.push(g);
-      }
-      const camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.1, 140);
+      ];
+
+      let currentZoneIdx = 0;
+
+      scene.background = ZONES[0].sky.clone();
+      scene.fog = new THREE.FogExp2(ZONES[0].fog.clone(), 0.016);
+
+      const camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.1, 150);
       camera.position.set(0, 4.3, 6.8);
       camera.lookAt(0, 1.3, -6);
 
       // --- LIGHTING ---
-      const hemiLight = new THREE.HemisphereLight(0x526db8, 0x0c1229, 0.85);
+      const hemiLight = new THREE.HemisphereLight(0x66c292, 0x0c1229, 0.85);
       scene.add(hemiLight);
 
-      const dirLight = new THREE.DirectionalLight(0xffdf9e, 0.9);
+      const dirLight = new THREE.DirectionalLight(0xffdf9e, 0.92);
       dirLight.position.set(12, 24, 14);
       dirLight.castShadow = true;
       dirLight.shadow.mapSize.width = 1024;
@@ -427,19 +657,31 @@
       dirLight.shadow.camera.bottom = -d;
       scene.add(dirLight);
 
-      // Warm ambient lantern fill
       const lanternAmbient = new THREE.PointLight(0xffaa33, 1.1, 35);
       lanternAmbient.position.set(0, 4, -8);
       scene.add(lanternAmbient);
 
+      // ---NIGHT MEADOW CELESTIAL MOON ---
+      const moonGroup = new THREE.Group();
+      const moonMat = new THREE.MeshBasicMaterial({ color: 0xfff8d6, transparent: true, opacity: 0 });
+      const moonMesh = new THREE.Mesh(new THREE.SphereGeometry(5.5, 24, 24), moonMat);
+      moonGroup.add(moonMesh);
+
+      const moonHaloMat = new THREE.MeshBasicMaterial({ color: 0xffe484, transparent: true, opacity: 0 });
+      const moonHalo = new THREE.Mesh(new THREE.SphereGeometry(8.2, 24, 24), moonHaloMat);
+      moonGroup.add(moonHalo);
+
+      moonGroup.position.set(-16, 22, -75);
+      scene.add(moonGroup);
+
       // --- SHARED MATERIALS ---
       const matStoneMain = new THREE.MeshStandardMaterial({
-        color: 0x162247,
+        color: ZONES[0].slab.clone(),
         roughness: 0.75,
         metalness: 0.15
       });
       const matStoneTrim = new THREE.MeshStandardMaterial({
-        color: 0x26386e,
+        color: ZONES[0].trim.clone(),
         roughness: 0.6,
         metalness: 0.25
       });
@@ -450,10 +692,7 @@
         roughness: 0.3,
         metalness: 0.7
       });
-      const matLanternPost = new THREE.MeshStandardMaterial({
-        color: 0x0b1024,
-        roughness: 0.8
-      });
+      const matLanternPost = new THREE.MeshStandardMaterial({ color: 0x0b1024, roughness: 0.8 });
       const matLanternPaper = new THREE.MeshStandardMaterial({
         color: 0xffe484,
         emissive: 0xffa824,
@@ -466,13 +705,236 @@
         opacity: 0.22
       });
 
+      // --- ZONES SCENERY MATERIALS ---
+      // 1. Forest Materials
+      const matPineTrunk = new THREE.MeshStandardMaterial({ color: 0x4a2f1d, roughness: 0.85 });
+      const matPineLeaves = new THREE.MeshStandardMaterial({ color: 0x1d5938, roughness: 0.65 });
+      const matMushStem = new THREE.MeshStandardMaterial({ color: 0xf5ecd7, roughness: 0.5 });
+      const matMushCap = new THREE.MeshStandardMaterial({
+        color: 0xff4560,
+        emissive: 0x881122,
+        emissiveIntensity: 0.4,
+        roughness: 0.4
+      });
+      const matFirefly = new THREE.MeshBasicMaterial({ color: 0xccff44 });
+
+      // 2. Desert Materials
+      const matCactus = new THREE.MeshStandardMaterial({ color: 0x3b7a3e, roughness: 0.7 });
+      const matDesertRock = new THREE.MeshStandardMaterial({ color: 0x9e5231, roughness: 0.85 });
+      const matTumbleweed = new THREE.MeshStandardMaterial({ color: 0xc28d4e, wireframe: true, roughness: 0.8 });
+
+      // 3. Snow Materials
+      const matSnowPine = new THREE.MeshStandardMaterial({ color: 0xdff2ff, roughness: 0.45 });
+      const matIceCrystal = new THREE.MeshStandardMaterial({
+        color: 0x7ce0ff,
+        emissive: 0x1b6ca8,
+        emissiveIntensity: 0.55,
+        roughness: 0.15,
+        metalness: 0.5
+      });
+
+      // 4. Night Meadow Materials
+      const matFlowerStem = new THREE.MeshStandardMaterial({ color: 0x2b6e44, roughness: 0.6 });
+      const matFlowerPetal = new THREE.MeshStandardMaterial({
+        color: 0xe68aff,
+        emissive: 0xb833ff,
+        emissiveIntensity: 0.85,
+        roughness: 0.2
+      });
+      const matFlowerBulb = new THREE.MeshBasicMaterial({ color: 0xfff088 });
+
+      // --- BUILD ZONE SCENERY PROPS FOR EACH SEGMENT ---
+      const animatedSceneryProps = []; // fireflies, tumbleweeds, crystals, glowing flowers
+
+      function buildForestScenery(seed) {
+        const g = new THREE.Group();
+        [-1, 1].forEach((side, sIdx) => {
+          const baseX = side * (6.2 + ((seed + sIdx) % 3) * 1.4);
+
+          // Multi-tiered Pine Tree
+          const tree = new THREE.Group();
+          tree.position.set(baseX, -0.4, (sIdx - 0.5) * 3.2);
+          const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.32, 1.6, 7), matPineTrunk);
+          trunk.position.y = 0.8;
+          tree.add(trunk);
+
+          const tier1 = new THREE.Mesh(new THREE.ConeGeometry(1.45, 2.2, 7), matPineLeaves);
+          tier1.position.y = 2.1;
+          tree.add(tier1);
+
+          const tier2 = new THREE.Mesh(new THREE.ConeGeometry(1.15, 1.9, 7), matPineLeaves);
+          tier2.position.y = 3.2;
+          tree.add(tier2);
+
+          const tier3 = new THREE.Mesh(new THREE.ConeGeometry(0.8, 1.5, 7), matPineLeaves);
+          tier3.position.y = 4.1;
+          tree.add(tier3);
+          g.add(tree);
+
+          // Glowing Toadstool Mushroom Cluster
+          const mush = new THREE.Group();
+          mush.position.set(side * 4.85, 0.0, -sIdx * 2.5 + 1.2);
+          const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 0.45, 8), matMushStem);
+          stem.position.y = 0.22;
+          mush.add(stem);
+
+          const cap = new THREE.Mesh(new THREE.SphereGeometry(0.38, 10, 8, 0, Math.PI * 2, 0, Math.PI * 0.55), matMushCap);
+          cap.position.y = 0.42;
+          mush.add(cap);
+          g.add(mush);
+
+          // Floating Firefly Orb
+          const firefly = new THREE.Mesh(new THREE.SphereGeometry(0.11, 6, 6), matFirefly);
+          firefly.position.set(side * 5.2, 1.6 + sIdx * 0.7, 0);
+          g.add(firefly);
+          animatedSceneryProps.push({ type: 'firefly', mesh: firefly, baseX: side * 5.2, baseY: 1.6 + sIdx * 0.7, phase: seed + sIdx * 2.1 });
+        });
+        return g;
+      }
+
+      function buildDesertScenery(seed) {
+        const g = new THREE.Group();
+        [-1, 1].forEach((side, sIdx) => {
+          const baseX = side * (6.0 + ((seed + sIdx) % 2) * 1.6);
+
+          // Saguaro Cactus with Arms
+          const cactus = new THREE.Group();
+          cactus.position.set(baseX, -0.3, (sIdx - 0.5) * 2.8);
+          const mainStem = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.32, 3.2, 8), matCactus);
+          mainStem.position.y = 1.6;
+          cactus.add(mainStem);
+
+          const topDome = new THREE.Mesh(new THREE.SphereGeometry(0.28, 8, 8), matCactus);
+          topDome.position.y = 3.2;
+          cactus.add(topDome);
+
+          // Left arm
+          const armL1 = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.7, 7), matCactus);
+          armL1.rotation.z = Math.PI * 0.5;
+          armL1.position.set(-0.4, 1.8, 0);
+          cactus.add(armL1);
+          const armL2 = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.95, 7), matCactus);
+          armL2.position.set(-0.72, 2.2, 0);
+          cactus.add(armL2);
+
+          // Right arm
+          const armR1 = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.65, 7), matCactus);
+          armR1.rotation.z = Math.PI * 0.5;
+          armR1.position.set(0.38, 1.35, 0);
+          cactus.add(armR1);
+          const armR2 = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.85, 7), matCactus);
+          armR2.position.set(0.68, 1.7, 0);
+          cactus.add(armR2);
+
+          g.add(cactus);
+
+          // Red Mesa Rock Formation
+          const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.95, 0), matDesertRock);
+          rock.scale.set(1.3, 0.85, 1.1);
+          rock.position.set(side * 5.1, 0.25, -2.2 + sIdx * 3.6);
+          g.add(rock);
+
+          // Rolling Tumbleweed
+          if (sIdx === 0) {
+            const weed = new THREE.Mesh(new THREE.IcosahedronGeometry(0.42, 1), matTumbleweed);
+            weed.position.set(side * 4.7, 0.42, 1.5);
+            g.add(weed);
+            animatedSceneryProps.push({ type: 'tumbleweed', mesh: weed, baseY: 0.42, phase: seed * 1.3 });
+          }
+        });
+        return g;
+      }
+
+      function buildSnowScenery(seed) {
+        const g = new THREE.Group();
+        [-1, 1].forEach((side, sIdx) => {
+          const baseX = side * (6.3 + ((seed + sIdx) % 3) * 1.2);
+
+          // Snow-Covered Pine Tree
+          const snowTree = new THREE.Group();
+          snowTree.position.set(baseX, -0.4, (sIdx - 0.5) * 3.0);
+          const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 1.4, 7), matPineTrunk);
+          trunk.position.y = 0.7;
+          snowTree.add(trunk);
+
+          const cone1 = new THREE.Mesh(new THREE.ConeGeometry(1.4, 2.1, 7), matPineLeaves);
+          cone1.position.y = 1.9;
+          snowTree.add(cone1);
+          const snowCap1 = new THREE.Mesh(new THREE.ConeGeometry(1.43, 0.9, 7), matSnowPine);
+          snowCap1.position.y = 2.52;
+          snowTree.add(snowCap1);
+
+          const cone2 = new THREE.Mesh(new THREE.ConeGeometry(1.05, 1.8, 7), matPineLeaves);
+          cone2.position.y = 3.1;
+          snowTree.add(cone2);
+          const snowCap2 = new THREE.Mesh(new THREE.ConeGeometry(1.08, 0.95, 7), matSnowPine);
+          snowCap2.position.y = 3.55;
+          snowTree.add(snowCap2);
+
+          g.add(snowTree);
+
+          // Glowing Ice Crystal Spire Cluster
+          const crystalCluster = new THREE.Group();
+          crystalCluster.position.set(side * 4.85, 0.0, 2.0 - sIdx * 3.8);
+
+          const spire1 = new THREE.Mesh(new THREE.OctahedronGeometry(0.55, 0), matIceCrystal);
+          spire1.scale.set(0.55, 1.85, 0.55);
+          spire1.position.y = 0.75;
+          crystalCluster.add(spire1);
+
+          const spire2 = new THREE.Mesh(new THREE.OctahedronGeometry(0.42, 0), matIceCrystal);
+          spire2.scale.set(0.5, 1.4, 0.5);
+          spire2.position.set(side * 0.32, 0.5, 0.2);
+          spire2.rotation.z = -side * 0.28;
+          crystalCluster.add(spire2);
+
+          g.add(crystalCluster);
+          animatedSceneryProps.push({ type: 'crystal', mesh: spire1, baseY: 0.75, phase: seed + sIdx });
+        });
+        return g;
+      }
+
+      function buildMeadowScenery(seed) {
+        const g = new THREE.Group();
+        [-1, 1].forEach((side, sIdx) => {
+          // Giant Bioluminescent Night Meadow Flowers
+          const flower = new THREE.Group();
+          flower.position.set(side * (5.2 + sIdx * 1.1), 0.0, (sIdx - 0.5) * 3.2);
+
+          const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.11, 1.85, 7), matFlowerStem);
+          stem.position.y = 0.92;
+          flower.add(stem);
+
+          const blossom = new THREE.Group();
+          blossom.position.set(0, 1.88, 0);
+          blossom.rotation.z = -side * 0.35;
+
+          const centerBulb = new THREE.Mesh(new THREE.SphereGeometry(0.24, 10, 10), matFlowerBulb);
+          blossom.add(centerBulb);
+
+          for (let p = 0; p < 5; p++) {
+            const angle = (p / 5) * Math.PI * 2;
+            const petal = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.65, 6), matFlowerPetal);
+            petal.rotation.z = Math.PI * 0.42;
+            petal.position.set(Math.cos(angle) * 0.36, 0.08, Math.sin(angle) * 0.36);
+            petal.rotation.y = -angle;
+            blossom.add(petal);
+          }
+
+          flower.add(blossom);
+          g.add(flower);
+          animatedSceneryProps.push({ type: 'flower', mesh: blossom, phase: seed + sIdx * 1.5 });
+        });
+        return g;
+      }
+
       // --- FLOATING STONE PATH & LANTERN POSTS ---
       const SEGMENT_LENGTH = 10;
       const NUM_SEGMENTS = 11;
       const pathSegments = [];
       const lanternGlowMats = [];
 
-      function createPathSegment(zPos, hasLanterns) {
+      function createPathSegment(zPos, index) {
         const group = new THREE.Group();
         group.position.z = zPos;
 
@@ -506,49 +968,55 @@
         group.add(stripR);
 
         // Lantern Posts on left and right edges
-        if (hasLanterns) {
-          [-4.05, 4.05].forEach((xSide) => {
-            const postGroup = new THREE.Group();
-            postGroup.position.set(xSide, 0, 0);
+        [-4.05, 4.05].forEach((xSide) => {
+          const postGroup = new THREE.Group();
+          postGroup.position.set(xSide, 0, 0);
 
-            // Vertical Pole
-            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, 3.6, 8), matLanternPost);
-            pole.position.y = 1.8;
-            pole.castShadow = true;
-            postGroup.add(pole);
+          const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, 3.6, 8), matLanternPost);
+          pole.position.y = 1.8;
+          pole.castShadow = true;
+          postGroup.add(pole);
 
-            // Top Crossbar pointing inward
-            const armDir = xSide < 0 ? 1 : -1;
-            const arm = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.09, 0.09), matLanternPost);
-            arm.position.set(armDir * 0.36, 3.55, 0);
-            postGroup.add(arm);
+          const armDir = xSide < 0 ? 1 : -1;
+          const arm = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.09, 0.09), matLanternPost);
+          arm.position.set(armDir * 0.36, 3.55, 0);
+          postGroup.add(arm);
 
-            // Hanging Golden Paper Lantern
-            const lanternX = armDir * 0.68;
-            const lantern = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.2, 0.52, 10), matLanternPaper);
-            lantern.position.set(lanternX, 3.18, 0);
-            postGroup.add(lantern);
+          const lanternX = armDir * 0.68;
+          const lantern = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.2, 0.52, 10), matLanternPaper);
+          lantern.position.set(lanternX, 3.18, 0);
+          postGroup.add(lantern);
 
-            // Top/bottom caps of lantern
-            const capGeo = new THREE.CylinderGeometry(0.26, 0.26, 0.06, 10);
-            const capTop = new THREE.Mesh(capGeo, matLanternPost);
-            capTop.position.set(lanternX, 3.46, 0);
-            postGroup.add(capTop);
+          const capGeo = new THREE.CylinderGeometry(0.26, 0.26, 0.06, 10);
+          const capTop = new THREE.Mesh(capGeo, matLanternPost);
+          capTop.position.set(lanternX, 3.46, 0);
+          postGroup.add(capTop);
 
-            const capBot = new THREE.Mesh(capGeo, matLanternPost);
-            capBot.position.set(lanternX, 2.9, 0);
-            postGroup.add(capBot);
+          const capBot = new THREE.Mesh(capGeo, matLanternPost);
+          capBot.position.set(lanternX, 2.9, 0);
+          postGroup.add(capBot);
 
-            // Soft Glow Halo Sphere
-            const haloMat = matLanternHalo.clone();
-            lanternGlowMats.push(haloMat);
-            const halo = new THREE.Mesh(new THREE.SphereGeometry(0.68, 12, 12), haloMat);
-            halo.position.set(lanternX, 3.18, 0);
-            postGroup.add(halo);
+          const haloMat = matLanternHalo.clone();
+          lanternGlowMats.push(haloMat);
+          const halo = new THREE.Mesh(new THREE.SphereGeometry(0.68, 12, 12), haloMat);
+          halo.position.set(lanternX, 3.18, 0);
+          postGroup.add(halo);
 
-            group.add(postGroup);
-          });
-        }
+          group.add(postGroup);
+        });
+
+        // Attach Zone-Specific Scenery Subgroups
+        const zoneProps = {
+          forest: buildForestScenery(index),
+          desert: buildDesertScenery(index),
+          snow: buildSnowScenery(index),
+          meadow: buildMeadowScenery(index)
+        };
+        Object.keys(zoneProps).forEach((k) => {
+          zoneProps[k].visible = (k === ZONES[0].id);
+          group.add(zoneProps[k]);
+        });
+        group.userData.zoneProps = zoneProps;
 
         scene.add(group);
         return group;
@@ -556,141 +1024,530 @@
 
       for (let i = 0; i < NUM_SEGMENTS; i++) {
         const z = 10 - i * SEGMENT_LENGTH;
-        pathSegments.push(createPathSegment(z, true));
+        pathSegments.push(createPathSegment(z, i));
       }
 
-      // --- DRIFTING STARFIELD & DISTANT CELESTIAL SHARDS ---
+      function applyZoneSceneryVisibility(zoneId) {
+        for (let i = 0; i < pathSegments.length; i++) {
+          const zp = pathSegments[i].userData.zoneProps;
+          for (const key in zp) {
+            zp[key].visible = (key === zoneId);
+          }
+        }
+      }
+
+      // --- DRIFTING WEATHER / CELESTIAL PARTICLES ---
       const STAR_COUNT = 320;
       const starGeo = new THREE.BufferGeometry();
       const starPositions = new Float32Array(STAR_COUNT * 3);
       for (let i = 0; i < STAR_COUNT; i++) {
         starPositions[i * 3] = (Math.random() - 0.5) * 95;
-        starPositions[i * 3 + 1] = Math.random() * 42 - 4;
+        starPositions[i * 3 + 1] = Math.random() * 42 - 2;
         starPositions[i * 3 + 2] = -Math.random() * 110 + 10;
       }
       starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
       const starMat = new THREE.PointsMaterial({
-        color: 0xffe9a6,
-        size: 0.38,
+        color: ZONES[0].particleColor.clone(),
+        size: 0.42,
         transparent: true,
-        opacity: 0.45
+        opacity: 0.7
       });
       const starField = new THREE.Points(starGeo, starMat);
       scene.add(starField);
 
-      // --- COMET CUB (PLAYER MODEL) ---
+      // --- UPGRADE 1: 5 DISTINCT 3D ANIMAL MODELS WITH UNIQUE SILHOUETTES & PROCEDURAL GAITS ---
       const cubGroup = new THREE.Group();
       scene.add(cubGroup);
 
       const cubBodyGroup = new THREE.Group();
       cubGroup.add(cubBodyGroup);
 
-      const matCubGold = new THREE.MeshStandardMaterial({
-        color: 0xffcc4d,
-        emissive: 0xff8811,
-        emissiveIntensity: 0.65,
-        roughness: 0.25
-      });
-      const matCubCream = new THREE.MeshStandardMaterial({
-        color: 0xfff7dc,
-        emissive: 0xffd27d,
-        emissiveIntensity: 0.75,
-        roughness: 0.2
-      });
-      const matCubDark = new THREE.MeshStandardMaterial({
-        color: 0x0b1026,
-        roughness: 0.4
-      });
-
-      // Torso
-      const torso = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.56, 1.05), matCubGold);
-      torso.position.set(0, 0.52, 0);
-      torso.castShadow = true;
-      cubBodyGroup.add(torso);
-
-      // Chest fluff
-      const chest = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.44, 0.35), matCubCream);
-      chest.position.set(0, 0.48, -0.42);
-      cubBodyGroup.add(chest);
-
-      // Head
-      const head = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.62, 0.68), matCubGold);
-      head.position.set(0, 0.96, -0.38);
-      head.castShadow = true;
-      cubBodyGroup.add(head);
-
-      // Snout
-      const snout = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.26, 0.35), matCubCream);
-      snout.position.set(0, 0.84, -0.78);
-      cubBodyGroup.add(snout);
-
-      // Nose tip
-      const nose = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.12, 0.1), matCubDark);
-      nose.position.set(0, 0.91, -0.96);
-      cubBodyGroup.add(nose);
-
-      // Ears
-      const earGeo = new THREE.ConeGeometry(0.2, 0.45, 4);
-      const earL = new THREE.Mesh(earGeo, matCubGold);
-      earL.position.set(-0.24, 1.42, -0.34);
-      earL.rotation.set(-0.15, 0.3, 0.15);
-      cubBodyGroup.add(earL);
-
-      const earR = new THREE.Mesh(earGeo, matCubGold);
-      earR.position.set(0.24, 1.42, -0.34);
-      earR.rotation.set(-0.15, -0.3, -0.15);
-      cubBodyGroup.add(earR);
-
-      // Glowing Comet Tail
-      const tailGroup = new THREE.Group();
-      tailGroup.position.set(0, 0.56, 0.48);
-      cubBodyGroup.add(tailGroup);
-
-      const tailBase = new THREE.Mesh(new THREE.ConeGeometry(0.32, 1.05, 8), matCubGold);
-      tailBase.rotation.x = Math.PI * 0.42;
-      tailBase.position.set(0, 0.1, 0.42);
-      tailGroup.add(tailBase);
-
-      const tailTip = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.65, 8), matCubCream);
-      tailTip.rotation.x = Math.PI * 0.42;
-      tailTip.position.set(0, 0.18, 0.85);
-      tailGroup.add(tailTip);
-
-      // 4 Articulated Legs
-      const legGeo = new THREE.BoxGeometry(0.18, 0.42, 0.18);
-      const legs = [];
-      const legOffsets = [
-        [-0.22, 0.22, -0.34],
-        [0.22, 0.22, -0.34],
-        [-0.22, 0.22, 0.34],
-        [0.22, 0.22, 0.34]
-      ];
-      legOffsets.forEach((pos) => {
-        const leg = new THREE.Mesh(legGeo, matCubCream);
-        leg.position.set(pos[0], pos[1], pos[2]);
-        leg.castShadow = true;
-        cubBodyGroup.add(leg);
-        legs.push(leg);
-      });
-
-      // Player Point Light
       const cubLight = new THREE.PointLight(0xffcc55, 1.4, 9);
       cubLight.position.set(0, 1.1, 0);
       cubGroup.add(cubLight);
 
-      // Antlers (deer) and mane (horse), hidden by default
-      const antlerGeo = new THREE.ConeGeometry(0.07, 0.5, 4);
-      const matAntler = new THREE.MeshStandardMaterial({ color: 0x8a5a2b, roughness: 0.5 });
-      const antlerL = new THREE.Mesh(antlerGeo, matAntler);
-      antlerL.position.set(-0.2, 1.62, -0.32); antlerL.rotation.z = 0.35;
-      const antlerR = new THREE.Mesh(antlerGeo, matAntler);
-      antlerR.position.set(0.2, 1.62, -0.32); antlerR.rotation.z = -0.35;
-      antlerL.visible = antlerR.visible = false;
-      cubBodyGroup.add(antlerL); cubBodyGroup.add(antlerR);
-      const mane = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.5, 0.5), new THREE.MeshStandardMaterial({ color: 0x4a2c14, roughness: 0.6 }));
-      mane.position.set(0, 1.34, -0.08);
-      mane.visible = false;
-      cubBodyGroup.add(mane);
+      const animalModels = {};
+
+      // 1. FOX: Sleek torso, pointed snout, big triangular ears, large multi-segment bushy comet tail
+      function createFoxModel() {
+        const root = new THREE.Group();
+        const matFur = new THREE.MeshStandardMaterial({ color: 0xffaa33, emissive: 0xcc5500, emissiveIntensity: 0.5, roughness: 0.3 });
+        const matCream = new THREE.MeshStandardMaterial({ color: 0xfff6dc, emissive: 0xffcc66, emissiveIntensity: 0.6, roughness: 0.2 });
+        const matDark = new THREE.MeshStandardMaterial({ color: 0x121629, roughness: 0.4 });
+
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.64, 0.52, 1.08), matFur);
+        torso.position.set(0, 0.52, 0);
+        torso.castShadow = true;
+        root.add(torso);
+
+        const chest = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.44, 0.36), matCream);
+        chest.position.set(0, 0.48, -0.44);
+        root.add(chest);
+
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.58, 0.64), matFur);
+        head.position.set(0, 0.94, -0.4);
+        head.castShadow = true;
+        root.add(head);
+
+        const snout = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.48, 4), matCream);
+        snout.rotation.x = -Math.PI * 0.5;
+        snout.rotation.y = Math.PI * 0.25;
+        snout.position.set(0, 0.82, -0.88);
+        root.add(snout);
+
+        const nose = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), matDark);
+        nose.position.set(0, 0.85, -1.1);
+        root.add(nose);
+
+        const earGeo = new THREE.ConeGeometry(0.21, 0.48, 4);
+        const earL = new THREE.Mesh(earGeo, matFur);
+        earL.position.set(-0.24, 1.4, -0.36);
+        earL.rotation.set(-0.15, 0.3, 0.18);
+        root.add(earL);
+
+        const earR = new THREE.Mesh(earGeo, matFur);
+        earR.position.set(0.24, 1.4, -0.36);
+        earR.rotation.set(-0.15, -0.3, -0.18);
+        root.add(earR);
+
+        // Large Sweeping Bushy Tail
+        const tailGroup = new THREE.Group();
+        tailGroup.position.set(0, 0.55, 0.52);
+        const tailMid = new THREE.Mesh(new THREE.SphereGeometry(0.34, 10, 10), matFur);
+        tailMid.scale.set(0.9, 0.9, 1.8);
+        tailMid.position.set(0, 0.14, 0.42);
+        tailGroup.add(tailMid);
+
+        const tailTip = new THREE.Mesh(new THREE.ConeGeometry(0.28, 0.65, 8), matCream);
+        tailTip.rotation.x = Math.PI * 0.42;
+        tailTip.position.set(0, 0.25, 0.95);
+        tailGroup.add(tailTip);
+        root.add(tailGroup);
+
+        const legGeo = new THREE.BoxGeometry(0.17, 0.42, 0.17);
+        const legs = [
+          [-0.21, 0.21, -0.35],
+          [0.21, 0.21, -0.35],
+          [-0.21, 0.21, 0.35],
+          [0.21, 0.21, 0.35]
+        ].map((p) => {
+          const l = new THREE.Mesh(legGeo, matCream);
+          l.position.set(p[0], p[1], p[2]);
+          l.castShadow = true;
+          root.add(l);
+          return l;
+        });
+
+        return { root, legs, tail: tailGroup, ears: [earL, earR] };
+      }
+
+      // 2. RABBIT: Plump rounded body, very long upright ears, round cotton puff tail, powerful hind legs
+      function createRabbitModel() {
+        const root = new THREE.Group();
+        const matWhite = new THREE.MeshStandardMaterial({ color: 0xfff9f5, emissive: 0xffb8d1, emissiveIntensity: 0.45, roughness: 0.25 });
+        const matPink = new THREE.MeshStandardMaterial({ color: 0xff8da6, emissive: 0xcc3355, emissiveIntensity: 0.4, roughness: 0.3 });
+
+        // Plump Rounded Haunches
+        const body = new THREE.Mesh(new THREE.SphereGeometry(0.46, 12, 12), matWhite);
+        body.scale.set(0.92, 0.88, 1.25);
+        body.position.set(0, 0.52, 0.06);
+        body.castShadow = true;
+        root.add(body);
+
+        // Round Head
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.36, 12, 12), matWhite);
+        head.position.set(0, 0.92, -0.38);
+        head.castShadow = true;
+        root.add(head);
+
+        const nose = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 8), matPink);
+        nose.position.set(0, 0.92, -0.74);
+        root.add(nose);
+
+        // Very Long Upright Rabbit Ears
+        const earLGroup = new THREE.Group();
+        earLGroup.position.set(-0.16, 1.2, -0.32);
+        const earOuterL = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.11, 0.88, 8), matWhite);
+        earOuterL.scale.set(1, 1, 0.45);
+        earOuterL.position.y = 0.42;
+        earLGroup.add(earOuterL);
+        const earInnerL = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.07, 0.72, 8), matPink);
+        earInnerL.scale.set(1, 1, 0.25);
+        earInnerL.position.set(0, 0.42, -0.04);
+        earLGroup.add(earInnerL);
+        earLGroup.rotation.z = 0.12;
+        root.add(earLGroup);
+
+        const earRGroup = earLGroup.clone();
+        earRGroup.position.x = 0.16;
+        earRGroup.rotation.z = -0.12;
+        root.add(earRGroup);
+
+        // Fluffy Cotton Ball Tail
+        const tail = new THREE.Mesh(new THREE.SphereGeometry(0.24, 10, 10), matWhite);
+        tail.position.set(0, 0.55, 0.66);
+        root.add(tail);
+
+        // Front paws & wide hind hopping feet
+        const frontGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.38, 8);
+        const legFL = new THREE.Mesh(frontGeo, matWhite);
+        legFL.position.set(-0.2, 0.2, -0.32);
+        root.add(legFL);
+        const legFR = new THREE.Mesh(frontGeo, matWhite);
+        legFR.position.set(0.2, 0.2, -0.32);
+        root.add(legFR);
+
+        const hindGeo = new THREE.BoxGeometry(0.22, 0.26, 0.48);
+        const legBL = new THREE.Mesh(hindGeo, matWhite);
+        legBL.position.set(-0.26, 0.16, 0.26);
+        root.add(legBL);
+        const legBR = new THREE.Mesh(hindGeo, matWhite);
+        legBR.position.set(0.26, 0.16, 0.26);
+        root.add(legBR);
+
+        return { root, legs: [legFL, legFR, legBL, legBR], tail, ears: [earLGroup, earRGroup] };
+      }
+
+      // 3. BEAR CUB: Stocky wide barrel torso, broad head, round hemispherical ears, stubby tail
+      function createBearModel() {
+        const root = new THREE.Group();
+        const matBrown = new THREE.MeshStandardMaterial({ color: 0xc87d32, emissive: 0x703808, emissiveIntensity: 0.45, roughness: 0.45 });
+        const matHoney = new THREE.MeshStandardMaterial({ color: 0xffdd99, emissive: 0xcc8822, emissiveIntensity: 0.5, roughness: 0.3 });
+        const matDark = new THREE.MeshStandardMaterial({ color: 0x15100c, roughness: 0.4 });
+
+        // Wide Stocky Torso
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.72, 1.05), matBrown);
+        torso.position.set(0, 0.58, 0.02);
+        torso.castShadow = true;
+        root.add(torso);
+
+        // Broad Bear Head
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.45, 12, 12), matBrown);
+        head.scale.set(1.08, 0.95, 0.95);
+        head.position.set(0, 1.02, -0.45);
+        head.castShadow = true;
+        root.add(head);
+
+        // Rounded Muzzle
+        const muzzle = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.24, 0.28, 10), matHoney);
+        muzzle.rotation.x = Math.PI * 0.5;
+        muzzle.position.set(0, 0.94, -0.85);
+        root.add(muzzle);
+
+        const nose = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), matDark);
+        nose.position.set(0, 1.0, -0.99);
+        root.add(nose);
+
+        // Distinct Round Bear Ears
+        const earGeo = new THREE.SphereGeometry(0.18, 10, 10);
+        const earL = new THREE.Mesh(earGeo, matBrown);
+        earL.scale.set(1, 1, 0.5);
+        earL.position.set(-0.36, 1.36, -0.4);
+        root.add(earL);
+
+        const earR = new THREE.Mesh(earGeo, matBrown);
+        earR.scale.set(1, 1, 0.5);
+        earR.position.set(0.36, 1.36, -0.4);
+        root.add(earR);
+
+        // Round Stubby Tail
+        const tail = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 8), matBrown);
+        tail.position.set(0, 0.68, 0.58);
+        root.add(tail);
+
+        // Thick Sturdy Bear Legs
+        const legGeo = new THREE.CylinderGeometry(0.16, 0.15, 0.44, 8);
+        const legs = [
+          [-0.3, 0.22, -0.34],
+          [0.3, 0.22, -0.34],
+          [-0.3, 0.22, 0.34],
+          [0.3, 0.22, 0.34]
+        ].map((p) => {
+          const l = new THREE.Mesh(legGeo, matBrown);
+          l.position.set(p[0], p[1], p[2]);
+          l.castShadow = true;
+          root.add(l);
+          return l;
+        });
+
+        return { root, legs, tail };
+      }
+
+      // 4. DEER: Long slender legs, tall graceful neck, branching golden antlers, white-spotted back
+      function createDeerModel() {
+        const root = new THREE.Group();
+        const matFawn = new THREE.MeshStandardMaterial({ color: 0xe69c4c, emissive: 0x995212, emissiveIntensity: 0.45, roughness: 0.35 });
+        const matCream = new THREE.MeshStandardMaterial({ color: 0xfff8e7, emissive: 0xffdd88, emissiveIntensity: 0.65, roughness: 0.2 });
+
+        // Slender Elevated Torso
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.46, 1.06), matFawn);
+        torso.position.set(0, 0.78, 0);
+        torso.castShadow = true;
+        root.add(torso);
+
+        // White Fawn Spots on Back
+        [-0.18, 0.18].forEach((xPos) => {
+          [-0.15, 0.22].forEach((zPos) => {
+            const spot = new THREE.Mesh(new THREE.SphereGeometry(0.08, 6, 6), matCream);
+            spot.position.set(xPos, 0.98, zPos);
+            root.add(spot);
+          });
+        });
+
+        // Tall Graceful Neck
+        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.22, 0.62, 8), matFawn);
+        neck.position.set(0, 1.15, -0.38);
+        neck.rotation.x = 0.28;
+        root.add(neck);
+
+        // Head
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.38, 0.56), matFawn);
+        head.position.set(0, 1.44, -0.52);
+        root.add(head);
+
+        // Branching Golden Antlers
+        const antlerGroup = new THREE.Group();
+        antlerGroup.position.set(0, 1.62, -0.46);
+        [-1, 1].forEach((side) => {
+          const mainBeam = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.05, 0.52, 6), matCream);
+          mainBeam.position.set(side * 0.18, 0.22, 0);
+          mainBeam.rotation.z = -side * 0.38;
+          antlerGroup.add(mainBeam);
+
+          const tine1 = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.035, 0.28, 6), matCream);
+          tine1.position.set(side * 0.28, 0.32, -0.08);
+          tine1.rotation.set(0.4, 0, -side * 0.75);
+          antlerGroup.add(tine1);
+
+          const tine2 = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.035, 0.24, 6), matCream);
+          tine2.position.set(side * 0.14, 0.36, 0.05);
+          tine2.rotation.z = side * 0.25;
+          antlerGroup.add(tine2);
+        });
+        root.add(antlerGroup);
+
+        // Perky White-Tipped Deer Tail
+        const tail = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.34, 6), matCream);
+        tail.position.set(0, 0.92, 0.58);
+        tail.rotation.x = -0.6;
+        root.add(tail);
+
+        // Long Slender Deer Legs
+        const legGeo = new THREE.CylinderGeometry(0.065, 0.05, 0.68, 7);
+        const legs = [
+          [-0.19, 0.34, -0.36],
+          [0.19, 0.34, -0.36],
+          [-0.19, 0.34, 0.36],
+          [0.19, 0.34, 0.36]
+        ].map((p) => {
+          const l = new THREE.Mesh(legGeo, matFawn);
+          l.position.set(p[0], p[1], p[2]);
+          l.castShadow = true;
+          root.add(l);
+          return l;
+        });
+
+        return { root, legs, tail, antlers: antlerGroup };
+      }
+
+      // 5. OWL: Upright avian body, wide articulated wings that flap, facial disc, golden eyes & beak, fanned tail feathers
+      function createOwlModel() {
+        const root = new THREE.Group();
+        const matPlumage = new THREE.MeshStandardMaterial({ color: 0x7b68ee, emissive: 0x3a2888, emissiveIntensity: 0.45, roughness: 0.35 });
+        const matBreast = new THREE.MeshStandardMaterial({ color: 0xfff5d6, emissive: 0xffcc66, emissiveIntensity: 0.55, roughness: 0.25 });
+        const matBeak = new THREE.MeshStandardMaterial({ color: 0xffbb22, emissive: 0xcc7700, emissiveIntensity: 0.7, roughness: 0.2 });
+
+        // Upright Feathered Body
+        const body = new THREE.Mesh(new THREE.SphereGeometry(0.46, 12, 12), matPlumage);
+        body.scale.set(0.95, 1.22, 0.92);
+        body.position.set(0, 0.68, 0);
+        body.castShadow = true;
+        root.add(body);
+
+        const breast = new THREE.Mesh(new THREE.SphereGeometry(0.38, 10, 10), matBreast);
+        breast.scale.set(0.85, 1.05, 0.55);
+        breast.position.set(0, 0.65, -0.24);
+        root.add(breast);
+
+        // Owl Head & Facial Disc
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.4, 12, 12), matPlumage);
+        head.scale.set(1.12, 0.95, 0.95);
+        head.position.set(0, 1.18, -0.12);
+        root.add(head);
+
+        // Glowing Owl Eyes
+        [-0.16, 0.16].forEach((xEye) => {
+          const eye = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.08, 10), matBeak);
+          eye.rotation.x = Math.PI * 0.5;
+          eye.position.set(xEye, 1.2, -0.47);
+          root.add(eye);
+
+          // Feather tufts / horns
+          const tuft = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.28, 4), matBreast);
+          tuft.position.set(xEye * 1.6, 1.48, -0.15);
+          tuft.rotation.z = -xEye * 1.4;
+          root.add(tuft);
+        });
+
+        // Hooked Beak
+        const beak = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.24, 4), matBeak);
+        beak.rotation.x = -Math.PI * 0.55;
+        beak.position.set(0, 1.12, -0.56);
+        root.add(beak);
+
+        // Wide Articulated Wings (Left & Right Pivots)
+        const wingL = new THREE.Group();
+        wingL.position.set(-0.4, 0.85, 0);
+        const wingBladeL = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.1, 0.56), matPlumage);
+        wingBladeL.position.set(-0.44, 0, 0);
+        wingL.add(wingBladeL);
+        const wingTipL = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.08, 0.42), matBreast);
+        wingTipL.position.set(-0.88, 0.01, 0.04);
+        wingL.add(wingTipL);
+        root.add(wingL);
+
+        const wingR = new THREE.Group();
+        wingR.position.set(0.4, 0.85, 0);
+        const wingBladeR = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.1, 0.56), matPlumage);
+        wingBladeR.position.set(0.44, 0, 0);
+        wingR.add(wingBladeR);
+        const wingTipR = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.08, 0.42), matBreast);
+        wingTipR.position.set(0.88, 0.01, 0.04);
+        wingR.add(wingTipR);
+        root.add(wingR);
+
+        // Fanned Tail Feathers
+        const tail = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.1, 0.45), matBreast);
+        tail.position.set(0, 0.42, 0.46);
+        tail.rotation.x = -0.25;
+        root.add(tail);
+
+        // Talons
+        const talonGeo = new THREE.CylinderGeometry(0.06, 0.09, 0.28, 6);
+        const legL = new THREE.Mesh(talonGeo, matBeak);
+        legL.position.set(-0.18, 0.16, -0.05);
+        root.add(legL);
+        const legR = new THREE.Mesh(talonGeo, matBeak);
+        legR.position.set(0.18, 0.16, -0.05);
+        root.add(legR);
+
+        return { root, wings: [wingL, wingR], legs: [legL, legR], tail };
+      }
+
+      animalModels.fox = createFoxModel();
+      animalModels.rabbit = createRabbitModel();
+      animalModels.bear = createBearModel();
+      animalModels.deer = createDeerModel();
+      animalModels.owl = createOwlModel();
+
+      Object.keys(animalModels).forEach((key) => {
+        animalModels[key].root.visible = (key === selectedSpecies);
+        cubBodyGroup.add(animalModels[key].root);
+      });
+
+      function selectSpecies(species) {
+        if (!animalModels[species]) return;
+        selectedSpecies = species;
+        Object.keys(animalModels).forEach((k) => {
+          animalModels[k].root.visible = (k === species);
+        });
+        animalButtons.forEach((btn) => {
+          btn.classList.toggle('active', btn.dataset.species === species);
+        });
+        try { localStorage.setItem(ANIMAL_KEY, species); } catch (e) {}
+      }
+
+      selectSpecies(selectedSpecies);
+
+      animalButtons.forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          initAudio();
+          sfxLane();
+          selectSpecies(btn.dataset.species);
+        });
+      });
+
+      //Distinct Procedural Animation per Species
+      function animateActiveAnimal(species, time, spd, jumping, sliding) {
+        const model = animalModels[species];
+        if (!model) return;
+        const cycle = time * spd * 1.45;
+
+        if (species === 'fox') {
+          if (!jumping && !sliding) {
+            cubBodyGroup.position.y = Math.abs(Math.sin(cycle)) * 0.13;
+            cubBodyGroup.rotation.x = Math.cos(cycle) * 0.06;
+            model.legs[0].rotation.x = Math.sin(cycle) * 0.7;
+            model.legs[1].rotation.x = -Math.sin(cycle) * 0.7;
+            model.legs[2].rotation.x = -Math.sin(cycle) * 0.7;
+            model.legs[3].rotation.x = Math.sin(cycle) * 0.7;
+          } else {
+            cubBodyGroup.position.y = 0;
+            cubBodyGroup.rotation.x = 0;
+          }
+          model.tail.rotation.y = Math.sin(time * 10) * 0.28;
+          model.tail.rotation.x = Math.cos(time * 8) * 0.14;
+        } else if (species === 'rabbit') {
+          // Bound & Hop Animation: Front paws and hind legs move in paired synchronous bounds
+          const hop = Math.abs(Math.sin(cycle * 0.85));
+          if (!jumping && !sliding) {
+            cubBodyGroup.position.y = hop * 0.28;
+            cubBodyGroup.rotation.x = Math.cos(cycle * 0.85) * 0.16;
+            const frontRot = Math.sin(cycle * 0.85) * 0.65;
+            const backRot = -Math.sin(cycle * 0.85) * 0.75;
+            model.legs[0].rotation.x = frontRot;
+            model.legs[1].rotation.x = frontRot;
+            model.legs[2].rotation.x = backRot;
+            model.legs[3].rotation.x = backRot;
+          } else {
+            cubBodyGroup.position.y = 0;
+            cubBodyGroup.rotation.x = 0;
+          }
+          model.ears[0].rotation.x = -0.15 - Math.sin(cycle * 0.85) * 0.22;
+          model.ears[1].rotation.x = -0.15 - Math.sin(cycle * 0.85) * 0.22;
+        } else if (species === 'bear') {
+          // Heavy Lumbering Waddle with side-to-side roll
+          if (!jumping && !sliding) {
+            cubBodyGroup.position.y = Math.abs(Math.sin(cycle * 0.9)) * 0.11;
+            cubBodyGroup.rotation.z = Math.sin(cycle * 0.9) * 0.09;
+            model.legs[0].rotation.x = Math.sin(cycle * 0.9) * 0.55;
+            model.legs[1].rotation.x = -Math.sin(cycle * 0.9) * 0.55;
+            model.legs[2].rotation.x = -Math.sin(cycle * 0.9) * 0.55;
+            model.legs[3].rotation.x = Math.sin(cycle * 0.9) * 0.55;
+          } else {
+            cubBodyGroup.position.y = 0;
+            cubBodyGroup.rotation.z = 0;
+          }
+        } else if (species === 'deer') {
+          // High Graceful Pronking Stride
+          if (!jumping && !sliding) {
+            cubBodyGroup.position.y = Math.abs(Math.sin(cycle * 0.95)) * 0.22;
+            cubBodyGroup.rotation.x = Math.cos(cycle * 0.95) * 0.09;
+            model.legs[0].rotation.x = Math.sin(cycle * 0.95) * 0.75;
+            model.legs[1].rotation.x = -Math.sin(cycle * 0.95 + 0.5) * 0.75;
+            model.legs[2].rotation.x = -Math.sin(cycle * 0.95) * 0.75;
+            model.legs[3].rotation.x = Math.sin(cycle * 0.95 + 0.5) * 0.75;
+          } else {
+            cubBodyGroup.position.y = 0;
+            cubBodyGroup.rotation.x = 0;
+          }
+        } else if (species === 'owl') {
+          // Swooping Wing-Flap Glide
+          const flap = Math.sin(time * 15) * 0.58;
+          model.wings[0].rotation.z = flap;
+          model.wings[1].rotation.z = -flap;
+          if (!jumping && !sliding) {
+            cubBodyGroup.position.y = 0.18 + Math.sin(time * 7.5) * 0.1;
+            cubBodyGroup.rotation.x = 0.12;
+          } else {
+            cubBodyGroup.position.y = 0;
+            cubBodyGroup.rotation.x = 0;
+          }
+          model.legs[0].rotation.x = 0.35 + Math.sin(time * 7.5) * 0.15;
+          model.legs[1].rotation.x = 0.35 + Math.sin(time * 7.5) * 0.15;
+        }
+      }
 
       // --- GOLD SPARKLE TRAIL PARTICLES ---
       const TRAIL_COUNT = 38;
@@ -738,23 +1595,14 @@
       const activeObstacles = [];
       const activeShards = [];
 
-      // Obstacle Materials
-      const matBarrierWood = new THREE.MeshStandardMaterial({
-        color: 0x2a3b75,
-        roughness: 0.55,
-        metalness: 0.2
-      });
+      const matBarrierWood = new THREE.MeshStandardMaterial({ color: 0x2a3b75, roughness: 0.55, metalness: 0.2 });
       const matHazardGold = new THREE.MeshStandardMaterial({
         color: 0xffbf47,
         emissive: 0xcc7a00,
         emissiveIntensity: 0.55,
         roughness: 0.3
       });
-      const matRockBlock = new THREE.MeshStandardMaterial({
-        color: 0x18234a,
-        roughness: 0.7,
-        metalness: 0.15
-      });
+      const matRockBlock = new THREE.MeshStandardMaterial({ color: 0x18234a, roughness: 0.7, metalness: 0.15 });
       const matShard = new THREE.MeshStandardMaterial({
         color: 0xffe680,
         emissive: 0xffae19,
@@ -763,12 +1611,10 @@
         metalness: 0.8
       });
 
-      // Create Obstacle Mesh by Type: 'barrier' (jump), 'beam' (slide), 'rock' (change lane)
       function buildObstacleMesh(type) {
         const group = new THREE.Group();
 
         if (type === 'barrier') {
-          // Low hurdle barrier (~0.95m tall) - Clearable by jumping
           const rail = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.38, 0.32), matHazardGold);
           rail.position.y = 0.68;
           rail.castShadow = true;
@@ -785,7 +1631,6 @@
           rightPost.castShadow = true;
           group.add(rightPost);
         } else if (type === 'beam') {
-          // Overhead hanging gate beam (bottom at y = 1.05m) - Clearable by sliding
           const sidePillarGeo = new THREE.BoxGeometry(0.22, 2.75, 0.34);
           const pillarL = new THREE.Mesh(sidePillarGeo, matBarrierWood);
           pillarL.position.set(-0.92, 1.375, 0);
@@ -797,18 +1642,15 @@
           pillarR.castShadow = true;
           group.add(pillarR);
 
-          // Overhead crossbeam
           const beam = new THREE.Mesh(new THREE.BoxGeometry(2.05, 1.35, 0.42), matBarrierWood);
           beam.position.y = 1.85;
           beam.castShadow = true;
           group.add(beam);
 
-          // Glowing bottom warning bar
           const trim = new THREE.Mesh(new THREE.BoxGeometry(1.98, 0.22, 0.46), matHazardGold);
           trim.position.y = 1.15;
           group.add(trim);
         } else if (type === 'rock') {
-          // Tall monolith rock block (2.5m tall) - Must switch lanes
           const mainRock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.95, 0), matRockBlock);
           mainRock.scale.set(0.92, 1.45, 0.85);
           mainRock.position.y = 1.15;
@@ -820,14 +1662,11 @@
           topRock.castShadow = true;
           group.add(topRock);
 
-          // Glowing gold rune ring embedded in rock
           const rune = new THREE.Mesh(new THREE.TorusGeometry(0.58, 0.06, 6, 16), matHazardGold);
           rune.position.set(0, 1.2, 0.38);
           group.add(rune);
-          group.scale.set(1.15, 0.6, 1.15);
         }
 
-        if (type === 'barrier') group.scale.set(1.2, 1.45, 1.2);
         return group;
       }
 
@@ -844,36 +1683,27 @@
         });
       }
 
-      // Fair Procedural Row Spawner
       let nextSpawnZ = -32;
 
       function spawnObstacleRow(zPos) {
-        // Choose lane roles ensuring AT LEAST ONE lane is never a full rock block,
-        // and any obstacle spawned is 100% clearable via jump, slide, or lane change.
         const lanesOrder = [0, 1, 2].sort(() => Math.random() - 0.5);
         const patternRoll = Math.random();
-
         const laneTypes = [null, null, null];
 
-        const diff = Math.min(1, distanceScore / 1200);
-        if (patternRoll < 0.5 - 0.4 * diff) {
-          // 1 obstacle, 2 open lanes
-          const types = ['barrier', 'rock'];
+        if (patternRoll < 0.32) {
+          const types = ['barrier', 'beam', 'rock'];
           laneTypes[lanesOrder[0]] = types[Math.floor(Math.random() * types.length)];
-        } else if (patternRoll < 0.9 - 0.35 * diff) {
-          // 2 obstacles, 1 completely open lane
-          const t1 = ['barrier', 'rock'][Math.floor(Math.random() * 2)];
-          const t2 = ['barrier', 'rock'][Math.floor(Math.random() * 2)];
+        } else if (patternRoll < 0.76) {
+          const t1 = ['barrier', 'beam', 'rock'][Math.floor(Math.random() * 3)];
+          const t2 = ['barrier', 'beam', 'rock'][Math.floor(Math.random() * 3)];
           laneTypes[lanesOrder[0]] = t1;
           laneTypes[lanesOrder[1]] = t2;
         } else {
-          // All 3 lanes have obstacles, but AT LEAST ONE is a jumpable barrier or slideable beam (never 3 rocks)
-          laneTypes[lanesOrder[0]] = 'barrier';
-          laneTypes[lanesOrder[1]] = ['barrier', 'rock'][Math.floor(Math.random() * 2)];
-          laneTypes[lanesOrder[2]] = ['barrier', 'rock'][Math.floor(Math.random() * 2)];
+          laneTypes[lanesOrder[0]] = Math.random() < 0.5 ? 'barrier' : 'beam';
+          laneTypes[lanesOrder[1]] = ['barrier', 'beam', 'rock'][Math.floor(Math.random() * 3)];
+          laneTypes[lanesOrder[2]] = ['barrier', 'beam', 'rock'][Math.floor(Math.random() * 3)];
         }
 
-        // Instantiate obstacles
         for (let laneIdx = 0; laneIdx < 3; laneIdx++) {
           const type = laneTypes[laneIdx];
           if (type) {
@@ -883,60 +1713,89 @@
             activeObstacles.push({
               mesh,
               lane: laneIdx,
-              type
+              type,
+              hit: false
             });
           }
         }
 
-        // Spawn Golden Star Shards in a rewarding line (either an open lane, over a barrier, or under a beam)
         const shardLaneCandidates = [0, 1, 2].filter((l) => laneTypes[l] !== 'rock');
         if (shardLaneCandidates.length > 0 && Math.random() < 0.85) {
           const sLane = shardLaneCandidates[Math.floor(Math.random() * shardLaneCandidates.length)];
           const obsInLane = laneTypes[sLane];
-          const count = 3;
           const spacing = 2.4;
 
           for (let i = -1; i <= 1; i++) {
             let shardY = 0.75;
             if (i === 0 && obsInLane === 'barrier') {
-              shardY = 1.95; // Arc over barrier
+              shardY = 1.95;
             } else if (i === 0 && obsInLane === 'beam') {
-              shardY = 0.45; // Low under hanging beam
+              shardY = 0.45;
             }
             spawnShard(sLane, shardY, zPos + i * spacing);
           }
         }
       }
 
-      // --- GAME STATE ---
-      let gameState = 'START'; // 'START' | 'PLAYING' | 'GAMEOVER'
-      let currentLane = 1; // 0 = Left, 1 = Center, 2 = Right
+      // --- GAME STATE, LIVES & ZONES ---
+      let gameState = 'START';
+      let currentLane = 1;
       let speed = BASE_SPEED;
       let distanceScore = 0;
       let shardCount = 0;
       let runTime = 0;
+      let lives = 3;
+      let invulnTimer = 0;
+      let bannerTimeout = null;
 
-      // Jump & Slide Physics State
       let playerY = 0;
       let velocityY = 0;
       let isJumping = false;
       let isSliding = false;
       let slideTimer = 0;
 
+      function updateLivesHUD() {
+        livesDisplay.textContent = '♥'.repeat(Math.max(0, lives)) + '♡'.repeat(Math.max(0, 3 - lives));
+      }
+
+      function showZoneBanner(text) {
+        zoneBanner.textContent = text;
+        zoneBanner.classList.add('show');
+        if (bannerTimeout) clearTimeout(bannerTimeout);
+        bannerTimeout = setTimeout(() => {
+          zoneBanner.classList.remove('show');
+        }, 2800);
+      }
+
+      function setZoneImmediate(idx) {
+        currentZoneIdx = idx;
+        const z = ZONES[idx];
+        scene.background.copy(z.sky);
+        scene.fog.color.copy(z.fog);
+        matStoneMain.color.copy(z.slab);
+        matStoneTrim.color.copy(z.trim);
+        hemiLight.color.copy(z.hemiSky);
+        starMat.color.copy(z.particleColor);
+        hudZone.textContent = z.name;
+        applyZoneSceneryVisibility(z.id);
+        moonMat.opacity = idx === 3 ? 0.95 : 0;
+        moonHaloMat.opacity = idx === 3 ? 0.25 : 0;
+      }
+
       function resetWorld() {
-        // Clear existing obstacles & shards
         activeObstacles.forEach((o) => scene.remove(o.mesh));
         activeObstacles.length = 0;
 
         activeShards.forEach((s) => scene.remove(s.mesh));
         activeShards.length = 0;
 
-        // Reset Player
         currentLane = 1;
         cubGroup.position.set(0, 0, 0);
         cubGroup.rotation.set(0, 0, 0);
+        cubGroup.visible = true;
         cubBodyGroup.scale.set(1, 1, 1);
         cubBodyGroup.position.y = 0;
+        cubBodyGroup.rotation.set(0, 0, 0);
 
         playerY = 0;
         velocityY = 0;
@@ -944,16 +1803,18 @@
         isSliding = false;
         slideTimer = 0;
 
-        // Reset Metrics
         speed = BASE_SPEED;
         distanceScore = 0;
         shardCount = 0;
         runTime = 0;
+        lives = 3;
+        invulnTimer = 0;
 
+        updateLivesHUD();
+        setZoneImmediate(0);
         hudScore.textContent = '0';
         hudCoins.textContent = '0';
 
-        // Pre-populate initial obstacles ahead
         nextSpawnZ = -28;
         for (let i = 0; i < 6; i++) {
           spawnObstacleRow(nextSpawnZ);
@@ -961,124 +1822,31 @@
         }
       }
 
-      // --- AUDIO (WebAudio, mute persisted) ---
-      let muted = false;
-      try { muted = localStorage.getItem('cometcub_mute') === '1'; } catch (e) {}
-      let actx = null, musicTimer = null, mStep = 0;
-      function ensureAudio() {
-        if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
-        if (actx && actx.state === 'suspended') actx.resume();
-      }
-      function tone(f, d, type, vol, when) {
-        if (muted || !actx) return;
-        const t = actx.currentTime + (when || 0);
-        const o = actx.createOscillator(), g = actx.createGain();
-        o.type = type || 'sine'; o.frequency.setValueAtTime(f, t);
-        g.gain.setValueAtTime(vol || 0.08, t);
-        g.gain.exponentialRampToValueAtTime(0.0001, t + d);
-        o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + d + 0.02);
-      }
-      function sfx(k) {
-        if (k === 'jump') { tone(380, 0.15, 'square', 0.05); tone(620, 0.12, 'square', 0.04, 0.06); }
-        else if (k === 'coin') { tone(988, 0.08, 'triangle', 0.08); tone(1318, 0.14, 'triangle', 0.08, 0.07); }
-        else if (k === 'over') { tone(300, 0.25, 'sawtooth', 0.07); tone(180, 0.45, 'sawtooth', 0.07, 0.2); }
-        else if (k === 'slide') { tone(220, 0.14, 'sine', 0.06); }
-      }
-      const zoneScale = [262, 330, 392, 523, 392, 330, 294, 392];
-      let zoneTempo = 380;
-      function musicStart() {
-        if (musicTimer) return;
-        let last = 0;
-        musicTimer = setInterval(() => {
-          if (gameState !== 'PLAYING') return;
-          const now = performance.now();
-          if (now - last < zoneTempo) return;
-          last = now;
-          tone(zoneScale[mStep % 8] / 2, 0.45, 'sine', 0.035);
-          if (mStep % 2 === 0) tone(zoneScale[(mStep + 3) % 8], 0.3, 'triangle', 0.02);
-          mStep++;
-        }, 120);
-      }
-
-      // --- ZONES: character + world + music evolve with score ---
-      const ZONES = [
-        { name: 'SKY MEADOW', char: 'PUP', sky: 0x6fb4ff, fog: 0x9fd0ff, cloud: 0xffffff, stars: 0.15, body: 0xffcc4d, bodyE: 0xff8811, cream: 0xfff7dc, creamE: 0xffd27d, earY: 1.0, antlers: false, mane: false, scale: [262,330,392,523,392,330,294,392], tempo: 380 },
-        { name: 'FOREST', char: 'CAT', sky: 0x5ecf8e, fog: 0x9fe8c0, cloud: 0xeafff0, stars: 0.18, body: 0xffa040, bodyE: 0xcc5500, cream: 0xfff2e0, creamE: 0xffc890, earY: 1.35, antlers: false, mane: false, scale: [294,370,440,587,440,370,330,440], tempo: 340 },
-        { name: 'DESERT', char: 'FOX', sky: 0xffd27a, fog: 0xffe6b0, cloud: 0xfff3d9, stars: 0.22, body: 0xe8622d, bodyE: 0x993311, cream: 0xfff0d0, creamE: 0xffb070, earY: 1.25, antlers: false, mane: false, scale: [262,311,392,466,392,311,277,349], tempo: 400 },
-        { name: 'SNOW', char: 'DEER', sky: 0xbfe3ff, fog: 0xe4f3ff, cloud: 0xffffff, stars: 0.3, body: 0xc49a6c, bodyE: 0x7a5230, cream: 0xf5ede0, creamE: 0xd9c9b0, earY: 0.8, antlers: true, mane: false, scale: [330,392,494,659,494,392,370,494], tempo: 460 },
-        { name: 'NIGHT LANTERNS', char: 'HORSE', sky: 0x3b3f9e, fog: 0x5a5fc0, cloud: 0xd9dcff, stars: 0.95, body: 0x7a4b2d, bodyE: 0x3d2210, cream: 0xe8d5b5, creamE: 0xa98c60, earY: 1.1, antlers: false, mane: true, scale: [220,262,330,440,330,262,247,330], tempo: 420 }
-      ];
-      let currentZone = -1;
-      const targetSky = new THREE.Color(ZONES[0].sky);
-      const targetFog = new THREE.Color(ZONES[0].fog);
-      const targetCloud = new THREE.Color(ZONES[0].cloud);
-      let targetStars = ZONES[0].stars;
-      let transformTimer = 0;
-      const zoneBannerEl = document.getElementById('zone-banner');
-      let bannerTimer = null;
-
-      function applyZone(idx, silent) {
-        if (idx === currentZone) return;
-        currentZone = idx;
-        const z = ZONES[idx];
-        targetSky.set(z.sky); targetFog.set(z.fog); targetCloud.set(z.cloud);
-        targetStars = z.stars;
-        matCubGold.color.set(z.body); matCubGold.emissive.set(z.bodyE);
-        matCubCream.color.set(z.cream); matCubCream.emissive.set(z.creamE);
-        earL.scale.y = z.earY; earR.scale.y = z.earY;
-        antlerL.visible = antlerR.visible = z.antlers;
-        mane.visible = z.mane;
-        zoneScale.length = 0; z.scale.forEach(n => zoneScale.push(n));
-        zoneTempo = z.tempo;
-        if (!silent) {
-          transformTimer = 0.7;
-          for (let i = 0; i < 16; i++) spawnTrailParticle();
-          zoneBannerEl.textContent = z.name + ' - ' + z.char + '!';
-          zoneBannerEl.style.opacity = '1';
-          zoneBannerEl.style.transform = 'translate(-50%,-50%) scale(1.08)';
-          if (bannerTimer) clearTimeout(bannerTimer);
-          bannerTimer = setTimeout(() => { zoneBannerEl.style.opacity = '0'; zoneBannerEl.style.transform = 'translate(-50%,-50%) scale(.8)'; }, 1800);
-          sfx('coin');
-        }
-      }
-      const muteBtn = document.getElementById('mute-btn');
-      function paintMute() { muteBtn.innerHTML = muted ? '&#128263;' : '&#128266;'; }
-      paintMute();
-      muteBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); ensureAudio(); muted = !muted; paintMute();
-        try { localStorage.setItem('cometcub_mute', muted ? '1' : '0'); } catch (er) {}
-      });
-      muteBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
-      muteBtn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
-      window.addEventListener('pointerdown', ensureAudio, { once: false });
-
       function startGame() {
+        initAudio();
         resetWorld();
-        currentZone = -1;
-        applyZone(0, true);
-        scene.background.copy(targetSky);
-        scene.fog.color.copy(targetFog);
-        cloudMat.color.copy(targetCloud);
-        starMat.opacity = targetStars;
         gameState = 'PLAYING';
         startScreen.classList.add('hidden');
         gameoverScreen.classList.add('hidden');
         hud.classList.add('visible');
-        ensureAudio(); musicStart();
+        showZoneBanner(ZONES[0].banner);
       }
 
       function triggerGameOver() {
+        if (gameState === 'GAMEOVER') return;
         gameState = 'GAMEOVER';
-        sfx('over');
         hud.classList.remove('visible');
+        zoneBanner.classList.remove('show');
+        cubGroup.visible = true;
 
         const totalScore = Math.floor(distanceScore) + shardCount * 25;
+        totalSavedCoins += shardCount;
         if (totalScore > bestScore) {
           bestScore = totalScore;
-          try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({ bestScore }));
-          } catch (e) {}
         }
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ bestScore, coins: totalSavedCoins }));
+        } catch (e) {}
 
         finalScoreEl.textContent = totalScore.toLocaleString();
         finalCoinsEl.textContent = shardCount.toLocaleString();
@@ -1086,7 +1854,23 @@
 
         gameoverScreen.classList.remove('hidden');
       }
+
+      // Expose window.triggerGameOver as required
       window.triggerGameOver = triggerGameOver;
+
+      function handleObstacleHit(obs) {
+        if (invulnTimer > 0 || obs.hit) return;
+        obs.hit = true;
+        sfxHit();
+        lives--;
+        updateLivesHUD();
+
+        if (lives <= 0) {
+          triggerGameOver();
+        } else {
+          invulnTimer = 1.5;
+        }
+      }
 
       // --- PLAYER ACTIONS ---
       function changeLane(dir) {
@@ -1094,19 +1878,18 @@
         const target = currentLane + dir;
         if (target >= 0 && target <= 2) {
           currentLane = target;
+          sfxLane();
         }
       }
 
-      let jumpBuffer = 0;
       function triggerJump() {
         if (gameState !== 'PLAYING') return;
-        if (isJumping) { jumpBuffer = 0.2; return; }
         if (!isJumping) {
           isJumping = true;
           isSliding = false;
           slideTimer = 0;
           velocityY = JUMP_VELOCITY;
-          sfx('jump');
+          sfxJump();
         }
       }
 
@@ -1114,8 +1897,8 @@
         if (gameState !== 'PLAYING') return;
         isSliding = true;
         slideTimer = SLIDE_DURATION;
+        sfxSlide();
         if (isJumping) {
-          // Fast-drop to ground if swiped down mid-air
           velocityY = -26;
         }
       }
@@ -1140,7 +1923,6 @@
         const absX = Math.abs(dx);
         const absY = Math.abs(dy);
 
-        // Responsive 26px swipe threshold
         if (Math.max(absX, absY) > 26) {
           touchHandled = true;
           if (absX > absY) {
@@ -1151,21 +1933,6 @@
           }
         }
       }, { passive: true });
-
-      window.addEventListener('touchend', (e) => {
-        if (gameState !== 'PLAYING') return;
-        if (!touchHandled) {
-          if (e.target && e.target.closest && e.target.closest('button')) return;
-          triggerJump();
-        }
-        touchHandled = false;
-      }, { passive: true });
-
-      window.addEventListener('pointerdown', (e) => {
-        if (gameState !== 'PLAYING' || e.pointerType === 'touch') return;
-        if (e.target && e.target.closest && e.target.closest('button')) return;
-        triggerJump();
-      });
 
       window.addEventListener('keydown', (e) => {
         if (gameState !== 'PLAYING') {
@@ -1208,7 +1975,6 @@
         const h = window.innerHeight;
         renderer.setSize(w, h);
         camera.aspect = w / h;
-        // Adjust FOV slightly on narrow mobile portrait screens so all 3 lanes & lanterns stay framed
         camera.fov = w < h ? 68 : 58;
         camera.updateProjectionMatrix();
       }
@@ -1221,31 +1987,46 @@
       function animate() {
         requestAnimationFrame(animate);
         const dt = Math.min(clock.getDelta(), 0.05);
+        const elapsed = clock.getElapsedTime();
 
         if (gameState === 'PLAYING') {
           runTime += dt;
           speed = Math.min(MAX_SPEED, speed + SPEED_ACCEL * dt);
           distanceScore += speed * dt * 1.2;
 
-          // Zones: character + world + music evolve with score
-          const zoneScore = Math.floor(distanceScore) + shardCount * 25;
-          applyZone(Math.floor(zoneScore / 250) % ZONES.length, false);
-          const zl = Math.min(1, dt * 1.4);
-          scene.background.lerp(targetSky, zl);
-          scene.fog.color.lerp(targetFog, zl);
-          cloudMat.color.lerp(targetCloud, zl);
-          starMat.opacity += (targetStars - starMat.opacity) * zl;
-          if (transformTimer > 0) {
-            transformTimer -= dt;
-            const pop = 1 + 0.3 * Math.abs(Math.sin(transformTimer * 12));
-            cubBodyGroup.scale.set(pop, pop, pop);
-          } else {
-            cubBodyGroup.scale.set(1, 1, 1);
+          // Invulnerability Flash
+          if (invulnTimer > 0) {
+            invulnTimer -= dt;
+            cubGroup.visible = Math.floor(invulnTimer * 16) % 2 === 0;
+            if (invulnTimer <= 0) cubGroup.visible = true;
           }
 
+          // Zone Progression & Scenery Swap
+          const targetZoneIdx = Math.floor(runTime / ZONE_DURATION) % ZONES.length;
+          if (targetZoneIdx !== currentZoneIdx) {
+            currentZoneIdx = targetZoneIdx;
+            const newZone = ZONES[currentZoneIdx];
+            hudZone.textContent = newZone.name;
+            showZoneBanner(newZone.banner);
+            applyZoneSceneryVisibility(newZone.id);
+          }
+
+          // Smoothly blend palette toward active Zone
+          const activeZone = ZONES[currentZoneIdx];
+          const lerpRate = Math.min(1, dt * 2.2);
+          scene.background.lerp(activeZone.sky, lerpRate);
+          scene.fog.color.lerp(activeZone.fog, lerpRate);
+          matStoneMain.color.lerp(activeZone.slab, lerpRate);
+          matStoneTrim.color.lerp(activeZone.trim, lerpRate);
+          hemiLight.color.lerp(activeZone.hemiSky, lerpRate);
+          starMat.color.lerp(activeZone.particleColor, lerpRate);
+
+          const targetMoonOpacity = currentZoneIdx === 3 ? 0.95 : 0.0;
+          moonMat.opacity += (targetMoonOpacity - moonMat.opacity) * lerpRate;
+          moonHaloMat.opacity += ((targetMoonOpacity * 0.28) - moonHaloMat.opacity) * lerpRate;
+
           // Pulse lantern halos subtly
-          const nightGlow = 1 - (scene.background.r * 0.3 + scene.background.g * 0.5 + scene.background.b * 0.2);
-          const haloPulse = 0.2 + Math.sin(runTime * 4.5) * 0.05 + nightGlow * 0.1;
+          const haloPulse = 0.22 + Math.sin(runTime * 4.5) * 0.06;
           for (let i = 0; i < lanternGlowMats.length; i++) {
             lanternGlowMats[i].opacity = haloPulse;
           }
@@ -1257,7 +2038,6 @@
           cubGroup.rotation.z = -diffX * 0.18;
           cubGroup.rotation.y = -diffX * 0.1;
 
-          if (jumpBuffer > 0) jumpBuffer -= dt;
           // Vertical Jump Physics
           if (isJumping) {
             playerY += velocityY * dt;
@@ -1266,7 +2046,6 @@
               playerY = 0;
               velocityY = 0;
               isJumping = false;
-              if (jumpBuffer > 0) { jumpBuffer = 0; triggerJump(); }
             }
           }
           cubGroup.position.y = playerY;
@@ -1285,19 +2064,8 @@
           cubBodyGroup.scale.x += (targetScaleXZ - cubBodyGroup.scale.x) * Math.min(1, dt * 18);
           cubBodyGroup.scale.z += (targetScaleXZ - cubBodyGroup.scale.z) * Math.min(1, dt * 18);
 
-          // Running Gait & Tail Animation
-          const stride = runTime * speed * 1.45;
-          if (!isJumping && !isSliding) {
-            cubBodyGroup.position.y = Math.abs(Math.sin(stride)) * 0.12;
-            legs[0].rotation.x = Math.sin(stride) * 0.65;
-            legs[1].rotation.x = -Math.sin(stride) * 0.65;
-            legs[2].rotation.x = -Math.sin(stride) * 0.65;
-            legs[3].rotation.x = Math.sin(stride) * 0.65;
-          } else {
-            cubBodyGroup.position.y = 0;
-          }
-          tailGroup.rotation.y = Math.sin(runTime * 10) * 0.25;
-          tailGroup.rotation.x = Math.cos(runTime * 8) * 0.12;
+          // Species-specific Running / Hopping / Wing-Flapping Animation
+          animateActiveAnimal(selectedSpecies, runTime, speed, isJumping, isSliding);
 
           // Move Path Segments & Recycle
           for (let i = 0; i < pathSegments.length; i++) {
@@ -1308,21 +2076,30 @@
             }
           }
 
-          // Drift Stars Forward
+          // Zone-specific Weather / Atmospheric Particle Motion
           const posArr = starGeo.attributes.position.array;
           for (let i = 0; i < STAR_COUNT; i++) {
-            posArr[i * 3 + 2] += speed * 0.22 * dt;
-            if (posArr[i * 3 + 2] > 12) {
-              posArr[i * 3 + 2] = -98;
-              posArr[i * 3] = (Math.random() - 0.5) * 95;
+            const idx3 = i * 3;
+            if (currentZoneIdx === 2) {
+              // Snowflakes fall downward and drift
+              posArr[idx3 + 1] -= 4.5 * dt;
+              posArr[idx3] += Math.sin(runTime + i) * 0.8 * dt;
+              if (posArr[idx3 + 1] < -2) posArr[idx3 + 1] = 38;
+            } else if (currentZoneIdx === 0) {
+              // Forest Fireflies bob gently
+              posArr[idx3 + 1] += Math.sin(runTime * 3 + i) * 1.2 * dt;
+            }
+            posArr[idx3 + 2] += speed * 0.25 * dt;
+            if (posArr[idx3 + 2] > 12) {
+              posArr[idx3 + 2] = -98;
+              posArr[idx3] = (Math.random() - 0.5) * 95;
             }
           }
           starGeo.attributes.position.needsUpdate = true;
 
-          for (const cg of cloudGroups) { cg.position.z += speed * 0.8 * dt; if (cg.position.z > 15) cg.position.z = -130; }
           // Spawn New Obstacles Ahead
           nextSpawnZ += speed * dt;
-          const dynamicSpacing = Math.max(26, speed * 1.3);
+          const dynamicSpacing = Math.max(15.5, 19.5 - (speed - BASE_SPEED) * 0.2);
           while (nextSpawnZ > -85) {
             spawnObstacleRow(nextSpawnZ - dynamicSpacing);
             nextSpawnZ -= dynamicSpacing;
@@ -1333,28 +2110,20 @@
             const obs = activeObstacles[i];
             obs.mesh.position.z += speed * dt;
 
-            // Collision check near player Z = 0
             const dz = Math.abs(obs.mesh.position.z - cubGroup.position.z);
             const dx = Math.abs(obs.mesh.position.x - cubGroup.position.x);
 
-            if (dz < 0.5 && dx < 0.6) {
+            if (dz < 0.62 && dx < 0.72) {
               if (obs.type === 'barrier') {
-                // Clearable if player jumped high enough
-                if (playerY < 1.05) {
-                  triggerGameOver();
-                  break;
+                if (playerY < 0.68) {
+                  handleObstacleHit(obs);
                 }
               } else if (obs.type === 'beam') {
-                // Clearable if player is sliding and close to the ground
                 if (!isSliding || playerY > 0.35) {
-                  triggerGameOver();
-                  break;
+                  handleObstacleHit(obs);
                 }
               } else if (obs.type === 'rock') {
-                if (playerY < 1.45) {
-                  triggerGameOver();
-                  break;
-                }
+                handleObstacleHit(obs);
               }
             }
 
@@ -1377,7 +2146,8 @@
 
               if (dx < 0.85 && dy < 0.95 && dz < 0.85) {
                 shard.collected = true;
-                shardCount++; sfx("coin");
+                shardCount++;
+                sfxShard();
                 scene.remove(shard.mesh);
                 activeShards.splice(i, 1);
                 continue;
@@ -1396,9 +2166,25 @@
           hudCoins.textContent = shardCount.toLocaleString();
         } else {
           // Idle gentle animation on Start / GameOver screen
-          const idleTime = clock.getElapsedTime();
-          cubBodyGroup.position.y = Math.sin(idleTime * 3) * 0.06;
-          tailGroup.rotation.y = Math.sin(idleTime * 4) * 0.2;
+          animateActiveAnimal(selectedSpecies, elapsed * 0.45, BASE_SPEED * 0.5, false, false);
+        }
+
+        // Animate Zone Props (Fireflies, Tumbleweeds, Ice Crystals, Glowing Flowers)
+        for (let i = 0; i < animatedSceneryProps.length; i++) {
+          const item = animatedSceneryProps[i];
+          if (item.type === 'firefly') {
+            item.mesh.position.y = item.baseY + Math.sin(elapsed * 3.2 + item.phase) * 0.38;
+            item.mesh.position.x = item.baseX + Math.cos(elapsed * 2.4 + item.phase) * 0.35;
+          } else if (item.type === 'tumbleweed') {
+            item.mesh.rotation.x += dt * 4.5;
+            item.mesh.rotation.z += dt * 2.8;
+            item.mesh.position.y = item.baseY + Math.abs(Math.sin(elapsed * 4.2 + item.phase)) * 0.45;
+          } else if (item.type === 'crystal') {
+            item.mesh.rotation.y += dt * 1.2;
+            item.mesh.position.y = item.baseY + Math.sin(elapsed * 2.5 + item.phase) * 0.12;
+          } else if (item.type === 'flower') {
+            item.mesh.rotation.y = Math.sin(elapsed * 2.0 + item.phase) * 0.25;
+          }
         }
 
         // Update Gold Sparkle Trail Particles
