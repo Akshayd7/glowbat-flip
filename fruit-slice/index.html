@@ -261,7 +261,7 @@
 <div id="startScreen" class="overlay">
   <div class="panel">
     <div class="title">FRUIT SLICE<span>FRENZY!</span></div>
-    <div class="subtitle">Swipe to slice juicy fruits!<br>Watch out for sneaky bombs!</div>
+    <div class="subtitle">Swipe to slice fruits AND manga heroes!<br>Watch out for sneaky bombs!</div>
     <div class="stats-grid">
       <div class="stat-item">
         <span class="stat-label">Best Score</span>
@@ -725,6 +725,16 @@
     }
   ];
 
+  // Original kawaii manga-style hero characters (v3): sliceable for bonus points
+  const CHAR_TYPES = [
+    { name: "Ninjo", char: true, radius: 46, juice: "#ff9100", points: 3,
+      skin: "#ffd9b3", hair: "#ff7b1c", accent: "#1a237e", plate: "#eceff1" },
+    { name: "Strawbo", char: true, radius: 46, juice: "#ff5252", points: 3,
+      skin: "#ffdfc4", hair: "#37474f", accent: "#f9a825", band: "#e53935" },
+    { name: "Zappo", char: true, radius: 44, juice: "#ffea00", points: 3,
+      skin: "#ffe14d", hair: null, accent: "#00acc1", cheek: "#4dd0e1" }
+  ];
+
   // --- GAME STATE & ARRAYS ---
   let gameState = "START"; // START, PLAYING, GAMEOVER
   let score = 0;
@@ -819,7 +829,14 @@
 
     for (let i = 0; i < count; i++) {
       const isBomb = Math.random() < bombChance && (count > 1 || elapsedGameTime > 5);
-      const type = isBomb ? null : FRUIT_TYPES[Math.floor(Math.random() * FRUIT_TYPES.length)];
+      // v3: manga heroes join the toss (30% once the game warms up)
+      const heroChance = elapsedGameTime > 8 ? 0.3 : 0;
+      let type = null;
+      if (!isBomb) {
+        type = Math.random() < heroChance
+          ? CHAR_TYPES[Math.floor(Math.random() * CHAR_TYPES.length)]
+          : FRUIT_TYPES[Math.floor(Math.random() * FRUIT_TYPES.length)];
+      }
       const radius = isBomb ? 36 : type.radius;
 
       const margin = Math.max(radius + 20, width * 0.12);
@@ -1087,6 +1104,142 @@
     }
   }
 
+  function drawCharacterGraphic(ctx, type, radius, halfMode) {
+    ctx.save();
+    if (halfMode !== 0) {
+      ctx.beginPath();
+      if (halfMode === -1) {
+        ctx.rect(-radius - 12, -radius - 12, (radius + 12) * 2, radius + 12);
+      } else {
+        ctx.rect(-radius - 12, 0, (radius + 12) * 2, radius + 12);
+      }
+      ctx.clip();
+    }
+    const r = radius;
+
+    // Glow halo so heroes pop against the backdrop
+    const halo = ctx.createRadialGradient(0, 0, r * 0.4, 0, 0, r * 1.5);
+    halo.addColorStop(0, "rgba(255,255,255,0.55)");
+    halo.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = halo;
+    ctx.beginPath(); ctx.arc(0, 0, r * 1.5, 0, Math.PI * 2); ctx.fill();
+
+    if (type.name === "Ninjo") {
+      // Spiky orange hair behind the face
+      ctx.fillStyle = type.hair;
+      for (let i = 0; i < 7; i++) {
+        const a = Math.PI + (i / 6) * Math.PI;
+        const bx = Math.cos(a) * r * 0.55, by = Math.sin(a) * r * 0.55 - r * 0.12;
+        const tx = Math.cos(a) * r * 1.25, ty = Math.sin(a) * r * 1.25 - r * 0.18;
+        const w = 0.28;
+        ctx.beginPath();
+        ctx.moveTo(bx - Math.sin(a) * r * w, by + Math.cos(a) * r * w);
+        ctx.lineTo(bx + Math.sin(a) * r * w, by - Math.cos(a) * r * w);
+        ctx.lineTo(tx, ty);
+        ctx.closePath(); ctx.fill();
+      }
+      // Face
+      ctx.fillStyle = type.skin;
+      ctx.beginPath(); ctx.arc(0, r * 0.08, r * 0.78, 0, Math.PI * 2); ctx.fill();
+      ctx.lineWidth = 3; ctx.strokeStyle = "#5d4037"; ctx.stroke();
+      // Headband
+      ctx.fillStyle = type.accent;
+      ctx.fillRect(-r * 0.78, -r * 0.5, r * 1.56, r * 0.3);
+      ctx.fillStyle = type.plate;
+      ctx.beginPath(); ctx.roundRect(-r * 0.22, -r * 0.47, r * 0.44, r * 0.24, 4); ctx.fill();
+      ctx.strokeStyle = "#90a4ae"; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = "#78909c";
+      ctx.beginPath(); ctx.arc(0, -r * 0.35, r * 0.05, 0, Math.PI * 2); ctx.fill();
+      // Big manga eyes
+      [-1, 1].forEach((s) => {
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath(); ctx.ellipse(s * r * 0.3, r * 0.08, r * 0.17, r * 0.22, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#3e2723";
+        ctx.beginPath(); ctx.arc(s * r * 0.3, r * 0.12, r * 0.1, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath(); ctx.arc(s * r * 0.26, r * 0.06, r * 0.04, 0, Math.PI * 2); ctx.fill();
+      });
+      // Open smile
+      ctx.fillStyle = "#8d4025";
+      ctx.beginPath(); ctx.arc(0, r * 0.42, r * 0.16, 0, Math.PI); ctx.closePath(); ctx.fill();
+    } else if (type.name === "Strawbo") {
+      // Face
+      ctx.fillStyle = type.skin;
+      ctx.beginPath(); ctx.arc(0, r * 0.12, r * 0.76, 0, Math.PI * 2); ctx.fill();
+      ctx.lineWidth = 3; ctx.strokeStyle = "#5d4037"; ctx.stroke();
+      // Messy hair tufts at the sides
+      ctx.fillStyle = type.hair;
+      [-1, 1].forEach((s) => {
+        for (let i = 0; i < 3; i++) {
+          ctx.beginPath();
+          ctx.ellipse(s * r * (0.5 + i * 0.14), -r * (0.12 + i * 0.1), r * 0.14, r * 0.2, s * 0.6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+      // Straw hat: wide brim + dome + band
+      ctx.fillStyle = type.accent;
+      ctx.beginPath(); ctx.ellipse(0, -r * 0.42, r * 1.15, r * 0.3, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(0, -r * 0.62, r * 0.62, r * 0.42, 0, Math.PI, 0); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = type.band;
+      ctx.beginPath(); ctx.ellipse(0, -r * 0.5, r * 0.66, r * 0.12, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = "#8d6e63"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(0, -r * 0.42, r * 1.15, r * 0.3, 0, 0, Math.PI * 2); ctx.stroke();
+      // Happy closed eyes (manga arcs)
+      ctx.strokeStyle = "#3e2723"; ctx.lineWidth = 4; ctx.lineCap = "round";
+      [-1, 1].forEach((s) => {
+        ctx.beginPath(); ctx.arc(s * r * 0.32, r * 0.18, r * 0.14, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
+      });
+      // Huge rubber grin with tooth gap
+      ctx.fillStyle = "#7b341e";
+      ctx.beginPath(); ctx.arc(0, r * 0.38, r * 0.3, 0.1, Math.PI - 0.1); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(-r * 0.18, r * 0.38, r * 0.14, r * 0.12);
+      ctx.fillRect(r * 0.06, r * 0.38, r * 0.14, r * 0.12);
+    } else {
+      // Zappo: round yellow critter head
+      ctx.fillStyle = type.skin;
+      ctx.beginPath(); ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2); ctx.fill();
+      ctx.lineWidth = 3; ctx.strokeStyle = "#8d6e63"; ctx.stroke();
+      // Antennae with spark tips
+      ctx.strokeStyle = "#8d6e63"; ctx.lineWidth = 4; ctx.lineCap = "round";
+      [-1, 1].forEach((s) => {
+        ctx.beginPath();
+        ctx.moveTo(s * r * 0.3, -r * 0.78);
+        ctx.quadraticCurveTo(s * r * 0.5, -r * 1.1, s * r * 0.42, -r * 1.25);
+        ctx.stroke();
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath(); ctx.arc(s * r * 0.42, -r * 1.28, r * 0.12, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = type.accent; ctx.lineWidth = 2; ctx.stroke();
+        ctx.strokeStyle = "#8d6e63"; ctx.lineWidth = 4;
+      });
+      // Star cheeks
+      ctx.fillStyle = type.cheek;
+      [-1, 1].forEach((s) => {
+        const cx = s * r * 0.55, cy = r * 0.28;
+        ctx.beginPath();
+        for (let i = 0; i < 5; i++) {
+          const a = -Math.PI / 2 + (i * 4 * Math.PI) / 5;
+          const px = cx + Math.cos(a) * r * 0.14, py = cy + Math.sin(a) * r * 0.14;
+          i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        }
+        ctx.closePath(); ctx.fill();
+      });
+      // Huge turquoise eyes
+      [-1, 1].forEach((s) => {
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath(); ctx.ellipse(s * r * 0.28, -r * 0.08, r * 0.18, r * 0.24, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = type.accent;
+        ctx.beginPath(); ctx.arc(s * r * 0.28, -r * 0.04, r * 0.11, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath(); ctx.arc(s * r * 0.24, -r * 0.1, r * 0.045, 0, Math.PI * 2); ctx.fill();
+      });
+      // Tiny open "o" mouth
+      ctx.fillStyle = "#8d4025";
+      ctx.beginPath(); ctx.arc(0, r * 0.42, r * 0.09, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
   function drawBombGraphic(ctx, radius, time) {
     ctx.save();
     // Fuse cord
@@ -1260,15 +1413,26 @@
       life: 0.18
     });
 
-    // Score popup
+    // Score popup (heroes get a bigger shout)
     popups.push({
       x: f.x,
       y: f.y - 15,
       text: "+" + f.type.points,
       color: "#ffea00",
-      scale: 1,
+      scale: f.type.char ? 1.5 : 1,
       life: 0.75
     });
+    if (f.type.char) {
+      popups.push({
+        x: f.x,
+        y: f.y - 55,
+        text: f.type.name.toUpperCase() + "!",
+        color: "#80d8ff",
+        scale: 1.6,
+        life: 1.1
+      });
+      spawnConfetti(f.x, f.y);
+    }
 
     // Spawn two spinning halves
     const normalAngle = slashAngle - Math.PI / 2;
@@ -1515,6 +1679,8 @@
       ctx.rotate(f.angle);
       if (f.isBomb) {
         drawBombGraphic(ctx, f.radius, elapsedGameTime);
+      } else if (f.type.char) {
+        drawCharacterGraphic(ctx, f.type, f.radius, 0);
       } else {
         drawFruitGraphic(ctx, f.type, f.radius, 0);
       }
@@ -1537,7 +1703,7 @@
       ctx.save();
       ctx.translate(h.x, h.y);
       ctx.rotate(h.angle);
-      drawFruitGraphic(ctx, h.type, h.radius, h.halfMode);
+      h.type.char ? drawCharacterGraphic(ctx, h.type, h.radius, h.halfMode) : drawFruitGraphic(ctx, h.type, h.radius, h.halfMode);
       ctx.restore();
     }
 
