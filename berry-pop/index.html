@@ -19,8 +19,8 @@
     height: 100%;
     overflow: hidden;
     touch-action: none;
-    background: linear-gradient(180deg, #74d4ff 0%, #b8f2e6 65%, #d8f8e1 100%);
-    font-family: 'Fredoka', 'Arial Rounded MT Bold', 'Comic Sans MS', 'Nunito', sans-serif;
+    background: linear-gradient(180deg, #1b9aaa 0%, #48cae4 45%, #ade8f4 80%, #70e000 80%, #38b000 100%);
+    font-family: 'Fredoka', 'Arial Rounded MT Bold', 'Comic Sans MS', 'Impact', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -36,15 +36,6 @@
     overflow: hidden;
   }
 
-  /* Decorative background clouds/bubbles */
-  .bg-cloud {
-    position: absolute;
-    background: rgba(255, 255, 255, 0.45);
-    border-radius: 50px;
-    pointer-events: none;
-    filter: blur(1px);
-  }
-
   #game-stage {
     position: relative;
     width: 480px;
@@ -57,6 +48,8 @@
     width: 100%;
     height: 100%;
     display: block;
+    border-radius: 18px;
+    box-shadow: 0 14px 38px rgba(0, 0, 0, 0.45);
   }
 
   /* Mute Button Always Visible Top-Right */
@@ -64,29 +57,30 @@
     position: fixed;
     top: 16px;
     right: 16px;
-    width: 54px;
-    height: 54px;
+    width: 58px;
+    height: 58px;
     border-radius: 50%;
-    background: #ffffff;
-    border: 4px solid #386641;
-    box-shadow: 0 5px 0 #386641, 0 8px 15px rgba(0,0,0,0.18);
+    background: linear-gradient(180deg, #ffd166 0%, #f77f00 100%);
+    border: 5px solid #1f1300;
+    box-shadow: 0 6px 0 #1f1300, inset 0 4px 0 rgba(255,255,255,0.65);
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     z-index: 200;
-    transition: transform 0.1s ease, background 0.2s;
+    transition: transform 0.1s ease;
   }
 
   #mute-btn:active {
     transform: translateY(4px);
-    box-shadow: 0 1px 0 #386641;
+    box-shadow: 0 2px 0 #1f1300, inset 0 3px 0 rgba(255,255,255,0.5);
   }
 
   #mute-btn svg {
-    width: 28px;
-    height: 28px;
-    fill: #386641;
+    width: 30px;
+    height: 30px;
+    fill: #1f1300;
+    filter: drop-shadow(0 1px 0 rgba(255,255,255,0.5));
   }
 
   /* Overlay Screens */
@@ -97,11 +91,12 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: rgba(25, 65, 85, 0.48);
+    background: rgba(15, 25, 40, 0.65);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
     z-index: 100;
     transition: opacity 0.25s ease;
+    border-radius: 18px;
   }
 
   .overlay.hidden {
@@ -109,132 +104,168 @@
     pointer-events: none;
   }
 
+  /* Chunky Wooden Plank Modal */
   .modal-card {
-    width: 380px;
-    background: #fffdf7;
-    border-radius: 36px;
-    border: 6px solid #4a7c59;
-    box-shadow: 0 12px 0 #386641, 0 20px 35px rgba(0, 0, 0, 0.28);
+    width: 390px;
+    background: repeating-linear-gradient(
+      0deg,
+      #d48b45 0px,
+      #d48b45 44px,
+      #a86428 44px,
+      #a86428 48px,
+      #c67d3b 48px,
+      #c67d3b 92px
+    );
+    border-radius: 30px;
+    border: 7px solid #1f1300;
+    box-shadow: 
+      0 12px 0 #1f1300,
+      0 22px 40px rgba(0, 0, 0, 0.55),
+      inset 0 6px 0 rgba(255, 230, 180, 0.55),
+      inset 0 -8px 0 rgba(70, 35, 5, 0.65);
     padding: 28px 24px 32px;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
     animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 
   @keyframes popIn {
-    0% { transform: scale(0.6); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
+    0% { transform: scale(0.5) rotate(-5deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
   }
 
   .game-title {
-    font-size: 46px;
-    line-height: 1.05;
+    font-size: 48px;
+    line-height: 1.02;
     font-weight: 900;
-    color: #ff4769;
+    color: #ffbe0b;
+    -webkit-text-stroke: 3px #1f1300;
     text-shadow: 
-      -3px -3px 0 #fff,
-       3px -3px 0 #fff,
-      -3px  3px 0 #fff,
-       3px  3px 0 #fff,
-       0px  6px 0 #c9184a;
+      -3px -3px 0 #1f1300,
+       3px -3px 0 #1f1300,
+      -3px  3px 0 #1f1300,
+       3px  3px 0 #1f1300,
+       0px  7px 0 #1f1300;
     margin-bottom: 10px;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
+    transform: rotate(-2deg);
   }
 
   .subtitle {
     font-size: 18px;
-    color: #52796f;
-    font-weight: 700;
+    color: #fff8e6;
+    font-weight: 900;
+    text-shadow: 
+      -2px -2px 0 #1f1300,
+       2px -2px 0 #1f1300,
+      -2px  2px 0 #1f1300,
+       2px  2px 0 #1f1300,
+       0px  4px 0 #1f1300;
     margin-bottom: 18px;
   }
 
   .fruit-parade {
     display: flex;
-    gap: 8px;
+    gap: 7px;
     justify-content: center;
     align-items: center;
-    background: #e8f8f5;
-    border: 3px dashed #76c893;
+    background: #fdf0d5;
+    border: 5px solid #1f1300;
+    box-shadow: inset 0 4px 0 rgba(0,0,0,0.12), 0 4px 0 rgba(0,0,0,0.25);
     border-radius: 22px;
-    padding: 12px 14px;
+    padding: 12px 12px;
     margin-bottom: 24px;
     width: 100%;
   }
 
   .parade-dot {
     border-radius: 50%;
-    border: 2px solid rgba(0,0,0,0.2);
-    box-shadow: inset -2px -2px 0 rgba(0,0,0,0.15);
+    border: 3px solid #1f1300;
+    box-shadow: inset -2px -3px 0 rgba(0,0,0,0.25), inset 2px 2px 0 rgba(255,255,255,0.6);
   }
 
   .btn-primary {
-    background: linear-gradient(180deg, #ff758f 0%, #ff4769 100%);
+    background: linear-gradient(180deg, #80ed99 0%, #38b000 45%, #008000 100%);
     color: #ffffff;
     font-size: 28px;
     font-weight: 900;
-    padding: 16px 42px;
+    padding: 15px 40px;
     border-radius: 50px;
-    border: 5px solid #ffffff;
-    box-shadow: 0 7px 0 #c9184a, 0 12px 20px rgba(255, 71, 105, 0.45);
+    border: 6px solid #1f1300;
+    box-shadow: 0 8px 0 #1f1300, 0 14px 20px rgba(0, 0, 0, 0.4), inset 0 5px 0 rgba(255,255,255,0.65);
     cursor: pointer;
-    text-shadow: 0 2px 0 #c9184a;
-    letter-spacing: 1px;
+    -webkit-text-stroke: 1.5px #1f1300;
+    text-shadow: 
+      -2px -2px 0 #1f1300,
+       2px -2px 0 #1f1300,
+      -2px  2px 0 #1f1300,
+       2px  2px 0 #1f1300,
+       0 4px 0 #1f1300;
+    letter-spacing: 1.5px;
     transition: transform 0.1s;
-    animation: pulseBtn 1.6s infinite ease-in-out;
+    animation: pulseBtn 1.4s infinite ease-in-out;
   }
 
   .btn-primary:active {
     transform: translateY(5px);
-    box-shadow: 0 2px 0 #c9184a;
+    box-shadow: 0 3px 0 #1f1300, inset 0 3px 0 rgba(255,255,255,0.5);
   }
 
   @keyframes pulseBtn {
     0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.06); }
+    50% { transform: scale(1.06) rotate(1deg); }
   }
 
   .score-box-group {
     display: flex;
-    gap: 16px;
+    gap: 14px;
     width: 100%;
-    margin: 14px 0 26px;
+    margin: 12px 0 26px;
   }
 
   .score-card {
     flex: 1;
-    background: #eef9f3;
-    border: 4px solid #76c893;
-    border-radius: 24px;
+    background: #fdf0d5;
+    border: 5px solid #1f1300;
+    box-shadow: 0 5px 0 #1f1300, inset 0 -4px 0 #e6ccb2;
+    border-radius: 20px;
     padding: 12px 8px;
   }
 
   .score-card.best {
-    background: #fff8e6;
-    border-color: #ffb703;
+    background: #fff3b0;
+    box-shadow: 0 5px 0 #1f1300, inset 0 -4px 0 #f4a261;
   }
 
   .score-label {
     font-size: 15px;
-    font-weight: 800;
-    color: #52796f;
+    font-weight: 900;
+    color: #7f4f24;
     text-transform: uppercase;
     margin-bottom: 4px;
   }
 
   .score-card.best .score-label {
-    color: #d48b00;
+    color: #b54500;
   }
 
   .score-val {
     font-size: 34px;
     font-weight: 900;
-    color: #2d6a4f;
+    color: #ff2a55;
+    text-shadow: 
+      -2px -2px 0 #1f1300,
+       2px -2px 0 #1f1300,
+      -2px  2px 0 #1f1300,
+       2px  2px 0 #1f1300,
+       0 3px 0 #1f1300;
   }
 
   .score-card.best .score-val {
-    color: #fb8500;
+    color: #ff9f1c;
   }
 </style>
 </head>
@@ -258,17 +289,17 @@
     <div id="start-screen" class="overlay">
       <div class="modal-card">
         <div class="game-title">BERRY POP<br>MERGE!</div>
-        <div class="subtitle">Drop &amp; match cute fruits in the jar!</div>
+        <div class="subtitle">Drop &amp; smash feisty fruits in the jar!</div>
         <div class="fruit-parade">
-          <div class="parade-dot" style="width:14px;height:14px;background:#ff3b56;"></div>
-          <div class="parade-dot" style="width:18px;height:18px;background:#ff6584;"></div>
-          <div class="parade-dot" style="width:22px;height:22px;background:#ff9f1c;"></div>
-          <div class="parade-dot" style="width:26px;height:26px;background:#e63946;"></div>
-          <div class="parade-dot" style="width:30px;height:30px;background:#a7c957;"></div>
-          <div class="parade-dot" style="width:34px;height:34px;background:#ff9ebb;"></div>
-          <div class="parade-dot" style="width:38px;height:38px;background:#ffd166;"></div>
-          <div class="parade-dot" style="width:42px;height:42px;background:#70e000;"></div>
-          <div class="parade-dot" style="width:48px;height:48px;background:#2ec4b6;"></div>
+          <div class="parade-dot" style="width:14px;height:14px;background:#ff1e42;"></div>
+          <div class="parade-dot" style="width:18px;height:18px;background:#ff4d6d;"></div>
+          <div class="parade-dot" style="width:22px;height:22px;background:#ff9100;"></div>
+          <div class="parade-dot" style="width:26px;height:26px;background:#d90429;"></div>
+          <div class="parade-dot" style="width:30px;height:30px;background:#8ac926;"></div>
+          <div class="parade-dot" style="width:34px;height:34px;background:#ff758f;"></div>
+          <div class="parade-dot" style="width:38px;height:38px;background:#ffbe0b;"></div>
+          <div class="parade-dot" style="width:42px;height:42px;background:#52b788;"></div>
+          <div class="parade-dot" style="width:48px;height:48px;background:#2b9348;"></div>
         </div>
         <button id="start-btn" class="btn-primary">TAP TO PLAY</button>
       </div>
@@ -277,7 +308,7 @@
     <!-- Game Over Overlay -->
     <div id="gameover-screen" class="overlay hidden">
       <div class="modal-card">
-        <div class="game-title" style="font-size:42px;">GAME OVER</div>
+        <div class="game-title" style="font-size:44px;">GAME OVER</div>
         <div class="subtitle" style="margin-bottom:6px;">The jar is overflowing!</div>
         <div class="score-box-group">
           <div class="score-card">
@@ -307,8 +338,9 @@
 
   const STAGE_W = 480;
   const STAGE_H = 820;
+  const OUTLINE_COLOR = "#1f1300";
 
-  // Jar boundaries
+  // Jar boundaries (Unchanged physics dimensions)
   const JAR = {
     x: 45,
     y: 195,
@@ -320,99 +352,129 @@
     dropY: 148
   };
 
-  // 9 Cute Fruit Tiers
+  // 9 Bold Feisty Cartoon Fruit Tiers
+  // browStyle: 'angry' (V-shaped scowl), 'determined' (flat/intense), 'cheeky' (one raised), 'boss' (heavy furrowed)
   const FRUITS = [
     {
       name: "Cherry",
       radius: 20,
-      color: "#ff2a55",
-      gradTop: "#ff5c7c",
-      gradBot: "#d90429",
-      stroke: "#800f2f",
+      color: "#ff1635",
+      gradTop: "#ff6b81",
+      gradMid: "#ff1635",
+      gradBot: "#a30018",
+      bellyColor: "#ffccd5",
       score: 2,
-      faceScale: 0.65
+      faceScale: 0.68,
+      browStyle: "angry",
+      browColor: "#3d0008"
     },
     {
       name: "Strawberry",
       radius: 28,
-      color: "#ff5d73",
-      gradTop: "#ff8598",
-      gradBot: "#e63956",
-      stroke: "#9e1931",
+      color: "#ff3355",
+      gradTop: "#ff758f",
+      gradMid: "#ff2a55",
+      gradBot: "#b5092b",
+      bellyColor: "#ffe5ec",
       score: 4,
-      faceScale: 0.78
+      faceScale: 0.8,
+      browStyle: "cheeky",
+      browColor: "#4a0514"
     },
     {
       name: "Orange",
       radius: 38,
-      color: "#ff9f1c",
-      gradTop: "#ffbf69",
-      gradBot: "#f77f00",
-      stroke: "#9c4f00",
+      color: "#ff8800",
+      gradTop: "#ffbe0b",
+      gradMid: "#ff8800",
+      gradBot: "#c45100",
+      bellyColor: "#fff3b0",
       score: 8,
-      faceScale: 0.9
+      faceScale: 0.92,
+      browStyle: "angry",
+      browColor: "#4a1c00"
     },
     {
       name: "Apple",
       radius: 49,
-      color: "#e63946",
-      gradTop: "#ff6b6b",
-      gradBot: "#c1121f",
-      stroke: "#780000",
+      color: "#e6192e",
+      gradTop: "#ff5964",
+      gradMid: "#d90429",
+      gradBot: "#780000",
+      bellyColor: "#ffd6d6",
       score: 16,
-      faceScale: 1.05
+      faceScale: 1.06,
+      browStyle: "boss",
+      browColor: "#2b0000"
     },
     {
       name: "Pear",
       radius: 61,
-      color: "#a7c957",
-      gradTop: "#c7e576",
-      gradBot: "#6a994e",
-      stroke: "#386641",
+      color: "#80b918",
+      gradTop: "#d4fc79",
+      gradMid: "#80b918",
+      gradBot: "#386641",
+      bellyColor: "#e9f5db",
       score: 32,
-      faceScale: 1.2
+      faceScale: 1.2,
+      browStyle: "determined",
+      browColor: "#1b3a10"
     },
     {
       name: "Peach",
       radius: 75,
-      color: "#ff9ebb",
-      gradTop: "#ffc2d4",
-      gradBot: "#ff6b9d",
-      stroke: "#a3335c",
+      color: "#ff7096",
+      gradTop: "#ffccd5",
+      gradMid: "#ff7096",
+      gradBot: "#c9184a",
+      bellyColor: "#fff0f3",
       score: 64,
-      faceScale: 1.38
+      faceScale: 1.38,
+      browStyle: "cheeky",
+      browColor: "#590d22"
     },
     {
       name: "Pineapple",
       radius: 90,
-      color: "#ffd166",
-      gradTop: "#ffe396",
-      gradBot: "#f4a261",
-      stroke: "#9c5a1a",
+      color: "#ffb703",
+      gradTop: "#ffee70",
+      gradMid: "#ffb703",
+      gradBot: "#cc5803",
+      bellyColor: "#fff8cc",
       score: 128,
-      faceScale: 1.55
+      faceScale: 1.56,
+      browStyle: "boss",
+      browColor: "#471d00"
     },
     {
       name: "Melon",
       radius: 107,
-      color: "#80ed99",
-      gradTop: "#b7efc5",
-      gradBot: "#57cc99",
-      stroke: "#22577a",
+      color: "#52b788",
+      gradTop: "#b7e4c7",
+      gradMid: "#52b788",
+      gradBot: "#1b4332",
+      bellyColor: "#d8f3dc",
       score: 256,
-      faceScale: 1.75
+      faceScale: 1.76,
+      browStyle: "angry",
+      browColor: "#081c15"
     },
     {
       name: "Watermelon",
       radius: 126,
-      color: "#38b000",
-      gradTop: "#70e000",
-      gradBot: "#007200",
-      stroke: "#004b23",
+      color: "#2b9348",
+      gradTop: "#80ed99",
+      gradMid: "#2b9348",
+      gradBot: "#004b23",
+      bellyColor: "#b7efc5",
       score: 512,
-      faceScale: 2.0
+      faceScale: 2.0,
+      browStyle: "boss",
+      browColor: "#00240f"
     }
   ];
+
+  const COMIC_WORDS = ["POW!", "POP!", "BAM!", "SMASH!", "ZAP!", "BOOM!"];
 
   /* ==========================================
      STATE VARIABLES
@@ -440,7 +502,10 @@
   let particles = [];
   let floatingTexts = [];
   let confetti = [];
-  let bgBubbles = [];
+  let bgClouds = [];
+  let starbursts = [];
+  let impactRings = [];
+  let dustPuffs = [];
 
   let currentFruitType = 0;
   let nextFruitType = 0;
@@ -535,7 +600,6 @@
       const now = audioCtx.currentTime;
       const baseFreq = 320 + tier * 55;
 
-      // Pop sound
       const osc1 = audioCtx.createOscillator();
       const gain1 = audioCtx.createGain();
       osc1.type = "triangle";
@@ -548,7 +612,6 @@
       osc1.start(now);
       osc1.stop(now + 0.17);
 
-      // Sparkle chime for bigger merges
       if (tier >= 3) {
         const osc2 = audioCtx.createOscillator();
         const gain2 = audioCtx.createGain();
@@ -651,21 +714,16 @@
   /* ==========================================
      GAMEPLAY & PHYSICS INITIALIZATION
   ========================================== */
-  function initBgBubbles() {
-    bgBubbles = [];
-    for (let i = 0; i < 14; i++) {
-      bgBubbles.push({
-        x: Math.random() * STAGE_W,
-        y: Math.random() * STAGE_H,
-        r: 12 + Math.random() * 28,
-        vy: -0.25 - Math.random() * 0.4,
-        alpha: 0.15 + Math.random() * 0.25
-      });
-    }
+  function initBgClouds() {
+    bgClouds = [
+      { x: 75, y: 120, scale: 0.9, speed: 0.18 },
+      { x: 260, y: 85, scale: 1.15, speed: 0.12 },
+      { x: 420, y: 155, scale: 0.78, speed: 0.22 },
+      { x: 160, y: 210, scale: 0.65, speed: 0.15 }
+    ];
   }
 
   function randomSpawnFruitType() {
-    // Drop first 4 smaller fruit types (Cherry, Strawberry, Orange, Apple)
     const weights = [0.38, 0.32, 0.20, 0.10];
     const r = Math.random();
     let sum = 0;
@@ -684,6 +742,9 @@
     particles = [];
     floatingTexts = [];
     confetti = [];
+    starbursts = [];
+    impactRings = [];
+    dustPuffs = [];
     score = 0;
     displayScore = 0;
     dangerTimer = 0;
@@ -719,9 +780,12 @@
       radius: def.radius,
       angle: 0,
       va: 0,
-      scaleX: isMerged ? 1.38 : 0.85,
-      scaleY: isMerged ? 0.68 : 1.18,
+      scaleX: isMerged ? 1.42 : 0.85,
+      scaleY: isMerged ? 0.64 : 1.18,
       blinkTimer: 100 + Math.random() * 240,
+      happyTimer: isMerged ? 0.95 : 0, // Happy cheering face on merge!
+      dizzyTimer: 0,                   // Dizzy eyes on hard bounce!
+      hasLanded: isMerged,
       isMerged: !!isMerged,
       age: 0,
       mergedFlag: false
@@ -739,7 +803,7 @@
     playDropSound();
 
     canDrop = false;
-    dropCooldown = 0.42; // seconds until next fruit ready
+    dropCooldown = 0.42;
 
     currentFruitType = nextFruitType;
     nextFruitType = randomSpawnFruitType();
@@ -747,54 +811,101 @@
   }
 
   /* ==========================================
-     PARTICLES, CONFETTI & VISUAL EFFECTS
+     COMIC POP EFFECTS (POW, RINGS, DUST, CONFETTI)
   ========================================== */
+  function createDustPuff(x, y, radius, intensity) {
+    const count = Math.min(8, Math.max(4, Math.floor(radius * 0.14)));
+    for (let i = 0; i < count; i++) {
+      const dir = i % 2 === 0 ? 1 : -1;
+      const spdX = dir * (1.2 + Math.random() * 2.8) * intensity;
+      const spdY = -0.5 - Math.random() * 1.4;
+      dustPuffs.push({
+        x: x + dir * (Math.random() * radius * 0.35),
+        y: y,
+        vx: spdX,
+        vy: spdY,
+        r: (6 + Math.random() * 7) * Math.min(1.4, intensity),
+        life: 0.32 + Math.random() * 0.18,
+        maxLife: 0.5
+      });
+    }
+  }
+
   function createMergeBurst(x, y, type) {
     const def = FRUITS[type];
+
+    // 1. Expanding Comic Impact Ring
+    impactRings.push({
+      x: x,
+      y: y,
+      r: def.radius * 0.4,
+      maxR: def.radius * 2.15,
+      color: def.gradTop,
+      life: 0.32,
+      maxLife: 0.32
+    });
+
+    // 2. Jagged Comic Starburst ("POW!", "POP!", "BAM!")
+    const word = COMIC_WORDS[(type + Math.floor(Math.random() * 3)) % COMIC_WORDS.length];
+    starbursts.push({
+      x: x,
+      y: y,
+      scale: 0.25,
+      targetScale: 0.85 + type * 0.12,
+      rot: (Math.random() - 0.5) * 0.35,
+      color: type % 2 === 0 ? "#ffbe0b" : "#ff5964",
+      word: word,
+      life: 0.42,
+      maxLife: 0.42
+    });
+
+    // 3. Comic Droplets & Star Particles
     const count = 14 + type * 3;
     for (let i = 0; i < count; i++) {
       const ang = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.4;
-      const spd = 2 + Math.random() * 5.5;
+      const spd = 2.5 + Math.random() * 6.5;
       particles.push({
         x: x,
         y: y,
         vx: Math.cos(ang) * spd,
-        vy: Math.sin(ang) * spd - 1,
-        r: 4 + Math.random() * (4 + type * 0.8),
-        color: i % 2 === 0 ? def.gradTop : "#ffffff",
+        vy: Math.sin(ang) * spd - 1.4,
+        r: 5 + Math.random() * (4.5 + type * 0.8),
+        color: i % 3 === 0 ? "#ffbe0b" : (i % 2 === 0 ? def.gradTop : "#ffffff"),
+        isStar: i % 4 === 0,
+        rot: Math.random() * Math.PI * 2,
+        vRot: (Math.random() - 0.5) * 0.25,
         alpha: 1,
-        life: 0.45 + Math.random() * 0.25
+        life: 0.48 + Math.random() * 0.25
       });
     }
 
-    // Floating score text
+    // 4. Floating Comic Score Text
     floatingTexts.push({
       x: x,
-      y: y - 10,
+      y: y - 16,
       text: "+" + def.score,
-      color: def.gradTop,
-      stroke: def.stroke,
+      color: "#ffbe0b",
       alpha: 1,
-      vy: -1.6,
-      scale: 1.25
+      vy: -1.9,
+      scale: 1.3
     });
 
-    // Big merge confetti (Orange or bigger, especially Peach/Pineapple/Melon/Watermelon)
+    // 5. Big Merge Confetti
     if (type >= 4) {
-      const confettiColors = ["#ff4769", "#ffd166", "#06d6a0", "#118ab2", "#ff9f1c", "#b5179e"];
-      const cCount = type >= 6 ? 45 : 24;
+      const confettiColors = ["#ff1635", "#ffbe0b", "#38b000", "#00bbf9", "#ff8800", "#9b5de5"];
+      const cCount = type >= 6 ? 48 : 26;
       for (let i = 0; i < cCount; i++) {
         confetti.push({
           x: x,
           y: y - 20,
-          vx: (Math.random() - 0.5) * 11,
-          vy: -4 - Math.random() * 7,
-          w: 8 + Math.random() * 6,
-          h: 5 + Math.random() * 5,
+          vx: (Math.random() - 0.5) * 12,
+          vy: -4.5 - Math.random() * 7.5,
+          w: 9 + Math.random() * 6,
+          h: 6 + Math.random() * 5,
           rot: Math.random() * Math.PI * 2,
-          vRot: (Math.random() - 0.5) * 0.25,
+          vRot: (Math.random() - 0.5) * 0.28,
           color: confettiColors[i % confettiColors.length],
-          life: 1.2 + Math.random() * 0.6
+          life: 1.25 + Math.random() * 0.6
         });
       }
     }
@@ -804,19 +915,20 @@
      PHYSICS & MERGE UPDATE STEP
   ========================================== */
   function updatePhysics(dt) {
-    // Sub-stepping for rock-solid stacking & circle collisions
     const subSteps = 6;
     const gravity = 0.46;
     const innerLeft = JAR.x + JAR.wall;
     const innerRight = JAR.x + JAR.w - JAR.wall;
     const innerBottom = JAR.y + JAR.h - JAR.wall;
 
-    // Update fruit ages and springy squash-and-stretch
     for (let i = 0; i < fruits.length; i++) {
       const f = fruits[i];
       f.age += dt;
       f.scaleX += (1 - f.scaleX) * 0.18;
       f.scaleY += (1 - f.scaleY) * 0.18;
+
+      if (f.happyTimer > 0) f.happyTimer = Math.max(0, f.happyTimer - dt);
+      if (f.dizzyTimer > 0) f.dizzyTimer = Math.max(0, f.dizzyTimer - dt);
 
       f.blinkTimer--;
       if (f.blinkTimer < -8) {
@@ -842,9 +954,17 @@
         // Wall boundaries
         if (f.x - f.radius < innerLeft) {
           f.x = innerLeft + f.radius;
+          if (f.vx < -2.6 && step === 0) {
+            f.dizzyTimer = 0.45;
+            createDustPuff(innerLeft + 4, f.y, f.radius * 0.6, 0.7);
+          }
           if (f.vx < 0) f.vx = -f.vx * 0.25;
         } else if (f.x + f.radius > innerRight) {
           f.x = innerRight - f.radius;
+          if (f.vx > 2.6 && step === 0) {
+            f.dizzyTimer = 0.45;
+            createDustPuff(innerRight - 4, f.y, f.radius * 0.6, 0.7);
+          }
           if (f.vx > 0) f.vx = -f.vx * 0.25;
         }
 
@@ -852,9 +972,17 @@
         if (f.y + f.radius > innerBottom) {
           f.y = innerBottom - f.radius;
           if (f.vy > 1.8 && step === 0) {
-            const squash = Math.min(0.22, f.vy * 0.02);
+            const squash = Math.min(0.24, f.vy * 0.022);
             f.scaleX = 1 + squash;
             f.scaleY = 1 - squash;
+
+            if (!f.hasLanded || f.vy > 3.2) {
+              f.hasLanded = true;
+              createDustPuff(f.x, innerBottom - 2, f.radius, Math.min(1.4, f.vy * 0.22));
+            }
+            if (f.vy > 4.2) {
+              f.dizzyTimer = 0.5;
+            }
           }
           if (f.vy > 0) f.vy = -f.vy * 0.18;
           f.vx *= 0.92;
@@ -890,7 +1018,6 @@
             const nx = dx / dist;
             const ny = dy / dist;
 
-            // Mass-weighted positional correction
             const totalR = a.radius + b.radius;
             const weightA = b.radius / totalR;
             const weightB = a.radius / totalR;
@@ -900,7 +1027,6 @@
             b.x += nx * overlap * weightB * 0.85;
             b.y += ny * overlap * weightB * 0.85;
 
-            // Velocity impulse
             const rvx = b.vx - a.vx;
             const rvy = b.vy - a.vy;
             const velAlongNormal = rvx * nx + rvy * ny;
@@ -913,17 +1039,29 @@
               b.vx += impulse * nx * weightB;
               b.vy += impulse * ny * weightB;
 
-              // Subtle roll torque
               const tangentX = -ny;
               const tangentY = nx;
               const slip = rvx * tangentX + rvy * tangentY;
               a.va -= slip * 0.0012;
               b.va += slip * 0.0012;
 
-              // Gentle squash on hard impact
-              if (Math.abs(velAlongNormal) > 3.5 && step === 0) {
-                a.scaleX = 1.1; a.scaleY = 0.9;
-                b.scaleX = 1.1; b.scaleY = 0.9;
+              // Hard impact: squash, dust puff & dizzy expression!
+              if (Math.abs(velAlongNormal) > 3.1 && step === 0) {
+                a.scaleX = 1.12; a.scaleY = 0.88;
+                b.scaleX = 1.12; b.scaleY = 0.88;
+
+                if (!a.hasLanded || !b.hasLanded || Math.abs(velAlongNormal) > 4.2) {
+                  a.hasLanded = true;
+                  b.hasLanded = true;
+                  const cx = a.x + nx * a.radius;
+                  const cy = a.y + ny * a.radius;
+                  createDustPuff(cx, cy, Math.min(a.radius, b.radius) * 0.85, 0.85);
+                }
+
+                if (Math.abs(velAlongNormal) > 3.6) {
+                  a.dizzyTimer = 0.55;
+                  b.dizzyTimer = 0.55;
+                }
               }
             }
           }
@@ -941,7 +1079,6 @@
         const my = (a.y + b.y) * 0.5;
         const nextType = Math.min(FRUITS.length - 1, a.type + 1);
 
-        // Add score
         const gained = FRUITS[nextType].score;
         score += gained;
         if (score > bestScore) {
@@ -949,13 +1086,20 @@
           saveBestScore();
         }
 
-        // Spawn next tier fruit (or pop two watermelons for huge bonus!)
         if (a.type < FRUITS.length - 1) {
           const newF = spawnFruit(mx, my, nextType, true);
           newF.x = clampDropperX(newF.x, nextType);
         } else {
-          // Two Watermelons merged! Extra celebration bonus
           score += 500;
+        }
+
+        // Nearby fruits cheer happily when a merge happens close to them!
+        for (let k = 0; k < fruits.length; k++) {
+          const other = fruits[k];
+          const d = Math.hypot(other.x - mx, other.y - my);
+          if (d < 150) {
+            other.happyTimer = Math.max(other.happyTimer, 0.55);
+          }
         }
 
         playMergeSound(nextType);
@@ -967,7 +1111,6 @@
     let anyAboveLine = false;
     for (let i = 0; i < fruits.length; i++) {
       const f = fruits[i];
-      // Ignore newly dropped fruit until it has settled or lived > 0.65s
       if (f.age > 0.65 && (f.y - f.radius) < JAR.dangerY) {
         anyAboveLine = true;
         break;
@@ -985,11 +1128,9 @@
   }
 
   function updateEffects(dt) {
-    // Smooth dropper movement
     targetDropperX = clampDropperX(targetDropperX, currentFruitType);
     dropperX += (targetDropperX - dropperX) * 0.35;
 
-    // Cooldown for dropping
     if (!canDrop) {
       dropCooldown -= dt;
       if (dropCooldown <= 0) {
@@ -997,29 +1138,56 @@
       }
     }
 
-    // Smooth score counter
     if (displayScore < score) {
       displayScore += Math.ceil((score - displayScore) * 0.2);
     }
 
-    // Background bubbles
-    for (let i = 0; i < bgBubbles.length; i++) {
-      const b = bgBubbles[i];
-      b.y += b.vy;
-      if (b.y + b.r < 0) {
-        b.y = STAGE_H + b.r;
-        b.x = Math.random() * STAGE_W;
+    // Drifting cartoon clouds
+    for (let i = 0; i < bgClouds.length; i++) {
+      const c = bgClouds[i];
+      c.x += c.speed;
+      if (c.x - 90 > STAGE_W) {
+        c.x = -90;
       }
     }
 
-    // Burst particles
+    // Dust puffs
+    for (let i = dustPuffs.length - 1; i >= 0; i--) {
+      const dp = dustPuffs[i];
+      dp.x += dp.vx;
+      dp.y += dp.vy;
+      dp.vx *= 0.92;
+      dp.r += dt * 16;
+      dp.life -= dt;
+      if (dp.life <= 0) dustPuffs.splice(i, 1);
+    }
+
+    // Impact rings
+    for (let i = impactRings.length - 1; i >= 0; i--) {
+      const ir = impactRings[i];
+      ir.life -= dt;
+      const progress = 1 - Math.max(0, ir.life / ir.maxLife);
+      ir.currentR = ir.r + (ir.maxR - ir.r) * (1 - Math.pow(1 - progress, 3));
+      if (ir.life <= 0) impactRings.splice(i, 1);
+    }
+
+    // Comic Starbursts
+    for (let i = starbursts.length - 1; i >= 0; i--) {
+      const sb = starbursts[i];
+      sb.life -= dt;
+      sb.scale += (sb.targetScale - sb.scale) * 0.35;
+      if (sb.life <= 0) starbursts.splice(i, 1);
+    }
+
+    // Particles
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
       p.x += p.vx;
       p.y += p.vy;
-      p.vy += 0.18;
+      p.vy += 0.22;
+      p.rot += p.vRot;
       p.life -= dt;
-      p.alpha = Math.max(0, p.life * 2);
+      p.alpha = Math.max(0, p.life * 2.2);
       if (p.life <= 0) particles.splice(i, 1);
     }
 
@@ -1036,7 +1204,7 @@
       const c = confetti[i];
       c.x += c.vx;
       c.y += c.vy;
-      c.vy += 0.22;
+      c.vy += 0.24;
       c.vx *= 0.98;
       c.rot += c.vRot;
       c.life -= dt;
@@ -1045,7 +1213,7 @@
   }
 
   /* ==========================================
-     CARTOON DRAWING ROUTINES
+     BOLD COMIC-CARTOON DRAWING ROUTINES
   ========================================== */
   function drawRoundedRect(ctx, x, y, w, h, r) {
     ctx.beginPath();
@@ -1061,22 +1229,302 @@
     ctx.closePath();
   }
 
-  function drawCuteFruit(ctx, x, y, radius, type, angle, scaleX, scaleY, isBlinking) {
+  function drawWoodPlankBox(ctx, x, y, w, h, r) {
+    ctx.save();
+    // Drop shadow
+    drawRoundedRect(ctx, x, y + 5, w, h, r);
+    ctx.fillStyle = OUTLINE_COLOR;
+    ctx.fill();
+
+    // Base wood fill
+    drawRoundedRect(ctx, x, y, w, h, r);
+    const grad = ctx.createLinearGradient(x, y, x, y + h);
+    grad.addColorStop(0, "#e09f5a");
+    grad.addColorStop(0.5, "#c67d3b");
+    grad.addColorStop(1, "#9c5a25");
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Wood grain lines inside clip
+    ctx.save();
+    ctx.clip();
+    ctx.strokeStyle = "rgba(85, 40, 5, 0.32)";
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(x, y + h * 0.35);
+    ctx.bezierCurveTo(x + w * 0.3, y + h * 0.25, x + w * 0.7, y + h * 0.45, x + w, y + h * 0.32);
+    ctx.moveTo(x, y + h * 0.72);
+    ctx.bezierCurveTo(x + w * 0.4, y + h * 0.82, x + w * 0.65, y + h * 0.62, x + w, y + h * 0.75);
+    ctx.stroke();
+
+    // Top highlight bevel
+    ctx.fillStyle = "rgba(255, 235, 195, 0.45)";
+    ctx.fillRect(x, y, w, 6);
+    ctx.restore();
+
+    // Thick cartoon outline
+    drawRoundedRect(ctx, x, y, w, h, r);
+    ctx.lineWidth = 4.5;
+    ctx.strokeStyle = OUTLINE_COLOR;
+    ctx.stroke();
+
+    // Corner rivets/nails
+    const nails = [
+      [x + 10, y + 10],
+      [x + w - 10, y + 10],
+      [x + 10, y + h - 10],
+      [x + w - 10, y + h - 10]
+    ];
+    for (let i = 0; i < nails.length; i++) {
+      ctx.fillStyle = "#5c4d3c";
+      ctx.beginPath();
+      ctx.arc(nails[i][0], nails[i][1], 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = OUTLINE_COLOR;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawCartoonCloud(ctx, x, y, scale) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+
+    ctx.beginPath();
+    ctx.arc(-36, 8, 22, Math.PI * 0.5, Math.PI * 1.45);
+    ctx.arc(-12, -10, 28, Math.PI * 1.05, Math.PI * 1.9);
+    ctx.arc(22, -4, 25, Math.PI * 1.15, Math.PI * 1.95);
+    ctx.arc(44, 10, 18, Math.PI * 1.4, Math.PI * 0.5);
+    ctx.closePath();
+
+    // Soft blue bottom tint
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+
+    ctx.lineWidth = 4.5;
+    ctx.strokeStyle = OUTLINE_COLOR;
+    ctx.lineJoin = "round";
+    ctx.stroke();
+
+    // Inner highlight puff
+    ctx.fillStyle = "#e0f7fa";
+    ctx.beginPath();
+    ctx.ellipse(0, 14, 42, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  function drawGrassTuft(ctx, x, y, scale, flip) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(flip ? -scale : scale, scale);
+
+    ctx.beginPath();
+    ctx.moveTo(-22, 0);
+    ctx.quadraticCurveTo(-26, -18, -34, -26);
+    ctx.quadraticCurveTo(-16, -18, -10, -6);
+    ctx.quadraticCurveTo(-8, -26, -2, -36);
+    ctx.quadraticCurveTo(4, -22, 6, -6);
+    ctx.quadraticCurveTo(16, -22, 28, -24);
+    ctx.quadraticCurveTo(22, -10, 18, 0);
+    ctx.closePath();
+
+    const grad = ctx.createLinearGradient(0, -36, 0, 0);
+    grad.addColorStop(0, "#aacc00");
+    grad.addColorStop(1, "#2b9348");
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    ctx.lineWidth = 4;
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = OUTLINE_COLOR;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawSkyAndBackdrop() {
+    ctx.save();
+
+    // 1. Bright Blue Sky Gradient
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, STAGE_H);
+    skyGrad.addColorStop(0, "#189ab4");
+    skyGrad.addColorStop(0.45, "#64dfdf");
+    skyGrad.addColorStop(0.75, "#caf0f8");
+    skyGrad.addColorStop(1, "#90e0ef");
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, STAGE_W, STAGE_H);
+
+    // Subtle comic sunbeams radiating from center
+    ctx.save();
+    ctx.translate(STAGE_W * 0.5, JAR.y + 200);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
+    for (let i = 0; i < 12; i++) {
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      const a1 = (i * Math.PI * 2) / 12;
+      const a2 = a1 + Math.PI / 12;
+      ctx.arc(0, 0, 650, a1, a2);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // 2. Soft Cartoon Clouds with Thick Outlines
+    for (let i = 0; i < bgClouds.length; i++) {
+      const c = bgClouds[i];
+      drawCartoonCloud(ctx, c.x, c.y, c.scale);
+    }
+
+    // 3. Distant Rolling Green Hills Behind the Jar
+    ctx.beginPath();
+    ctx.moveTo(-10, STAGE_H);
+    ctx.lineTo(-10, 655);
+    ctx.quadraticCurveTo(120, 600, 260, 650);
+    ctx.quadraticCurveTo(380, 690, STAGE_W + 10, 635);
+    ctx.lineTo(STAGE_W + 10, STAGE_H);
+    ctx.closePath();
+    ctx.fillStyle = "#55a630";
+    ctx.fill();
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = OUTLINE_COLOR;
+    ctx.stroke();
+
+    // Foreground Vibrant Grass Hill
+    ctx.beginPath();
+    ctx.moveTo(-10, STAGE_H);
+    ctx.lineTo(-10, 715);
+    ctx.quadraticCurveTo(240, 680, STAGE_W + 10, 715);
+    ctx.lineTo(STAGE_W + 10, STAGE_H);
+    ctx.closePath();
+    const grassGrad = ctx.createLinearGradient(0, 690, 0, STAGE_H);
+    grassGrad.addColorStop(0, "#80ed99");
+    grassGrad.addColorStop(0.25, "#57cc99");
+    grassGrad.addColorStop(1, "#2b9348");
+    ctx.fillStyle = grassGrad;
+    ctx.fill();
+    ctx.lineWidth = 5.5;
+    ctx.strokeStyle = OUTLINE_COLOR;
+    ctx.stroke();
+
+    // Grass Tufts flanking the jar
+    drawGrassTuft(ctx, 28, 725, 0.9, false);
+    drawGrassTuft(ctx, 452, 725, 0.95, true);
+
+    ctx.restore();
+  }
+
+  /* ==========================================
+     FEISTY / EXPRESSIVE FRUIT CHARACTERS
+  ========================================== */
+  function drawCuteFruit(ctx, x, y, radius, type, angle, scaleX, scaleY, isBlinking, mood) {
     const def = FRUITS[type];
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(scaleX, scaleY);
     ctx.rotate(angle);
 
-    // Soft drop shadow
-    ctx.fillStyle = "rgba(0, 40, 30, 0.14)";
+    // 1. Bold Drop Shadow inside jar
+    ctx.fillStyle = "rgba(20, 10, 0, 0.25)";
     ctx.beginPath();
-    ctx.arc(0, 4, radius, 0, Math.PI * 2);
+    ctx.arc(0, 5, radius, 0, Math.PI * 2);
     ctx.fill();
 
-    // Main circular body gradient
-    const grad = ctx.createRadialGradient(-radius * 0.3, -radius * 0.35, radius * 0.1, 0, 0, radius);
+    // 2. Top Stems / Leaves / Crown Drawn Behind or Top of Body
+    ctx.save();
+    if (type === 0) {
+      // Cherry curved stem + leaf
+      ctx.strokeStyle = OUTLINE_COLOR;
+      ctx.lineWidth = 7.5;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(0, -radius * 0.82);
+      ctx.quadraticCurveTo(6, -radius * 1.48, 14, -radius * 1.6);
+      ctx.stroke();
+
+      ctx.strokeStyle = "#55a630";
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+    } else if (type === 1) {
+      // Strawberry spiky green leaf crown
+      ctx.fillStyle = "#55a630";
+      ctx.strokeStyle = OUTLINE_COLOR;
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(-14, -radius * 0.82);
+      ctx.lineTo(-6, -radius * 1.15);
+      ctx.lineTo(0, -radius * 0.92);
+      ctx.lineTo(6, -radius * 1.15);
+      ctx.lineTo(14, -radius * 0.82);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    } else if (type === 2 || type === 3 || type === 4 || type === 5) {
+      // Chunky cartoon leaf + stem
+      ctx.fillStyle = "#6a4c93";
+      ctx.strokeStyle = OUTLINE_COLOR;
+      ctx.lineWidth = 3.5;
+      drawRoundedRect(ctx, -3, -radius * 1.16, 6, radius * 0.3, 3);
+      ctx.fillStyle = "#7f4f24";
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.save();
+      ctx.translate(8, -radius * 0.98);
+      ctx.rotate(-0.35);
+      ctx.fillStyle = "#70e000";
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 11, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = OUTLINE_COLOR;
+      ctx.stroke();
+      ctx.restore();
+    } else if (type === 6) {
+      // Pineapple bold spiky crown
+      ctx.fillStyle = "#38b000";
+      ctx.strokeStyle = OUTLINE_COLOR;
+      ctx.lineWidth = 4.5;
+      ctx.lineJoin = "round";
+      ctx.beginPath();
+      ctx.moveTo(-24, -radius * 0.82);
+      ctx.lineTo(-16, -radius * 1.22);
+      ctx.lineTo(-6, -radius * 0.96);
+      ctx.lineTo(0, -radius * 1.32);
+      ctx.lineTo(6, -radius * 0.96);
+      ctx.lineTo(16, -radius * 1.22);
+      ctx.lineTo(24, -radius * 0.82);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    } else if (type === 7 || type === 8) {
+      // Curly vine tendril on top of Melon & Watermelon
+      ctx.strokeStyle = OUTLINE_COLOR;
+      ctx.lineWidth = 8;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(0, -radius * 0.92);
+      ctx.bezierCurveTo(-12, -radius * 1.22, 16, -radius * 1.28, 6, -radius * 1.05);
+      ctx.stroke();
+      ctx.strokeStyle = "#55a630";
+      ctx.lineWidth = 4;
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // 3. Glossy Saturated Round Body
+    const grad = ctx.createRadialGradient(
+      -radius * 0.28,
+      -radius * 0.35,
+      radius * 0.08,
+      0,
+      0,
+      radius
+    );
     grad.addColorStop(0, def.gradTop);
+    grad.addColorStop(0.55, def.gradMid);
     grad.addColorStop(1, def.gradBot);
 
     ctx.fillStyle = grad;
@@ -1084,40 +1532,53 @@
     ctx.arc(0, 0, radius, 0, Math.PI * 2);
     ctx.fill();
 
-    // Fruit-specific cute patterns/textures clipped inside circle
+    // 4. Clipped Character Details (Belly Patch, Stripes, Seeds, Rim Lighting)
     ctx.save();
     ctx.beginPath();
     ctx.arc(0, 0, radius - 2, 0, Math.PI * 2);
     ctx.clip();
 
+    // Lighter cartoon belly patch at bottom (Angry-Birds-like round character styling)
+    ctx.fillStyle = def.bellyColor;
+    ctx.globalAlpha = 0.65;
+    ctx.beginPath();
+    ctx.ellipse(0, radius * 0.78, radius * 0.72, radius * 0.45, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
     if (type === 1) {
-      // Strawberry seeds
-      ctx.fillStyle = "rgba(255, 240, 170, 0.75)";
-      const seeds = [[-10, -8], [10, -8], [-14, 6], [14, 6], [0, 14]];
+      // Strawberry bold seeds
+      ctx.fillStyle = "#ffbe0b";
+      ctx.strokeStyle = OUTLINE_COLOR;
+      ctx.lineWidth = 1.6;
+      const seeds = [[-13, -12], [13, -12], [-17, 5], [17, 5], [-10, 17], [10, 17]];
       for (let s of seeds) {
         ctx.beginPath();
-        ctx.arc(s[0], s[1], 2.2, 0, Math.PI * 2);
+        ctx.ellipse(s[0], s[1], 2.4, 3.4, 0, 0, Math.PI * 2);
         ctx.fill();
+        ctx.stroke();
       }
     } else if (type === 2) {
-      // Orange pores
-      ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
+      // Orange dimple spots
+      ctx.fillStyle = "rgba(140, 50, 0, 0.32)";
       ctx.beginPath();
-      ctx.arc(radius * 0.45, radius * 0.3, 3, 0, Math.PI * 2);
-      ctx.arc(radius * 0.55, radius * 0.1, 2, 0, Math.PI * 2);
+      ctx.arc(-radius * 0.58, -radius * 0.15, 3, 0, Math.PI * 2);
+      ctx.arc(-radius * 0.48, -radius * 0.38, 2.2, 0, Math.PI * 2);
+      ctx.arc(radius * 0.58, -radius * 0.1, 3.2, 0, Math.PI * 2);
       ctx.fill();
-    } else if (type === 5) {
-      // Peach blush cleft
-      ctx.strokeStyle = "rgba(215, 65, 115, 0.35)";
-      ctx.lineWidth = 4;
+    } else if (type === 4) {
+      // Pear speckles
+      ctx.fillStyle = "rgba(45, 85, 20, 0.35)";
       ctx.beginPath();
-      ctx.arc(0, -radius * 0.3, radius * 0.65, -Math.PI * 0.7, -Math.PI * 0.3);
-      ctx.stroke();
+      ctx.arc(-radius * 0.52, 8, 3, 0, Math.PI * 2);
+      ctx.arc(radius * 0.55, 4, 3.5, 0, Math.PI * 2);
+      ctx.arc(radius * 0.42, 18, 2.5, 0, Math.PI * 2);
+      ctx.fill();
     } else if (type === 6) {
-      // Pineapple crosshatch
-      ctx.strokeStyle = "rgba(210, 115, 20, 0.25)";
-      ctx.lineWidth = 3;
-      for (let d = -radius; d <= radius; d += 26) {
+      // Pineapple bold crosshatch
+      ctx.strokeStyle = "rgba(160, 65, 0, 0.32)";
+      ctx.lineWidth = 4;
+      for (let d = -radius; d <= radius; d += 28) {
         ctx.beginPath();
         ctx.moveTo(d - radius, -radius);
         ctx.lineTo(d + radius, radius);
@@ -1126,192 +1587,315 @@
         ctx.stroke();
       }
     } else if (type === 7) {
-      // Melon net lines
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
-      ctx.lineWidth = 4;
+      // Melon cantaloupe ribs
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.38)";
+      ctx.lineWidth = 5;
       ctx.beginPath();
-      ctx.arc(-radius * 0.3, 0, radius * 0.85, -0.8, 0.8);
+      ctx.arc(-radius * 0.32, 0, radius * 0.88, -0.85, 0.85);
       ctx.stroke();
       ctx.beginPath();
-      ctx.arc(radius * 0.3, 0, radius * 0.85, Math.PI - 0.8, Math.PI + 0.8);
+      ctx.arc(radius * 0.32, 0, radius * 0.88, Math.PI - 0.85, Math.PI + 0.85);
       ctx.stroke();
     } else if (type === 8) {
-      // Watermelon dark green stripes
-      ctx.strokeStyle = "#004b23";
-      ctx.lineWidth = 10;
+      // Watermelon jagged dark stripes
+      ctx.strokeStyle = "#003d1b";
+      ctx.lineWidth = 12;
       ctx.lineCap = "round";
-      for (let sx = -radius * 0.65; sx <= radius * 0.65; sx += radius * 0.42) {
+      for (let sx = -radius * 0.68; sx <= radius * 0.68; sx += radius * 0.45) {
         ctx.beginPath();
         ctx.moveTo(sx, -radius);
-        ctx.quadraticCurveTo(sx * 1.25, 0, sx, radius);
+        ctx.quadraticCurveTo(sx * 1.28, 0, sx, radius);
         ctx.stroke();
       }
     }
-    ctx.restore();
 
-    // Chunky cartoon outline
-    ctx.lineWidth = Math.max(3, radius * 0.085);
-    ctx.strokeStyle = def.stroke;
+    // Inner bottom rim shadow for 3D depth
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.25)";
+    ctx.lineWidth = radius * 0.14;
     ctx.beginPath();
-    ctx.arc(0, 0, radius - ctx.lineWidth * 0.5, 0, Math.PI * 2);
+    ctx.arc(0, -radius * 0.06, radius, 0.15 * Math.PI, 0.85 * Math.PI);
     ctx.stroke();
 
-    // Glossy top-left highlight
-    ctx.fillStyle = "rgba(255, 255, 255, 0.48)";
-    ctx.beginPath();
-    ctx.ellipse(-radius * 0.35, -radius * 0.38, radius * 0.24, radius * 0.13, -Math.PI / 4, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Top stems / leaves per fruit
-    ctx.save();
-    if (type === 0) {
-      // Cherry long stem
-      ctx.strokeStyle = "#4f772d";
-      ctx.lineWidth = 3.5;
-      ctx.lineCap = "round";
-      ctx.beginPath();
-      ctx.moveTo(0, -radius * 0.85);
-      ctx.quadraticCurveTo(6, -radius * 1.45, 12, -radius * 1.55);
-      ctx.stroke();
-    } else if (type === 1) {
-      // Strawberry leafy crown
-      ctx.fillStyle = "#52b788";
-      ctx.strokeStyle = "#2d6a4f";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.ellipse(0, -radius * 0.88, 11, 5, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-    } else if (type === 3 || type === 4 || type === 2) {
-      // Little green leaf on top
-      ctx.fillStyle = "#70e000";
-      ctx.strokeStyle = "#2b9348";
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.ellipse(7, -radius * 0.92, 9, 5, -0.35, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-    } else if (type === 6) {
-      // Pineapple tuft
-      ctx.fillStyle = "#38b000";
-      ctx.strokeStyle = "#006400";
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.ellipse(0, -radius * 0.95, 16, 9, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-    }
     ctx.restore();
 
-    // Cute Cartoon Face!
-    const fs = def.faceScale;
-    const eyeX = 9.5 * fs;
-    const eyeY = -1.5 * fs;
-    const eyeR = 3.8 * fs;
-
-    // Rosy cheeks
-    ctx.fillStyle = "rgba(255, 105, 135, 0.55)";
+    // 5. Crisp Glossy Highlight Bean (Top-Left)
+    ctx.fillStyle = "rgba(255, 255, 255, 0.68)";
     ctx.beginPath();
-    ctx.ellipse(-eyeX * 1.38, eyeY + 5 * fs, 5 * fs, 3.2 * fs, 0, 0, Math.PI * 2);
-    ctx.ellipse(eyeX * 1.38, eyeY + 5 * fs, 5 * fs, 3.2 * fs, 0, 0, Math.PI * 2);
+    ctx.ellipse(-radius * 0.34, -radius * 0.38, radius * 0.25, radius * 0.13, -Math.PI / 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.beginPath();
+    ctx.arc(-radius * 0.12, -radius * 0.56, radius * 0.06, 0, Math.PI * 2);
     ctx.fill();
 
-    // Eyes
-    ctx.fillStyle = "#2b192e";
-    ctx.strokeStyle = "#2b192e";
-    if (isBlinking) {
-      ctx.lineWidth = 2.5 * fs;
+    // 6. Thick Dark Cartoon Outline Around Body
+    const outlineW = Math.max(3.8, Math.min(7.5, radius * 0.11));
+    ctx.lineWidth = outlineW;
+    ctx.strokeStyle = OUTLINE_COLOR;
+    ctx.beginPath();
+    ctx.arc(0, 0, radius - outlineW * 0.4, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // 7. EXPRESSIVE CARTOON EYES, EYEBROWS & MOUTH!
+    const fs = def.faceScale;
+    const eyeSpan = 8.8 * fs;
+    const eyeY = 1.5 * fs;
+    const eyeRX = 7.4 * fs;
+    const eyeRY = 8.4 * fs;
+
+    // Rosy/Punchy Cheeks
+    ctx.fillStyle = "rgba(255, 50, 90, 0.48)";
+    ctx.beginPath();
+    ctx.ellipse(-eyeSpan * 1.55, eyeY + 6.5 * fs, 4.8 * fs, 3 * fs, 0, 0, Math.PI * 2);
+    ctx.ellipse(eyeSpan * 1.55, eyeY + 6.5 * fs, 4.8 * fs, 3 * fs, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // --- EYES ---
+    if (mood === "happy") {
+      // Happy cheering curved arcs (^ ^) on merge
+      ctx.strokeStyle = OUTLINE_COLOR;
+      ctx.lineWidth = Math.max(2.5, 3.2 * fs);
       ctx.lineCap = "round";
       ctx.beginPath();
-      ctx.moveTo(-eyeX - eyeR, eyeY);
-      ctx.lineTo(-eyeX + eyeR, eyeY);
-      ctx.moveTo(eyeX - eyeR, eyeY);
-      ctx.lineTo(eyeX + eyeR, eyeY);
+      ctx.arc(-eyeSpan, eyeY + 1 * fs, 5.5 * fs, Math.PI * 1.15, Math.PI * 1.85);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(eyeSpan, eyeY + 1 * fs, 5.5 * fs, Math.PI * 1.15, Math.PI * 1.85);
+      ctx.stroke();
+    } else if (isBlinking && mood === "normal") {
+      // Closed blink line
+      ctx.strokeStyle = OUTLINE_COLOR;
+      ctx.lineWidth = Math.max(2.5, 3.0 * fs);
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(-eyeSpan - eyeRX * 0.8, eyeY);
+      ctx.lineTo(-eyeSpan + eyeRX * 0.8, eyeY);
+      ctx.moveTo(eyeSpan - eyeRX * 0.8, eyeY);
+      ctx.lineTo(eyeSpan + eyeRX * 0.8, eyeY);
       ctx.stroke();
     } else {
-      ctx.beginPath();
-      ctx.arc(-eyeX, eyeY, eyeR, 0, Math.PI * 2);
-      ctx.arc(eyeX, eyeY, eyeR, 0, Math.PI * 2);
-      ctx.fill();
-
-      // White eye sparkles
+      // Big expressive white scleras touching/close together
       ctx.fillStyle = "#ffffff";
+      ctx.strokeStyle = OUTLINE_COLOR;
+      ctx.lineWidth = Math.max(2.2, 2.6 * fs);
+
+      // Left eye
       ctx.beginPath();
-      ctx.arc(-eyeX - eyeR * 0.3, eyeY - eyeR * 0.3, eyeR * 0.38, 0, Math.PI * 2);
-      ctx.arc(eyeX - eyeR * 0.3, eyeY - eyeR * 0.3, eyeR * 0.38, 0, Math.PI * 2);
+      ctx.ellipse(-eyeSpan, eyeY, eyeRX, eyeRY, 0, 0, Math.PI * 2);
       ctx.fill();
+      ctx.stroke();
+
+      // Right eye
+      ctx.beginPath();
+      ctx.ellipse(eyeSpan, eyeY, eyeRX, eyeRY, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      if (mood === "dizzy") {
+        // Goofy cross-eyed / spinning pupils on bounce!
+        const spin = performance.now() * 0.02;
+        const pR = 2.8 * fs;
+        ctx.fillStyle = OUTLINE_COLOR;
+        ctx.beginPath();
+        ctx.arc(-eyeSpan + Math.cos(spin) * 2.5 * fs, eyeY + Math.sin(spin) * 2.5 * fs, pR, 0, Math.PI * 2);
+        ctx.arc(eyeSpan - Math.cos(spin) * 2.5 * fs, eyeY - Math.sin(spin) * 2.5 * fs, pR, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (mood === "worried") {
+        // Tiny jittering panicked pupils looking up at the danger line!
+        const jitterX = (Math.random() - 0.5) * 1.5 * fs;
+        const pR = 2.3 * fs;
+        ctx.fillStyle = OUTLINE_COLOR;
+        ctx.beginPath();
+        ctx.arc(-eyeSpan + jitterX, eyeY - 2 * fs, pR, 0, Math.PI * 2);
+        ctx.arc(eyeSpan + jitterX, eyeY - 2 * fs, pR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Sweat drop on side of forehead
+        ctx.fillStyle = "#48cae4";
+        ctx.strokeStyle = OUTLINE_COLOR;
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(eyeSpan * 1.9, eyeY - 9 * fs);
+        ctx.quadraticCurveTo(eyeSpan * 2.25, eyeY - 2 * fs, eyeSpan * 1.9, eyeY - 1 * fs);
+        ctx.quadraticCurveTo(eyeSpan * 1.55, eyeY - 2 * fs, eyeSpan * 1.9, eyeY - 9 * fs);
+        ctx.fill();
+        ctx.stroke();
+      } else {
+        // Bold focused pupils
+        const pR = 3.5 * fs;
+        ctx.fillStyle = OUTLINE_COLOR;
+        ctx.beginPath();
+        ctx.arc(-eyeSpan * 0.78, eyeY + 0.5 * fs, pR, 0, Math.PI * 2);
+        ctx.arc(eyeSpan * 0.78, eyeY + 0.5 * fs, pR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Crisp eye shine dots
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(-eyeSpan * 0.78 - pR * 0.35, eyeY - pR * 0.35, pR * 0.42, 0, Math.PI * 2);
+        ctx.arc(eyeSpan * 0.78 - pR * 0.35, eyeY - pR * 0.35, pR * 0.42, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
 
-    // Happy mouth
-    ctx.strokeStyle = "#2b192e";
-    ctx.lineWidth = Math.max(2, 2.3 * fs);
+    // --- THICK REACTIVE EYEBROWS ---
+    ctx.save();
+    ctx.fillStyle = def.browColor;
+    ctx.strokeStyle = OUTLINE_COLOR;
+    ctx.lineWidth = Math.max(1.8, 2.0 * fs);
+    ctx.lineJoin = "round";
+
+    const browW = 10.5 * fs;
+    const browH = 3.8 * fs;
+    let leftBrowAngle = 0.32;
+    let rightBrowAngle = -0.32;
+    let browOffsetY = -eyeRY - 1.5 * fs;
+
+    if (mood === "worried") {
+      // Slanted UP in the middle (/ \) for worried panic!
+      leftBrowAngle = -0.38;
+      rightBrowAngle = 0.38;
+      browOffsetY -= 2.2 * fs;
+    } else if (mood === "happy") {
+      // High arched happy brows
+      leftBrowAngle = -0.15;
+      rightBrowAngle = 0.15;
+      browOffsetY -= 3.5 * fs;
+    } else if (mood === "dizzy") {
+      // Wonky asymmetric dizzy brows
+      leftBrowAngle = -0.28;
+      rightBrowAngle = -0.22;
+      browOffsetY -= 1.5 * fs;
+    } else {
+      // Default feisty character brow personality
+      if (def.browStyle === "angry") {
+        leftBrowAngle = 0.34;
+        rightBrowAngle = -0.34;
+      } else if (def.browStyle === "boss") {
+        leftBrowAngle = 0.42;
+        rightBrowAngle = -0.42;
+        browOffsetY += 1.2 * fs;
+      } else if (def.browStyle === "cheeky") {
+        leftBrowAngle = 0.28;
+        rightBrowAngle = -0.08;
+      } else {
+        leftBrowAngle = 0.20;
+        rightBrowAngle = -0.20;
+      }
+    }
+
+    // Left Eyebrow Block
+    ctx.save();
+    ctx.translate(-eyeSpan, eyeY + browOffsetY);
+    ctx.rotate(leftBrowAngle);
+    ctx.fillRect(-browW * 0.55, -browH * 0.5, browW, browH);
+    ctx.strokeRect(-browW * 0.55, -browH * 0.5, browW, browH);
+    ctx.restore();
+
+    // Right Eyebrow Block
+    ctx.save();
+    ctx.translate(eyeSpan, eyeY + browOffsetY);
+    ctx.rotate(rightBrowAngle);
+    ctx.fillRect(-browW * 0.45, -browH * 0.5, browW, browH);
+    ctx.strokeRect(-browW * 0.45, -browH * 0.5, browW, browH);
+    ctx.restore();
+    ctx.restore();
+
+    // --- EXPRESSIVE MOUTH ---
+    const mouthY = eyeY + eyeRY + 3.2 * fs;
+    ctx.strokeStyle = OUTLINE_COLOR;
+    ctx.lineWidth = Math.max(2.2, 2.5 * fs);
     ctx.lineCap = "round";
-    ctx.beginPath();
-    if (type >= 6) {
-      // Big open smile for large fruits
-      ctx.fillStyle = "#d90429";
-      ctx.arc(0, eyeY + 3 * fs, 6.5 * fs, 0, Math.PI);
+
+    if (mood === "happy") {
+      // Big open joyful laugh with tongue!
+      ctx.fillStyle = "#590d22";
+      ctx.beginPath();
+      ctx.arc(0, mouthY - 1 * fs, 6.8 * fs, 0, Math.PI);
+      ctx.closePath();
       ctx.fill();
       ctx.stroke();
-    } else {
-      ctx.arc(0, eyeY + 2 * fs, 5 * fs, 0.15 * Math.PI, 0.85 * Math.PI);
+
+      ctx.fillStyle = "#ff4d6d";
+      ctx.beginPath();
+      ctx.arc(0, mouthY + 2.5 * fs, 3.6 * fs, Math.PI, 0);
+      ctx.fill();
+    } else if (mood === "worried") {
+      // Wavy/quivering "O" mouth
+      ctx.fillStyle = "#590d22";
+      ctx.beginPath();
+      ctx.ellipse(0, mouthY + 1 * fs, 4.2 * fs, 5.2 * fs, 0, 0, Math.PI * 2);
+      ctx.fill();
       ctx.stroke();
+    } else if (mood === "dizzy") {
+      // Squiggly dazed mouth
+      ctx.beginPath();
+      ctx.moveTo(-6 * fs, mouthY + 1 * fs);
+      ctx.quadraticCurveTo(-3 * fs, mouthY - 2.5 * fs, 0, mouthY + 1 * fs);
+      ctx.quadraticCurveTo(3 * fs, mouthY + 4.5 * fs, 6 * fs, mouthY + 1 * fs);
+      ctx.stroke();
+    } else {
+      // Feisty toothy grin or determined smirk
+      if (type >= 3) {
+        // Bold clenched-teeth grin
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(0, mouthY - 1.5 * fs, 6.2 * fs, 0.05 * Math.PI, 0.95 * Math.PI);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      } else {
+        // Cute feisty smirk
+        ctx.beginPath();
+        ctx.arc(0, mouthY - 1 * fs, 4.8 * fs, 0.15 * Math.PI, 0.88 * Math.PI);
+        ctx.stroke();
+      }
     }
 
     ctx.restore();
   }
 
-  function drawHUD() {
-    // 1. Score Badge (Top-Left)
+  function drawStrokedText(ctx, text, x, y, font, fill, strokeW) {
     ctx.save();
-    drawRoundedRect(ctx, 22, 18, 146, 76, 22);
-    ctx.fillStyle = "#ffffff";
-    ctx.fill();
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = "#386641";
-    ctx.stroke();
-
-    ctx.fillStyle = "#52796f";
-    ctx.font = "900 14px 'Fredoka', 'Arial Rounded MT Bold', sans-serif";
+    ctx.font = font;
     ctx.textAlign = "center";
-    ctx.fillText("SCORE", 95, 41);
+    ctx.lineJoin = "round";
+    ctx.miterLimit = 2;
 
-    ctx.fillStyle = "#ff4769";
-    ctx.font = "900 30px 'Fredoka', 'Arial Rounded MT Bold', sans-serif";
-    ctx.fillText(String(displayScore), 95, 76);
+    // Drop shadow
+    ctx.fillStyle = OUTLINE_COLOR;
+    ctx.fillText(text, x, y + 3);
 
-    // 2. Best Score Badge (Top-Center-Left)
-    drawRoundedRect(ctx, 180, 18, 130, 76, 22);
-    ctx.fillStyle = "#fff8e6";
-    ctx.fill();
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = "#e09f3e";
-    ctx.stroke();
+    ctx.lineWidth = strokeW;
+    ctx.strokeStyle = OUTLINE_COLOR;
+    ctx.strokeText(text, x, y);
 
-    ctx.fillStyle = "#d48b00";
-    ctx.font = "900 14px 'Fredoka', 'Arial Rounded MT Bold', sans-serif";
-    ctx.fillText("BEST", 245, 41);
+    ctx.fillStyle = fill;
+    ctx.fillText(text, x, y);
+    ctx.restore();
+  }
 
-    ctx.fillStyle = "#fb8500";
-    ctx.font = "900 28px 'Fredoka', 'Arial Rounded MT Bold', sans-serif";
-    ctx.fillText(String(bestScore), 245, 76);
+  function drawHUD() {
+    ctx.save();
 
-    // 3. Next Fruit Preview Bubble
-    drawRoundedRect(ctx, 322, 18, 92, 76, 22);
-    ctx.fillStyle = "#ffffff";
-    ctx.fill();
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = "#386641";
-    ctx.stroke();
+    // 1. Score Wooden Plank Sign (Top-Left)
+    drawWoodPlankBox(ctx, 20, 16, 146, 76, 18);
+    drawStrokedText(ctx, "SCORE", 93, 40, "900 14px 'Fredoka', 'Arial Rounded MT Bold', sans-serif", "#fff8e6", 4);
+    drawStrokedText(ctx, String(displayScore), 93, 76, "900 30px 'Fredoka', 'Arial Rounded MT Bold', sans-serif", "#ffbe0b", 6);
 
-    ctx.fillStyle = "#52796f";
-    ctx.font = "900 13px 'Fredoka', 'Arial Rounded MT Bold', sans-serif";
-    ctx.fillText("NEXT", 368, 37);
+    // 2. Best Score Wooden Plank Sign
+    drawWoodPlankBox(ctx, 178, 16, 132, 76, 18);
+    drawStrokedText(ctx, "BEST", 244, 40, "900 14px 'Fredoka', 'Arial Rounded MT Bold', sans-serif", "#fff8e6", 4);
+    drawStrokedText(ctx, String(bestScore), 244, 76, "900 28px 'Fredoka', 'Arial Rounded MT Bold', sans-serif", "#ff9f1c", 6);
+
+    // 3. Next Fruit Wooden Box
+    drawWoodPlankBox(ctx, 322, 16, 92, 76, 18);
+    drawStrokedText(ctx, "NEXT", 368, 36, "900 13px 'Fredoka', 'Arial Rounded MT Bold', sans-serif", "#fff8e6", 4);
 
     // Draw scaled preview of next fruit
     const previewRadius = Math.min(20, FRUITS[nextFruitType].radius * 0.72);
     const scaleRatio = previewRadius / FRUITS[nextFruitType].radius;
-    drawCuteFruit(ctx, 368, 65, FRUITS[nextFruitType].radius, nextFruitType, 0, scaleRatio, scaleRatio, false);
+    drawCuteFruit(ctx, 368, 65, FRUITS[nextFruitType].radius, nextFruitType, 0, scaleRatio, scaleRatio, false, "normal");
 
     ctx.restore();
   }
@@ -1319,21 +1903,27 @@
   function drawJarBack() {
     ctx.save();
 
-    // Wooden/Mint Table Surface under Jar
-    drawRoundedRect(ctx, 20, JAR.y + JAR.h - 8, STAGE_W - 40, 32, 16);
-    ctx.fillStyle = "#76c893";
-    ctx.fill();
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = "#386641";
-    ctx.stroke();
-
-    // Translucent Glass Interior
     const x = JAR.x;
     const y = JAR.y;
     const w = JAR.w;
     const h = JAR.h;
     const r = JAR.bottomRadius;
 
+    // 1. Sturdy Slingshot-Style Wooden Timber Posts Framing the Jar
+    const postW = 18;
+    // Left Wooden Post
+    drawWoodPlankBox(ctx, x - postW + 4, y - 4, postW, h + 12, 8);
+    // Right Wooden Post
+    drawWoodPlankBox(ctx, x + w - 4, y - 4, postW, h + 12, 8);
+
+    // Heavy Wooden Platform Beam Under the Jar
+    drawWoodPlankBox(ctx, 18, y + h - 8, STAGE_W - 36, 34, 12);
+
+    // Foreground Grass Tufts Overlapping the Wooden Base
+    drawGrassTuft(ctx, 68, y + h + 24, 0.75, false);
+    drawGrassTuft(ctx, 412, y + h + 24, 0.78, true);
+
+    // 2. Translucent Glossy Glass Jar Interior
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(x, y + h - r);
@@ -1345,30 +1935,38 @@
 
     const glassGrad = ctx.createLinearGradient(x, y, x + w, y + h);
     glassGrad.addColorStop(0, "rgba(255, 255, 255, 0.52)");
-    glassGrad.addColorStop(0.5, "rgba(240, 252, 255, 0.35)");
+    glassGrad.addColorStop(0.5, "rgba(220, 248, 255, 0.34)");
     glassGrad.addColorStop(1, "rgba(255, 255, 255, 0.58)");
     ctx.fillStyle = glassGrad;
     ctx.fill();
 
-    // Top Danger Dashed Line
-    const dangerPulse = dangerTimer > 0 ? 0.55 + 0.45 * Math.sin(performance.now() * 0.018) : 0.45;
+    // 3. Top Danger Dashed Line (Comic Red/Yellow Hazard Strip feel)
+    const dangerPulse = dangerTimer > 0 ? 0.55 + 0.45 * Math.sin(performance.now() * 0.02) : 0.55;
     ctx.save();
-    ctx.strokeStyle = dangerTimer > 0
-      ? `rgba(255, 42, 85, ${dangerPulse})`
-      : "rgba(255, 95, 125, 0.45)";
-    ctx.lineWidth = dangerTimer > 0 ? 5 : 3;
-    ctx.setLineDash([12, 10]);
+    ctx.strokeStyle = OUTLINE_COLOR;
+    ctx.lineWidth = dangerTimer > 0 ? 7 : 5;
+    ctx.setLineDash([14, 10]);
     ctx.beginPath();
     ctx.moveTo(JAR.x + JAR.wall + 4, JAR.dangerY);
     ctx.lineTo(JAR.x + JAR.w - JAR.wall - 4, JAR.dangerY);
     ctx.stroke();
+
+    ctx.strokeStyle = dangerTimer > 0
+      ? `rgba(255, 22, 53, ${dangerPulse})`
+      : "rgba(255, 65, 95, 0.75)";
+    ctx.lineWidth = dangerTimer > 0 ? 4 : 2.5;
+    ctx.stroke();
     ctx.restore();
 
-    // Warning timer bar if fruits are above danger line
+    // Warning progress bar if fruits are above danger line
     if (dangerTimer > 0.1) {
       const pct = Math.min(1, dangerTimer / 2.0);
-      ctx.fillStyle = "rgba(255, 42, 85, 0.85)";
-      drawRoundedRect(ctx, JAR.x + 80, JAR.dangerY - 24, (JAR.w - 160) * pct, 12, 6);
+      drawRoundedRect(ctx, JAR.x + 80, JAR.dangerY - 26, JAR.w - 160, 14, 7);
+      ctx.fillStyle = OUTLINE_COLOR;
+      ctx.fill();
+
+      drawRoundedRect(ctx, JAR.x + 82, JAR.dangerY - 24, (JAR.w - 164) * pct, 10, 5);
+      ctx.fillStyle = "#ff1635";
       ctx.fill();
     }
 
@@ -1383,22 +1981,27 @@
     const h = JAR.h;
     const r = JAR.bottomRadius;
 
-    // Glossy vertical reflection streak on glass
-    ctx.fillStyle = "rgba(255, 255, 255, 0.36)";
-    drawRoundedRect(ctx, x + 22, y + 35, 16, h - 85, 8);
+    // Crisp Glossy Reflections on Glass
+    ctx.fillStyle = "rgba(255, 255, 255, 0.42)";
+    drawRoundedRect(ctx, x + 20, y + 32, 16, h - 85, 8);
     ctx.fill();
-    drawRoundedRect(ctx, x + w - 34, y + 60, 10, h - 120, 5);
+    drawRoundedRect(ctx, x + w - 34, y + 55, 10, h - 120, 5);
     ctx.fill();
 
-    // Jar Rim / Lip at Top
-    drawRoundedRect(ctx, x - 8, y - 14, w + 16, 18, 9);
-    ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+    // Chunky Jar Rim / Lip at Top with Thick Outline
+    drawRoundedRect(ctx, x - 10, y - 15, w + 20, 19, 9);
+    ctx.fillStyle = "#e0fbfc";
     ctx.fill();
     ctx.lineWidth = 5;
-    ctx.strokeStyle = "#386641";
+    ctx.strokeStyle = OUTLINE_COLOR;
     ctx.stroke();
 
-    // Outer Thick Jar Wall Border
+    // Rim glossy highlight
+    ctx.fillStyle = "#ffffff";
+    drawRoundedRect(ctx, x + 12, y - 12, w - 24, 5, 2.5);
+    ctx.fill();
+
+    // Outer Thick Dark Outline Around the Glass Jar
     ctx.beginPath();
     ctx.moveTo(x, y + 4);
     ctx.lineTo(x, y + h - r);
@@ -1407,39 +2010,40 @@
     ctx.quadraticCurveTo(x + w, y + h, x + w, y + h - r);
     ctx.lineTo(x + w, y + 4);
 
-    ctx.lineWidth = 10;
+    ctx.lineWidth = 11;
     ctx.lineCap = "round";
-    ctx.strokeStyle = "#386641";
+    ctx.strokeStyle = OUTLINE_COLOR;
     ctx.stroke();
 
     ctx.lineWidth = 4;
-    ctx.strokeStyle = "#95d5b2";
+    ctx.strokeStyle = "#90e0ef";
     ctx.stroke();
 
-    // Cute Evolution Guide Strip along bottom
-    const stripY = STAGE_H - 30;
-    ctx.fillStyle = "rgba(255, 255, 255, 0.72)";
-    drawRoundedRect(ctx, 52, stripY - 18, STAGE_W - 104, 34, 17);
-    ctx.fill();
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = "#52b788";
-    ctx.stroke();
+    // Wooden Evolution Guide Strip Along Bottom
+    const stripY = STAGE_H - 28;
+    drawWoodPlankBox(ctx, 46, stripY - 19, STAGE_W - 92, 36, 18);
 
-    const startX = 82;
-    const gap = 39.5;
+    const startX = 80;
+    const gap = 40;
     for (let i = 0; i < FRUITS.length; i++) {
       const cx = startX + i * gap;
       ctx.fillStyle = FRUITS[i].color;
-      ctx.strokeStyle = FRUITS[i].stroke;
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = OUTLINE_COLOR;
+      ctx.lineWidth = 2.8;
       ctx.beginPath();
       ctx.arc(cx, stripY - 1, 7 + i * 0.7, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
 
+      // Tiny highlight dot
+      ctx.fillStyle = "rgba(255,255,255,0.65)";
+      ctx.beginPath();
+      ctx.arc(cx - 2, stripY - 3, 2, 0, Math.PI * 2);
+      ctx.fill();
+
       if (i < FRUITS.length - 1) {
-        ctx.fillStyle = "#52796f";
-        ctx.font = "900 11px sans-serif";
+        ctx.fillStyle = "#fff8e6";
+        ctx.font = "900 12px sans-serif";
         ctx.textAlign = "center";
         ctx.fillText("›", cx + gap * 0.5, stripY + 3);
       }
@@ -1455,58 +2059,215 @@
     const y = JAR.dropY;
     const r = FRUITS[currentFruitType].radius;
 
-    // Aiming dotted guide line
+    // Slingshot-style trajectory dotted line
     ctx.save();
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.75)";
-    ctx.lineWidth = 3.5;
-    ctx.setLineDash([8, 8]);
+    ctx.strokeStyle = OUTLINE_COLOR;
+    ctx.lineWidth = 6;
+    ctx.setLineDash([8, 10]);
     ctx.beginPath();
     ctx.moveTo(x, y + r);
     ctx.lineTo(x, JAR.y + JAR.h - 16);
     ctx.stroke();
+
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 3;
+    ctx.stroke();
     ctx.restore();
 
-    // Cute little cloud holder
+    // Wooden Slingshot Gripper / Cloud Holder Above Fruit
     ctx.save();
     ctx.fillStyle = "#ffffff";
-    ctx.strokeStyle = "#386641";
-    ctx.lineWidth = 3.5;
+    ctx.strokeStyle = OUTLINE_COLOR;
+    ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.arc(x - 14, y - r - 4, 10, 0, Math.PI * 2);
-    ctx.arc(x, y - r - 8, 13, 0, Math.PI * 2);
-    ctx.arc(x + 14, y - r - 4, 10, 0, Math.PI * 2);
+    ctx.arc(x - 15, y - r - 4, 10, 0, Math.PI * 2);
+    ctx.arc(x, y - r - 9, 13, 0, Math.PI * 2);
+    ctx.arc(x + 15, y - r - 4, 10, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
     ctx.restore();
 
     // Current fruit waiting to drop
-    drawCuteFruit(ctx, x, y, r, currentFruitType, 0, 1, 1, false);
+    drawCuteFruit(ctx, x, y, r, currentFruitType, 0, 1, 1, false, "normal");
+  }
+
+  function drawComicEffects() {
+    // 1. Dust Puffs on Landing/Bounce
+    for (let i = 0; i < dustPuffs.length; i++) {
+      const dp = dustPuffs[i];
+      const alpha = Math.max(0, dp.life / dp.maxLife);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = "#fff8e6";
+      ctx.strokeStyle = OUTLINE_COLOR;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(dp.x, dp.y, dp.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 2. Expanding Impact Rings on Merge
+    for (let i = 0; i < impactRings.length; i++) {
+      const ir = impactRings[i];
+      const alpha = Math.max(0, ir.life / ir.maxLife);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = OUTLINE_COLOR;
+      ctx.lineWidth = 9 * alpha;
+      ctx.beginPath();
+      ctx.arc(ir.x, ir.y, ir.currentR || ir.r, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 4.5 * alpha;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 3. Comic Starbursts ("POW!", "POP!", "BAM!")
+    for (let i = 0; i < starbursts.length; i++) {
+      const sb = starbursts[i];
+      const alpha = Math.min(1, (sb.life / sb.maxLife) * 2);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(sb.x, sb.y);
+      ctx.rotate(sb.rot);
+      ctx.scale(sb.scale, sb.scale);
+
+      // Jagged 12-point comic star polygon
+      const spikes = 12;
+      const outerR = 54;
+      const innerR = 30;
+      ctx.beginPath();
+      for (let s = 0; s < spikes * 2; s++) {
+        const rad = s % 2 === 0 ? outerR : innerR;
+        const ang = (s * Math.PI) / spikes;
+        const px = Math.cos(ang) * rad;
+        const py = Math.sin(ang) * rad;
+        if (s === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+
+      ctx.fillStyle = sb.color;
+      ctx.fill();
+      ctx.lineWidth = 4.5;
+      ctx.strokeStyle = OUTLINE_COLOR;
+      ctx.stroke();
+
+      // Inner white burst
+      ctx.beginPath();
+      for (let s = 0; s < spikes * 2; s++) {
+        const rad = s % 2 === 0 ? outerR * 0.65 : innerR * 0.65;
+        const ang = (s * Math.PI) / spikes;
+        const px = Math.cos(ang) * rad;
+        const py = Math.sin(ang) * rad;
+        if (s === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fillStyle = "#fff8e6";
+      ctx.fill();
+
+      // Comic Word inside starburst
+      drawStrokedText(ctx, sb.word, 0, 7, "900 20px 'Fredoka', 'Impact', sans-serif", "#ff1635", 5);
+      ctx.restore();
+    }
+
+    // 4. Outlined Comic Particles & Stars
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.strokeStyle = OUTLINE_COLOR;
+      ctx.lineWidth = 2.5;
+
+      if (p.isStar) {
+        ctx.beginPath();
+        for (let s = 0; s < 10; s++) {
+          const rad = s % 2 === 0 ? p.r * 1.35 : p.r * 0.55;
+          const ang = (s * Math.PI) / 5;
+          const px = Math.cos(ang) * rad;
+          const py = Math.sin(ang) * rad;
+          if (s === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 5. Confetti with dark comic borders
+    for (let i = 0; i < confetti.length; i++) {
+      const c = confetti[i];
+      ctx.save();
+      ctx.translate(c.x, c.y);
+      ctx.rotate(c.rot);
+      ctx.fillStyle = c.color;
+      ctx.strokeStyle = OUTLINE_COLOR;
+      ctx.lineWidth = 2;
+      ctx.fillRect(-c.w * 0.5, -c.h * 0.5, c.w, c.h);
+      ctx.strokeRect(-c.w * 0.5, -c.h * 0.5, c.w, c.h);
+      ctx.restore();
+    }
+
+    // 6. Floating Merge Score Popups
+    for (let i = 0; i < floatingTexts.length; i++) {
+      const ft = floatingTexts[i];
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, ft.alpha);
+      drawStrokedText(
+        ctx,
+        ft.text,
+        ft.x,
+        ft.y,
+        "900 30px 'Fredoka', 'Arial Rounded MT Bold', sans-serif",
+        ft.color,
+        6
+      );
+      ctx.restore();
+    }
+  }
+
+  function getFruitMood(f) {
+    if (f.happyTimer > 0) return "happy";
+    if (f.dizzyTimer > 0) return "dizzy";
+    // Worried expression when settled near the top danger line or when danger timer is active
+    if (f.age > 0.65 && (f.y - f.radius < JAR.dangerY + 58 || dangerTimer > 0.15)) {
+      return "worried";
+    }
+    return "normal";
   }
 
   function render() {
     ctx.clearRect(0, 0, STAGE_W, STAGE_H);
 
-    // 1. Background floating bubbles
-    ctx.save();
-    for (let i = 0; i < bgBubbles.length; i++) {
-      const b = bgBubbles[i];
-      ctx.fillStyle = `rgba(255, 255, 255, ${b.alpha})`;
-      ctx.beginPath();
-      ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.restore();
+    // 1. Sky, Sunbeams, Outlined Clouds & Rolling Grass Hills
+    drawSkyAndBackdrop();
 
-    // 2. HUD
+    // 2. Wooden Signboard HUD
     drawHUD();
 
-    // 3. Jar Back & Aiming Dropper
+    // 3. Wooden Frame, Jar Back & Aiming Dropper
     drawJarBack();
     drawDropper();
 
-    // 4. Fruits inside the Jar
+    // 4. Feisty Expressive Fruits inside the Jar
     for (let i = 0; i < fruits.length; i++) {
       const f = fruits[i];
+      const mood = getFruitMood(f);
       drawCuteFruit(
         ctx,
         f.x,
@@ -1516,50 +2277,16 @@
         f.angle,
         f.scaleX,
         f.scaleY,
-        f.blinkTimer < 0
+        f.blinkTimer < 0,
+        mood
       );
     }
 
-    // 5. Jar Front Glass Highlights & Rim
+    // 5. Jar Front Glass Highlights, Rim & Evolution Plank
     drawJarFront();
 
-    // 6. Particle Bursts
-    for (let i = 0; i < particles.length; i++) {
-      const p = particles[i];
-      ctx.save();
-      ctx.globalAlpha = p.alpha;
-      ctx.fillStyle = p.color;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    // 7. Confetti
-    for (let i = 0; i < confetti.length; i++) {
-      const c = confetti[i];
-      ctx.save();
-      ctx.translate(c.x, c.y);
-      ctx.rotate(c.rot);
-      ctx.fillStyle = c.color;
-      ctx.fillRect(-c.w * 0.5, -c.h * 0.5, c.w, c.h);
-      ctx.restore();
-    }
-
-    // 8. Floating Merge Score Popups
-    for (let i = 0; i < floatingTexts.length; i++) {
-      const ft = floatingTexts[i];
-      ctx.save();
-      ctx.globalAlpha = Math.max(0, ft.alpha);
-      ctx.font = "900 28px 'Fredoka', 'Arial Rounded MT Bold', sans-serif";
-      ctx.textAlign = "center";
-      ctx.lineWidth = 5;
-      ctx.strokeStyle = "#ffffff";
-      ctx.strokeText(ft.text, ft.x, ft.y);
-      ctx.fillStyle = "#ff2a55";
-      ctx.fillText(ft.text, ft.x, ft.y);
-      ctx.restore();
-    }
+    // 6. Comic Pop Effects (Dust, Impact Rings, POW Starbursts, Particles, Confetti)
+    drawComicEffects();
   }
 
   /* ==========================================
@@ -1599,7 +2326,6 @@
     }
   });
 
-  // Prevent context menu or accidental gestures
   window.addEventListener("contextmenu", (e) => e.preventDefault());
 
   startBtn.addEventListener("click", (e) => {
@@ -1650,7 +2376,7 @@
 
   // Initialize
   loadStorage();
-  initBgBubbles();
+  initBgClouds();
   handleResize();
   requestAnimationFrame(loop);
 })();
