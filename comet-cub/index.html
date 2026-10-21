@@ -269,6 +269,7 @@
 <body>
 
   <button id="mute-btn" aria-label="Mute" style="position:fixed;top:88px;right:16px;z-index:50;width:44px;height:44px;border-radius:50%;border:2px solid #f5c542;background:rgba(10,20,50,.75);color:#f5c542;font-size:20px;cursor:pointer;pointer-events:auto">&#128266;</button>
+  <div id="zone-banner" style="position:fixed;top:36%;left:50%;transform:translate(-50%,-50%) scale(.8);z-index:60;pointer-events:none;font-size:32px;font-weight:900;color:#fff6d1;text-shadow:0 0 18px #ffcc55,0 3px 0 #7a4b00;opacity:0;transition:opacity .3s,transform .3s;text-align:center;letter-spacing:2px;white-space:nowrap;"></div>
   <canvas id="game-canvas"></canvas>
 
   <!-- HUD -->
@@ -677,6 +678,20 @@
       cubLight.position.set(0, 1.1, 0);
       cubGroup.add(cubLight);
 
+      // Antlers (deer) and mane (horse), hidden by default
+      const antlerGeo = new THREE.ConeGeometry(0.07, 0.5, 4);
+      const matAntler = new THREE.MeshStandardMaterial({ color: 0x8a5a2b, roughness: 0.5 });
+      const antlerL = new THREE.Mesh(antlerGeo, matAntler);
+      antlerL.position.set(-0.2, 1.62, -0.32); antlerL.rotation.z = 0.35;
+      const antlerR = new THREE.Mesh(antlerGeo, matAntler);
+      antlerR.position.set(0.2, 1.62, -0.32); antlerR.rotation.z = -0.35;
+      antlerL.visible = antlerR.visible = false;
+      cubBodyGroup.add(antlerL); cubBodyGroup.add(antlerR);
+      const mane = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.5, 0.5), new THREE.MeshStandardMaterial({ color: 0x4a2c14, roughness: 0.6 }));
+      mane.position.set(0, 1.34, -0.08);
+      mane.visible = false;
+      cubBodyGroup.add(mane);
+
       // --- GOLD SPARKLE TRAIL PARTICLES ---
       const TRAIL_COUNT = 38;
       const trailParticles = [];
@@ -969,15 +984,62 @@
         else if (k === 'over') { tone(300, 0.25, 'sawtooth', 0.07); tone(180, 0.45, 'sawtooth', 0.07, 0.2); }
         else if (k === 'slide') { tone(220, 0.14, 'sine', 0.06); }
       }
-      const SCALE = [262, 330, 392, 523, 392, 330, 294, 392];
+      const zoneScale = [262, 330, 392, 523, 392, 330, 294, 392];
+      let zoneTempo = 380;
       function musicStart() {
         if (musicTimer) return;
+        let last = 0;
         musicTimer = setInterval(() => {
           if (gameState !== 'PLAYING') return;
-          tone(SCALE[mStep % 8] / 2, 0.45, 'sine', 0.035);
-          if (mStep % 2 === 0) tone(SCALE[(mStep + 3) % 8], 0.3, 'triangle', 0.02);
+          const now = performance.now();
+          if (now - last < zoneTempo) return;
+          last = now;
+          tone(zoneScale[mStep % 8] / 2, 0.45, 'sine', 0.035);
+          if (mStep % 2 === 0) tone(zoneScale[(mStep + 3) % 8], 0.3, 'triangle', 0.02);
           mStep++;
-        }, 380);
+        }, 120);
+      }
+
+      // --- ZONES: character + world + music evolve with score ---
+      const ZONES = [
+        { name: 'SKY MEADOW', char: 'PUP', sky: 0x6fb4ff, fog: 0x9fd0ff, cloud: 0xffffff, stars: 0.15, body: 0xffcc4d, bodyE: 0xff8811, cream: 0xfff7dc, creamE: 0xffd27d, earY: 1.0, antlers: false, mane: false, scale: [262,330,392,523,392,330,294,392], tempo: 380 },
+        { name: 'FOREST', char: 'CAT', sky: 0x5ecf8e, fog: 0x9fe8c0, cloud: 0xeafff0, stars: 0.18, body: 0xffa040, bodyE: 0xcc5500, cream: 0xfff2e0, creamE: 0xffc890, earY: 1.35, antlers: false, mane: false, scale: [294,370,440,587,440,370,330,440], tempo: 340 },
+        { name: 'DESERT', char: 'FOX', sky: 0xffd27a, fog: 0xffe6b0, cloud: 0xfff3d9, stars: 0.22, body: 0xe8622d, bodyE: 0x993311, cream: 0xfff0d0, creamE: 0xffb070, earY: 1.25, antlers: false, mane: false, scale: [262,311,392,466,392,311,277,349], tempo: 400 },
+        { name: 'SNOW', char: 'DEER', sky: 0xbfe3ff, fog: 0xe4f3ff, cloud: 0xffffff, stars: 0.3, body: 0xc49a6c, bodyE: 0x7a5230, cream: 0xf5ede0, creamE: 0xd9c9b0, earY: 0.8, antlers: true, mane: false, scale: [330,392,494,659,494,392,370,494], tempo: 460 },
+        { name: 'NIGHT LANTERNS', char: 'HORSE', sky: 0x3b3f9e, fog: 0x5a5fc0, cloud: 0xd9dcff, stars: 0.95, body: 0x7a4b2d, bodyE: 0x3d2210, cream: 0xe8d5b5, creamE: 0xa98c60, earY: 1.1, antlers: false, mane: true, scale: [220,262,330,440,330,262,247,330], tempo: 420 }
+      ];
+      let currentZone = -1;
+      const targetSky = new THREE.Color(ZONES[0].sky);
+      const targetFog = new THREE.Color(ZONES[0].fog);
+      const targetCloud = new THREE.Color(ZONES[0].cloud);
+      let targetStars = ZONES[0].stars;
+      let transformTimer = 0;
+      const zoneBannerEl = document.getElementById('zone-banner');
+      let bannerTimer = null;
+
+      function applyZone(idx, silent) {
+        if (idx === currentZone) return;
+        currentZone = idx;
+        const z = ZONES[idx];
+        targetSky.set(z.sky); targetFog.set(z.fog); targetCloud.set(z.cloud);
+        targetStars = z.stars;
+        matCubGold.color.set(z.body); matCubGold.emissive.set(z.bodyE);
+        matCubCream.color.set(z.cream); matCubCream.emissive.set(z.creamE);
+        earL.scale.y = z.earY; earR.scale.y = z.earY;
+        antlerL.visible = antlerR.visible = z.antlers;
+        mane.visible = z.mane;
+        zoneScale.length = 0; z.scale.forEach(n => zoneScale.push(n));
+        zoneTempo = z.tempo;
+        if (!silent) {
+          transformTimer = 0.7;
+          for (let i = 0; i < 16; i++) spawnTrailParticle();
+          zoneBannerEl.textContent = z.name + ' - ' + z.char + '!';
+          zoneBannerEl.style.opacity = '1';
+          zoneBannerEl.style.transform = 'translate(-50%,-50%) scale(1.08)';
+          if (bannerTimer) clearTimeout(bannerTimer);
+          bannerTimer = setTimeout(() => { zoneBannerEl.style.opacity = '0'; zoneBannerEl.style.transform = 'translate(-50%,-50%) scale(.8)'; }, 1800);
+          sfx('coin');
+        }
       }
       const muteBtn = document.getElementById('mute-btn');
       function paintMute() { muteBtn.innerHTML = muted ? '&#128263;' : '&#128266;'; }
@@ -992,6 +1054,12 @@
 
       function startGame() {
         resetWorld();
+        currentZone = -1;
+        applyZone(0, true);
+        scene.background.copy(targetSky);
+        scene.fog.color.copy(targetFog);
+        cloudMat.color.copy(targetCloud);
+        starMat.opacity = targetStars;
         gameState = 'PLAYING';
         startScreen.classList.add('hidden');
         gameoverScreen.classList.add('hidden');
@@ -1018,6 +1086,7 @@
 
         gameoverScreen.classList.remove('hidden');
       }
+      window.triggerGameOver = triggerGameOver;
 
       // --- PLAYER ACTIONS ---
       function changeLane(dir) {
@@ -1083,6 +1152,21 @@
         }
       }, { passive: true });
 
+      window.addEventListener('touchend', (e) => {
+        if (gameState !== 'PLAYING') return;
+        if (!touchHandled) {
+          if (e.target && e.target.closest && e.target.closest('button')) return;
+          triggerJump();
+        }
+        touchHandled = false;
+      }, { passive: true });
+
+      window.addEventListener('pointerdown', (e) => {
+        if (gameState !== 'PLAYING' || e.pointerType === 'touch') return;
+        if (e.target && e.target.closest && e.target.closest('button')) return;
+        triggerJump();
+      });
+
       window.addEventListener('keydown', (e) => {
         if (gameState !== 'PLAYING') {
           if (e.code === 'Space' || e.code === 'Enter') {
@@ -1143,16 +1227,25 @@
           speed = Math.min(MAX_SPEED, speed + SPEED_ACCEL * dt);
           distanceScore += speed * dt * 1.2;
 
-          // Day/Twilight to Starry Night smooth progression (completes transition over ~65 seconds)
-          const nightFactor = Math.min(1, runTime / 65);
-          scene.background.lerpColors(colorTwilightSky, colorNightSky, nightFactor);
-          scene.fog.color.lerpColors(colorTwilightFog, colorNightFog, nightFactor);
-          hemiLight.intensity = 0.85 - nightFactor * 0.4;
-          dirLight.intensity = 0.9 - nightFactor * 0.45;
-          starMat.opacity = 0.4 + nightFactor * 0.6;
+          // Zones: character + world + music evolve with score
+          const zoneScore = Math.floor(distanceScore) + shardCount * 25;
+          applyZone(Math.floor(zoneScore / 250) % ZONES.length, false);
+          const zl = Math.min(1, dt * 1.4);
+          scene.background.lerp(targetSky, zl);
+          scene.fog.color.lerp(targetFog, zl);
+          cloudMat.color.lerp(targetCloud, zl);
+          starMat.opacity += (targetStars - starMat.opacity) * zl;
+          if (transformTimer > 0) {
+            transformTimer -= dt;
+            const pop = 1 + 0.3 * Math.abs(Math.sin(transformTimer * 12));
+            cubBodyGroup.scale.set(pop, pop, pop);
+          } else {
+            cubBodyGroup.scale.set(1, 1, 1);
+          }
 
           // Pulse lantern halos subtly
-          const haloPulse = 0.2 + Math.sin(runTime * 4.5) * 0.05 + nightFactor * 0.08;
+          const nightGlow = 1 - (scene.background.r * 0.3 + scene.background.g * 0.5 + scene.background.b * 0.2);
+          const haloPulse = 0.2 + Math.sin(runTime * 4.5) * 0.05 + nightGlow * 0.1;
           for (let i = 0; i < lanternGlowMats.length; i++) {
             lanternGlowMats[i].opacity = haloPulse;
           }
