@@ -336,12 +336,12 @@
       const LANE_WIDTH = 2.3;
       const LANES = [-LANE_WIDTH, 0, LANE_WIDTH];
 
-      const BASE_SPEED = 14.5;
-      const MAX_SPEED = 30.0;
+      const BASE_SPEED = 17.5;
+      const MAX_SPEED = 34.0;
       const SPEED_ACCEL = 0.26; // units per second squared
 
-      const GRAVITY = -38.0;
-      const JUMP_VELOCITY = 14.2;
+      const GRAVITY = -34.0;
+      const JUMP_VELOCITY = 16.5;
       const SLIDE_DURATION = 0.62;
 
       // Saved Data
@@ -792,6 +792,7 @@
           const rune = new THREE.Mesh(new THREE.TorusGeometry(0.58, 0.06, 6, 16), matHazardGold);
           rune.position.set(0, 1.2, 0.38);
           group.add(rune);
+          group.scale.set(1, 0.32, 1);
         }
 
         return group;
@@ -823,19 +824,19 @@
 
         if (patternRoll < 0.32) {
           // 1 obstacle, 2 open lanes
-          const types = ['barrier', 'beam', 'rock'];
+          const types = ['barrier', 'rock'];
           laneTypes[lanesOrder[0]] = types[Math.floor(Math.random() * types.length)];
         } else if (patternRoll < 0.76) {
           // 2 obstacles, 1 completely open lane
-          const t1 = ['barrier', 'beam', 'rock'][Math.floor(Math.random() * 3)];
-          const t2 = ['barrier', 'beam', 'rock'][Math.floor(Math.random() * 3)];
+          const t1 = ['barrier', 'rock'][Math.floor(Math.random() * 2)];
+          const t2 = ['barrier', 'rock'][Math.floor(Math.random() * 2)];
           laneTypes[lanesOrder[0]] = t1;
           laneTypes[lanesOrder[1]] = t2;
         } else {
           // All 3 lanes have obstacles, but AT LEAST ONE is a jumpable barrier or slideable beam (never 3 rocks)
-          laneTypes[lanesOrder[0]] = Math.random() < 0.5 ? 'barrier' : 'beam';
-          laneTypes[lanesOrder[1]] = ['barrier', 'beam', 'rock'][Math.floor(Math.random() * 3)];
-          laneTypes[lanesOrder[2]] = ['barrier', 'beam', 'rock'][Math.floor(Math.random() * 3)];
+          laneTypes[lanesOrder[0]] = 'barrier';
+          laneTypes[lanesOrder[1]] = ['barrier', 'rock'][Math.floor(Math.random() * 2)];
+          laneTypes[lanesOrder[2]] = ['barrier', 'rock'][Math.floor(Math.random() * 2)];
         }
 
         // Instantiate obstacles
@@ -1008,8 +1009,10 @@
         }
       }
 
+      let jumpBuffer = 0;
       function triggerJump() {
         if (gameState !== 'PLAYING') return;
+        if (isJumping) { jumpBuffer = 0.2; return; }
         if (!isJumping) {
           isJumping = true;
           isSliding = false;
@@ -1142,6 +1145,7 @@
           cubGroup.rotation.z = -diffX * 0.18;
           cubGroup.rotation.y = -diffX * 0.1;
 
+          if (jumpBuffer > 0) jumpBuffer -= dt;
           // Vertical Jump Physics
           if (isJumping) {
             playerY += velocityY * dt;
@@ -1150,6 +1154,7 @@
               playerY = 0;
               velocityY = 0;
               isJumping = false;
+              if (jumpBuffer > 0) { jumpBuffer = 0; triggerJump(); }
             }
           }
           cubGroup.position.y = playerY;
@@ -1204,7 +1209,7 @@
 
           // Spawn New Obstacles Ahead
           nextSpawnZ += speed * dt;
-          const dynamicSpacing = Math.max(15.5, 19.5 - (speed - BASE_SPEED) * 0.2);
+          const dynamicSpacing = Math.max(24, 30 - (speed - BASE_SPEED) * 0.25);
           while (nextSpawnZ > -85) {
             spawnObstacleRow(nextSpawnZ - dynamicSpacing);
             nextSpawnZ -= dynamicSpacing;
@@ -1219,10 +1224,10 @@
             const dz = Math.abs(obs.mesh.position.z - cubGroup.position.z);
             const dx = Math.abs(obs.mesh.position.x - cubGroup.position.x);
 
-            if (dz < 0.62 && dx < 0.72) {
+            if (dz < 0.5 && dx < 0.6) {
               if (obs.type === 'barrier') {
                 // Clearable if player jumped high enough
-                if (playerY < 0.68) {
+                if (playerY < 0.4) {
                   triggerGameOver();
                   break;
                 }
@@ -1233,9 +1238,10 @@
                   break;
                 }
               } else if (obs.type === 'rock') {
-                // Full-lane obstacle
-                triggerGameOver();
-                break;
+                if (playerY < 0.85) {
+                  triggerGameOver();
+                  break;
+                }
               }
             }
 
