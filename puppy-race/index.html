@@ -650,6 +650,7 @@
     targetCurve: 0,
     curveTimer: 0,
     playerX: 0, // -1 (left lane), 0 (center), 1 (right lane)
+    targetLane: 0,
     playerVx: 0,
     steerLeft: false,
     steerRight: false,
@@ -728,6 +729,7 @@
     state.targetCurve = 0.25;
     state.curveTimer = 4;
     state.playerX = 0;
+    state.targetLane = 0;
     state.playerVx = 0;
     state.shakeTimer = 0;
     state.spawnTimer = 0.4;
@@ -753,12 +755,17 @@
 
   // --- CONTROLS (Keyboard, Touch Buttons, Pointer Drag) ---
   window.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
+    // One lane step per key press
+    if (!e.repeat && (e.key === "ArrowLeft" || e.key === "a" || e.key === "A")) {
+      state.targetLane = Math.max(-1, state.targetLane - 1);
       state.steerLeft = true;
+      setTimeout(() => { state.steerLeft = false; }, 220);
       state.dragging = false;
     }
-    if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+    if (!e.repeat && (e.key === "ArrowRight" || e.key === "d" || e.key === "D")) {
+      state.targetLane = Math.min(1, state.targetLane + 1);
       state.steerRight = true;
+      setTimeout(() => { state.steerRight = false; }, 220);
       state.dragging = false;
     }
     if ((e.key === " " || e.key === "Enter") && state.mode !== "PLAYING") {
@@ -777,8 +784,14 @@
       e.stopPropagation();
       btn.classList.add("pressed");
       state.dragging = false;
-      if (isLeft) state.steerLeft = true;
-      else state.steerRight = true;
+      // One lane step per tap
+      if (isLeft) {
+        state.targetLane = Math.max(-1, state.targetLane - 1);
+        state.steerLeft = true;
+      } else {
+        state.targetLane = Math.min(1, state.targetLane + 1);
+        state.steerRight = true;
+      }
     };
     const release = (e) => {
       e.preventDefault();
@@ -795,24 +808,22 @@
   bindSteerBtn(btnLeft, true);
   bindSteerBtn(btnRight, false);
 
-  // Canvas Drag Steering
-  function updateDragFromPointer(clientX) {
-    const rect = canvas.getBoundingClientRect();
-    const relX = (clientX - rect.left) / rect.width; // 0 to 1
-    // Map screen [0.15 .. 0.85] to lane [-1.15 .. 1.15]
-    const norm = ((relX - 0.5) / 0.34);
-    state.dragTargetX = Math.max(-1.15, Math.min(1.15, norm));
-  }
-
+  // Canvas Drag Steering: one lane step per swipe chunk
+  let dragAnchorX = 0;
+  let dragAnchorLane = 0;
   canvas.addEventListener("pointerdown", (e) => {
     if (state.mode !== "PLAYING") return;
     state.dragging = true;
-    updateDragFromPointer(e.clientX);
+    dragAnchorX = e.clientX;
+    dragAnchorLane = state.targetLane;
   });
 
   window.addEventListener("pointermove", (e) => {
     if (!state.dragging || state.mode !== "PLAYING") return;
-    updateDragFromPointer(e.clientX);
+    const rect = canvas.getBoundingClientRect();
+    const stepPx = rect.width * 0.22;
+    const steps = Math.round((e.clientX - dragAnchorX) / stepPx);
+    state.targetLane = Math.max(-1, Math.min(1, dragAnchorLane + steps));
   });
 
   window.addEventListener("pointerup", () => {
@@ -1042,28 +1053,12 @@
     }
     state.curve += (state.targetCurve - state.curve) * dt * 0.85;
 
-    // Player steering
-    const steerAccel = 4.6;
-    if (state.dragging && state.dragTargetX !== null) {
-      const diff = state.dragTargetX - state.playerX;
-      state.playerVx = diff * 10;
-      state.playerX += state.playerVx * dt;
-    } else {
-      let dir = 0;
-      if (state.steerLeft) dir -= 1;
-      if (state.steerRight) dir += 1;
-
-      if (dir !== 0) {
-        state.playerVx += dir * steerAccel * dt * 3.2;
-        state.playerVx = Math.max(-2.6, Math.min(2.6, state.playerVx));
-      } else {
-        // Gentle assist toward nearest lane center or smooth damping
-        state.playerVx *= Math.pow(0.04, dt);
-      }
-      // Subtle centrifugal pull on sharp curves
-      state.playerX -= state.curve * effectiveSpeed * 0.14 * dt;
-      state.playerX += state.playerVx * dt;
-    }
+    // Player steering: ease one lane at a time toward the tapped lane
+    const laneDiff = state.targetLane - state.playerX;
+    state.playerVx = laneDiff * 14;
+    state.playerX += state.playerVx * dt;
+    // Very subtle centrifugal pull on sharp curves
+    state.playerX -= state.curve * effectiveSpeed * 0.05 * dt;
 
     // Clamp player to road edges
     if (state.playerX < -1.18) {
