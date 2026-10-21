@@ -529,11 +529,14 @@
 
       const BLOCK_HEIGHT = 42;
       const PERFECT_TOLERANCE = 9;
+      const GOLD_COLOR = { fill: '#ffd700', border: '#d4a017', cheek: '#ff9f1c' };
       const WIDEN_BONUS = 10;
 
       let score = 0;
       let towerHeight = 0;
       let combo = 0;
+      let hearts = 1;
+      let perfectStreakTotal = 0;
       let bestScore = loadBestScore();
 
       let cameraY = 0;
@@ -703,6 +706,8 @@
         score = 0;
         towerHeight = 0;
         combo = 0;
+        hearts = 1;
+        perfectStreakTotal = 0;
         cameraY = 0;
         targetCameraY = 0;
         fallingSlices = [];
@@ -737,10 +742,14 @@
         const color = PALETTE[nextIndex % PALETTE.length];
         const yPos = topBlock.y - BLOCK_HEIGHT;
 
-        // Fair speed progression
+        // Fair speed progression (perfect streaks slow the block down)
         const baseSpeed = 145;
-        const speed = Math.min(350, baseSpeed + towerHeight * 4.5);
+        let speed = Math.min(350, baseSpeed + towerHeight * 4.5);
+        if (combo >= 4) speed = Math.round(speed * 0.55);
         const startLeft = nextIndex % 2 === 1;
+
+        // Golden WIDE bonus block every 10th: lands full-width, no slicing
+        const isWide = nextIndex % 10 === 9;
 
         activeBlock = {
           x: startLeft ? 16 : width - topBlock.w - 16,
@@ -748,8 +757,9 @@
           w: topBlock.w,
           h: BLOCK_HEIGHT,
           vx: startLeft ? speed : -speed,
-          color: color,
-          faceType: nextIndex % 4
+          color: isWide ? GOLD_COLOR : color,
+          faceType: nextIndex % 4,
+          wide: isWide
         };
 
         // Scroll camera up smoothly when tower grows past mid-lower screen
@@ -817,8 +827,32 @@
         const diff = curr.x - top.x;
         const absDiff = Math.abs(diff);
 
-        // Missed completely -> Game Over
+        // Missed completely -> spend a Rescue Heart or Game Over
         if (absDiff >= curr.w) {
+          if (hearts > 0) {
+            hearts--;
+            combo++;
+            towerHeight++;
+            score += 2;
+            sound.playPerfect(combo);
+            spawnConfetti(top.x + top.w / 2, curr.y + curr.h / 2);
+            spawnFloatingText('RESCUED! ❤️', top.x + top.w / 2, curr.y - 10, '#ff5d8f');
+            stack.push({
+              x: top.x,
+              y: curr.y,
+              w: top.w,
+              h: curr.h,
+              color: curr.color,
+              faceType: curr.faceType,
+              bounce: 1.0,
+              bounceVel: 0
+            });
+            updateScoreUI(true);
+            updateComboUI();
+            activeBlock = null;
+            spawnNextBlock();
+            return;
+          }
           fallingSlices.push({
             x: curr.x,
             y: curr.y,
@@ -832,6 +866,36 @@
           });
           activeBlock = null;
           window.triggerGameOver();
+          return;
+        }
+
+        // Golden WIDE block: any overlap lands full width
+        if (curr.wide && absDiff < curr.w) {
+          combo++;
+          perfectStreakTotal++;
+          towerHeight++;
+          score += 3;
+          sound.playPerfect(combo);
+          spawnConfetti(top.x + top.w / 2, curr.y + curr.h / 2);
+          spawnFloatingText('WIDE BONUS! +3', top.x + top.w / 2, curr.y - 10, '#ffd700');
+          stack.push({
+            x: top.x,
+            y: curr.y,
+            w: top.w,
+            h: curr.h,
+            color: curr.color,
+            faceType: curr.faceType,
+            bounce: 1.0,
+            bounceVel: 0
+          });
+          if (perfectStreakTotal % 6 === 0 && hearts < 3) {
+            hearts++;
+            spawnFloatingText('+1 ❤️ HEART', top.x + top.w / 2, curr.y - 40, '#ff5d8f');
+          }
+          updateScoreUI(true);
+          updateComboUI();
+          activeBlock = null;
+          spawnNextBlock();
           return;
         }
 
@@ -851,9 +915,18 @@
             newX = Math.max(16, Math.min(width - newW - 16, newX - WIDEN_BONUS / 2));
           }
 
+          perfectStreakTotal++;
           towerHeight++;
           const bonusPoints = combo; // Height + combo bonus
           score += 1 + bonusPoints;
+
+          if (perfectStreakTotal % 6 === 0 && hearts < 3) {
+            hearts++;
+            spawnFloatingText('+1 ❤️ HEART', top.x + top.w / 2, curr.y - 40, '#ff5d8f');
+          }
+          if (combo === 4) {
+            spawnFloatingText('SLOW-MO STREAK!', top.x + top.w / 2, curr.y - 64, '#00bbf9');
+          }
 
           sound.playPerfect(combo);
           spawnConfetti(newX + newW / 2, curr.y + curr.h / 2);
@@ -900,8 +973,30 @@
             });
           }
 
-          // If block became too tiny to see, end game gracefully
+          // If block became too tiny to see, spend a heart or end gracefully
           if (newW < 10) {
+            if (hearts > 0) {
+              hearts--;
+              combo = 0;
+              towerHeight++;
+              score += 1;
+              spawnFloatingText('RESCUED! ❤️', top.x + top.w / 2, curr.y - 10, '#ff5d8f');
+              stack.push({
+                x: top.x,
+                y: curr.y,
+                w: Math.max(top.w * 0.6, 60),
+                h: curr.h,
+                color: curr.color,
+                faceType: curr.faceType,
+                bounce: 1.0,
+                bounceVel: 0
+              });
+              updateScoreUI(true);
+              updateComboUI();
+              activeBlock = null;
+              spawnNextBlock();
+              return;
+            }
             activeBlock = null;
             window.triggerGameOver();
             return;
@@ -1351,8 +1446,22 @@
           }
         }
 
-        // Draw active sliding block
+        // Draw active sliding block (golden aura on WIDE bonus blocks)
         if (activeBlock) {
+          if (activeBlock.wide) {
+            ctx.save();
+            const ax = activeBlock.x + activeBlock.w / 2;
+            const ay = activeBlock.y + activeBlock.h / 2;
+            const pulse = 1 + Math.sin(performance.now() * 0.006) * 0.08;
+            const aura = ctx.createRadialGradient(ax, ay, 8, ax, ay, activeBlock.w * 0.85 * pulse);
+            aura.addColorStop(0, 'rgba(255, 215, 0, 0.55)');
+            aura.addColorStop(1, 'rgba(255, 215, 0, 0)');
+            ctx.fillStyle = aura;
+            ctx.beginPath();
+            ctx.arc(ax, ay, activeBlock.w * 0.85 * pulse, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
           drawCuteBlock(activeBlock, true);
         }
 
@@ -1399,6 +1508,37 @@
         }
 
         ctx.restore();
+
+        // Rescue hearts (top-left, under the score)
+        if (gameState === 'PLAYING' || gameState === 'GAMEOVER') {
+          ctx.save();
+          ctx.font = '26px sans-serif';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          for (let hi = 0; hi < 3; hi++) {
+            ctx.globalAlpha = hi < hearts ? 1 : 0.22;
+            ctx.fillText('❤️', 16 + hi * 32, 82);
+          }
+          ctx.restore();
+          // Slow-mo chip while streak reward is active
+          if (combo >= 4) {
+            ctx.save();
+            ctx.globalAlpha = 0.95;
+            ctx.fillStyle = '#00bbf9';
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(14, 106, 118, 30, 15);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '900 15px "Fredoka", "Comic Sans MS", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('SLOW-MO!', 73, 122);
+            ctx.restore();
+          }
+        }
       }
 
       function loop(now) {
