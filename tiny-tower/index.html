@@ -32,7 +32,7 @@
       margin: 0 auto;
       overflow: hidden;
       box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
-      background: linear-gradient(180deg, #a2d2ff 0%, #cdb4db 38%, #ffc8dd 72%, #ffafcc 100%);
+      background: #7ec8ff;
     }
 
     canvas {
@@ -545,6 +545,13 @@
       let confetti = [];
       let floatingTexts = [];
       let clouds = [];
+      let birds = [];
+      let birdTimer = 1.5;
+      let curZoneIdx = -1;
+      const stars = [];
+      for (let i = 0; i < 90; i++) {
+        stars.push({ x: Math.random(), y: Math.random() * 0.9, r: 0.6 + Math.random() * 1.7, tw: Math.random() * 6.28 });
+      }
 
       let lastTime = performance.now();
 
@@ -579,6 +586,96 @@
             alpha: 0.65 + Math.random() * 0.25
           });
         }
+      }
+
+      // --- Sky Zones (evolve with tower height) ---
+      const SKY_ZONES = [
+        { name: 'SUNRISE MEADOW', top: [255, 183, 197], bot: [255, 229, 180], cloud: [255, 244, 230], cloudA: 0.95, starA: 0.0,  birds: 1.0, sun: '#ffd166' },
+        { name: 'BLUE DAY SKY',   top: [126, 200, 255], bot: [227, 246, 255], cloud: [255, 255, 255], cloudA: 1.0,  starA: 0.0,  birds: 1.0, sun: '#ffe066' },
+        { name: 'SUNSET GLOW',    top: [255, 140, 105], bot: [255, 209, 102], cloud: [255, 214, 186], cloudA: 0.9,  starA: 0.15, birds: 0.7, sun: '#ff9e5e' },
+        { name: 'STARRY NIGHT',   top: [27, 42, 94],    bot: [74, 59, 122],   cloud: [120, 130, 180], cloudA: 0.35, starA: 1.0,  birds: 0.15, sun: '#f4f1de' },
+        { name: 'OUTER SPACE',    top: [11, 11, 42],    bot: [42, 26, 74],    cloud: [90, 90, 140],   cloudA: 0.15, starA: 1.0,  birds: 0.0, sun: '#f4f1de' }
+      ];
+      const ZONE_HEIGHT = 15; // blocks per sky zone
+
+      function lerpN(a, b, t) { return a + (b - a) * t; }
+      function lerpColor(a, b, t) {
+        return 'rgb(' + Math.round(lerpN(a[0], b[0], t)) + ',' + Math.round(lerpN(a[1], b[1], t)) + ',' + Math.round(lerpN(a[2], b[2], t)) + ')';
+      }
+
+      function skyState() {
+        const zf = Math.min(SKY_ZONES.length - 0.001, score / ZONE_HEIGHT);
+        const i = Math.floor(zf);
+        const t = Math.min(1, (zf - i) * 1.5);
+        const a = SKY_ZONES[i];
+        const b = SKY_ZONES[Math.min(SKY_ZONES.length - 1, i + 1)];
+        return {
+          idx: i,
+          top: lerpColor(a.top, b.top, t),
+          bot: lerpColor(a.bot, b.bot, t),
+          cloud: lerpColor(a.cloud, b.cloud, t),
+          cloudA: lerpN(a.cloudA, b.cloudA, t),
+          starA: lerpN(a.starA, b.starA, t),
+          birds: lerpN(a.birds, b.birds, t),
+          night: i >= 3,
+          space: i >= 4
+        };
+      }
+
+      function spawnFlock() {
+        const n = 3 + Math.floor(Math.random() * 3);
+        const baseY = 40 + Math.random() * (height * 0.4);
+        const dir = Math.random() < 0.5 ? 1 : -1;
+        const flock = { x: dir > 0 ? -60 : width + 60, y: baseY, speed: (45 + Math.random() * 40) * dir, birds: [], hue: Math.random() };
+        for (let i = 0; i < n; i++) {
+          flock.birds.push({
+            ox: -i * (22 + Math.random() * 14),
+            oy: (Math.random() * 26 - 13),
+            ph: Math.random() * 6.28,
+            s: 0.75 + Math.random() * 0.5
+          });
+        }
+        birds.push(flock);
+      }
+
+      function drawBird(x, y, s, ph, dir, tint) {
+        const flap = Math.sin(ph) * 6;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(s * dir, s);
+        // body
+        ctx.fillStyle = tint;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 9, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // head
+        ctx.beginPath();
+        ctx.arc(8, -4, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        // belly
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.beginPath();
+        ctx.ellipse(-1, 2, 5, 3.4, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // wing
+        ctx.fillStyle = 'rgba(0,0,0,0.18)';
+        ctx.beginPath();
+        ctx.ellipse(-3, -2 - flap * 0.4, 6.5, 3, -0.5 - flap * 0.06, 0, Math.PI * 2);
+        ctx.fill();
+        // beak
+        ctx.fillStyle = '#ff9f1c';
+        ctx.beginPath();
+        ctx.moveTo(12, -4);
+        ctx.lineTo(17, -2.5);
+        ctx.lineTo(12, -1.5);
+        ctx.closePath();
+        ctx.fill();
+        // eye
+        ctx.fillStyle = '#2b2d42';
+        ctx.beginPath();
+        ctx.arc(9.5, -5, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
       }
 
       // --- Resize Handling ---
@@ -936,7 +1033,8 @@
         ctx.save();
         ctx.translate(c.x, c.y);
         ctx.scale(c.scale, c.scale);
-        ctx.fillStyle = `rgba(255, 255, 255, ${c.alpha})`;
+        ctx.fillStyle = c.tint || `rgba(255, 255, 255, ${c.alpha})`;
+        ctx.globalAlpha = c.tint ? c.alpha : 1;
 
         ctx.beginPath();
         ctx.arc(0, 0, 26, 0, Math.PI * 2);
@@ -1055,6 +1153,30 @@
           }
         }
 
+        // Sky zone banner when the tower reaches a new zone
+        const zi = Math.min(SKY_ZONES.length - 1, Math.floor(score / ZONE_HEIGHT));
+        if (zi !== curZoneIdx && gameState === 'PLAYING') {
+          curZoneIdx = zi;
+          floatingTexts.push({ x: width / 2, y: 140 - cameraY, text: SKY_ZONES[zi].name + '!', color: '#ffffff', life: 1.4 });
+        }
+
+        // Bird flocks
+        const sky = skyState();
+        birdTimer -= dt * Math.max(0.05, sky.birds);
+        if (birdTimer <= 0) {
+          spawnFlock();
+          birdTimer = 4 + Math.random() * 5;
+        }
+        for (let i = birds.length - 1; i >= 0; i--) {
+          const f = birds[i];
+          f.x += f.speed * dt;
+          f.y += Math.sin(f.x * 0.01) * 12 * dt;
+          for (let j = 0; j < f.birds.length; j++) f.birds[j].ph += dt * 9;
+          if ((f.speed > 0 && f.x - 120 > width) || (f.speed < 0 && f.x + 160 < 0)) {
+            birds.splice(i, 1);
+          }
+        }
+
         // Smooth camera vertical follow
         cameraY += (targetCameraY - cameraY) * Math.min(1, dt * 8);
 
@@ -1119,9 +1241,93 @@
       function render() {
         ctx.clearRect(0, 0, width, height);
 
-        // Draw drifting clouds in sky
+        // Sky: evolving gradient by tower height
+        const sky = skyState();
+        const grad = ctx.createLinearGradient(0, 0, 0, height);
+        grad.addColorStop(0, sky.top);
+        grad.addColorStop(1, sky.bot);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Stars (night & space)
+        if (sky.starA > 0.02) {
+          const tNow = performance.now() * 0.001;
+          for (let i = 0; i < stars.length; i++) {
+            const st = stars[i];
+            const tw = 0.55 + 0.45 * Math.sin(tNow * 2.2 + st.tw);
+            ctx.globalAlpha = sky.starA * tw;
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(st.x * width, st.y * height * 0.8, st.r, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.globalAlpha = 1;
+          // Moon
+          ctx.fillStyle = '#f4f1de';
+          ctx.beginPath();
+          ctx.arc(width - 64, 74, 26, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = 'rgba(0,0,0,0.08)';
+          ctx.beginPath();
+          ctx.arc(width - 72, 68, 6, 0, Math.PI * 2);
+          ctx.arc(width - 56, 82, 4, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // Sun with soft rays
+          ctx.save();
+          ctx.translate(width - 64, 74);
+          ctx.strokeStyle = 'rgba(255, 224, 102, 0.65)';
+          ctx.lineWidth = 4;
+          const rt = performance.now() * 0.0004;
+          for (let i = 0; i < 8; i++) {
+            const a = rt + i * Math.PI / 4;
+            ctx.beginPath();
+            ctx.moveTo(Math.cos(a) * 34, Math.sin(a) * 34);
+            ctx.lineTo(Math.cos(a) * 44, Math.sin(a) * 44);
+            ctx.stroke();
+          }
+          ctx.fillStyle = '#ffe066';
+          ctx.beginPath();
+          ctx.arc(0, 0, 26, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // Space planets
+        if (sky.space) {
+          ctx.save();
+          ctx.globalAlpha = 0.9;
+          ctx.fillStyle = '#ff8fa3';
+          ctx.beginPath();
+          ctx.arc(56, 120, 15, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#ffd6a5';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.ellipse(56, 120, 24, 7, -0.35, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.fillStyle = '#8ecae6';
+          ctx.beginPath();
+          ctx.arc(width * 0.35, 52, 9, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // Bird flocks
+        for (let i = 0; i < birds.length; i++) {
+          const f = birds[i];
+          const dir = f.speed > 0 ? 1 : -1;
+          const tint = sky.night ? '#3a4a7a' : (f.hue < 0.5 ? '#2b2d42' : '#5e548e');
+          for (let j = 0; j < f.birds.length; j++) {
+            const bd = f.birds[j];
+            drawBird(f.x + bd.ox * dir, f.y + bd.oy, bd.s, bd.ph, dir, tint);
+          }
+        }
+
+        // Draw drifting clouds in sky (tinted per zone)
         for (let i = 0; i < clouds.length; i++) {
-          drawCloud(clouds[i]);
+          const c = clouds[i];
+          drawCloud({ x: c.x, y: c.y, scale: c.scale, alpha: c.alpha * sky.cloudA, tint: sky.cloud });
         }
 
         ctx.save();
