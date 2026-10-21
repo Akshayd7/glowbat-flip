@@ -510,7 +510,7 @@
         } else {
           const baseFreq = 58 + speedRatio * 55 + (turbo ? 35 : 0);
           this.engineOsc.frequency.setTargetAtTime(baseFreq, now, 0.05);
-          this.engineGain.gain.setTargetAtTime(0.045, now, 0.08);
+          this.engineGain.gain.setTargetAtTime(0.095, now, 0.08);
         }
       } catch (e) {}
     },
@@ -523,7 +523,7 @@
         this.musicTimer = 0;
         const freq = this.melody[this.noteIdx % this.melody.length];
         this.noteIdx++;
-        this.playTone(freq * (turbo ? 1.25 : 1), 0.11, "sine", 0.035);
+        this.playTone(freq * (turbo ? 1.25 : 1), 0.13, "sine", 0.075);
       }
     },
 
@@ -548,8 +548,27 @@
     },
 
     playCollectBone() {
-      this.playTone(587.33, 0.09, "sine", 0.12, 880);
-      setTimeout(() => this.playTone(880, 0.14, "triangle", 0.12, 1174.66), 60);
+      this.playTone(587.33, 0.09, "sine", 0.16, 880);
+      setTimeout(() => this.playTone(880, 0.14, "triangle", 0.16, 1174.66), 60);
+    },
+
+    playPower() {
+      const notes = [523.25, 659.25, 783.99, 1046.5];
+      notes.forEach((n, i) => {
+        setTimeout(() => this.playTone(n, 0.16, "square", 0.09), i * 70);
+      });
+    },
+
+    playStage() {
+      const notes = [392, 523.25, 659.25, 783.99, 1046.5];
+      notes.forEach((n, i) => {
+        setTimeout(() => this.playTone(n, 0.2, "triangle", 0.12), i * 90);
+      });
+    },
+
+    playShieldPop() {
+      this.playTone(880, 0.12, "sine", 0.14, 220);
+      setTimeout(() => this.playTone(220, 0.25, "sawtooth", 0.1, 110), 90);
     },
 
     playTurbo() {
@@ -596,6 +615,10 @@
 
   Sound.updateMuteUI();
 
+  // Mobile browsers suspend audio until a user gesture - resume on every tap
+  window.addEventListener("pointerdown", () => Sound.init(), { passive: true });
+  window.addEventListener("touchstart", () => Sound.init(), { passive: true });
+
   muteBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     Sound.init();
@@ -617,6 +640,12 @@
     baseSpeed: 0.95,
     maxBaseSpeed: 2.15,
     turboTimer: 0,
+    flyTimer: 0,
+    shieldTimer: 0,
+    magnetTimer: 0,
+    invulnTimer: 0,
+    stageIdx: 0,
+    stageBanner: { text: "", t: 0 },
     curve: 0,
     targetCurve: 0,
     curveTimer: 0,
@@ -641,6 +670,17 @@
       { x: 450, y: 115, s: 1.15, v: 15 }
     ]
   };
+
+  // --- STAGES (scenery evolves as the run goes on) ---
+  const STAGE_LENGTH = 400;
+  const STAGES = [
+    { name: "SUNNY MEADOW", sky: ["#38b6ff", "#80ffdb", "#fff3b0"], hillBack: "#52b788", hillFront: "#74c69d", grass: ["#70e000", "#38b000"], curb: ["#ef233c", "#ffffff"], road: ["#495057", "#343a40"], water: null, night: false, sun: "#ffbe0b", types: ["tree", "bush", "flower", "sign"] },
+    { name: "LAKESIDE DRIVE", sky: ["#4cc9f0", "#90e0ef", "#caf0f8"], hillBack: "#52b788", hillFront: "#74c69d", grass: ["#70e000", "#38b000"], curb: ["#0077b6", "#ffffff"], road: ["#495057", "#343a40"], water: "side", night: false, sun: "#ffbe0b", types: ["reed", "bush", "flower", "sign"] },
+    { name: "RIVER BRIDGE", sky: ["#38b6ff", "#80ffdb", "#fff3b0"], hillBack: "#52b788", hillFront: "#74c69d", grass: ["#8d6e63", "#6d4c41"], curb: ["#a1887f", "#8d6e63"], road: ["#a98467", "#8d6e63"], water: "full", night: false, sun: "#ffbe0b", types: ["rock", "sign"] },
+    { name: "SUNSET COAST", sky: ["#ff5d8f", "#ff9e5e", "#ffd166"], hillBack: "#b56576", hillFront: "#6d6875", grass: ["#e9c46a", "#dda15e"], curb: ["#ef233c", "#ffffff"], road: ["#495057", "#343a40"], water: "side", night: false, sun: "#ff9e5e", types: ["tree", "flower", "reed", "sign"] },
+    { name: "STARRY NIGHT", sky: ["#14213d", "#1b2a5e", "#3a2b6b"], hillBack: "#1d3557", hillFront: "#27447a", grass: ["#2d6a4f", "#1b4332"], curb: ["#495057", "#adb5bd"], road: ["#343a40", "#212529"], water: null, night: true, sun: null, types: ["pine", "rock", "sign"] }
+  ];
+  function currentStage() { return STAGES[state.stageIdx]; }
 
   // --- GLOBAL TRIGGER GAME OVER ---
   function triggerGameOver() {
@@ -678,6 +718,12 @@
     state.score = 0;
     state.baseSpeed = 0.95;
     state.turboTimer = 0;
+    state.flyTimer = 0;
+    state.shieldTimer = 0;
+    state.magnetTimer = 0;
+    state.invulnTimer = 0;
+    state.stageIdx = 0;
+    state.stageBanner = { text: STAGES[0].name, t: 2.4 };
     state.curve = 0;
     state.targetCurve = 0.25;
     state.curveTimer = 4;
@@ -814,7 +860,7 @@
   function spawnSceneryAt(zStart = 0.01) {
     const side = Math.random() < 0.5 ? -1 : 1;
     const offset = side * (1.85 + Math.random() * 1.1);
-    const types = ["tree", "bush", "flower", "sign"];
+    const types = currentStage().types;
     const type = types[Math.floor(Math.random() * types.length)];
     state.scenery.push({
       laneX: offset,
@@ -852,9 +898,14 @@
       // Maybe put a bone or turbo star in the remaining free lane!
       if (Math.random() < 0.65) {
         const freeLane = lanes[carCount];
-        const isStar = Math.random() < 0.16 && state.turboTimer <= 0;
+        const pr = Math.random();
+        let ptype = "bone";
+        if (pr < 0.15 && state.turboTimer <= 0) ptype = "star";
+        else if (pr < 0.22 && state.flyTimer <= 0) ptype = "fly";
+        else if (pr < 0.29 && state.shieldTimer <= 0) ptype = "shield";
+        else if (pr < 0.36 && state.magnetTimer <= 0) ptype = "magnet";
         state.entities.push({
-          type: isStar ? "star" : "bone",
+          type: ptype,
           laneX: freeLane,
           z: 0.02,
           speed: 0,
@@ -864,14 +915,15 @@
     } else {
       // Collectible trail of bones or a star
       const lane = lanes[0];
-      if (Math.random() < 0.22 && state.turboTimer <= 0) {
-        state.entities.push({
-          type: "star",
-          laneX: lane,
-          z: 0.01,
-          speed: 0,
-          spin: 0
-        });
+      const pr2 = Math.random();
+      if (pr2 < 0.2 && state.turboTimer <= 0) {
+        state.entities.push({ type: "star", laneX: lane, z: 0.01, speed: 0, spin: 0 });
+      } else if (pr2 < 0.27 && state.flyTimer <= 0) {
+        state.entities.push({ type: "fly", laneX: lane, z: 0.01, speed: 0, spin: 0 });
+      } else if (pr2 < 0.34 && state.shieldTimer <= 0) {
+        state.entities.push({ type: "shield", laneX: lane, z: 0.01, speed: 0, spin: 0 });
+      } else if (pr2 < 0.41 && state.magnetTimer <= 0) {
+        state.entities.push({ type: "magnet", laneX: lane, z: 0.01, speed: 0, spin: 0 });
       } else {
         for (let b = 0; b < 3; b++) {
           state.entities.push({
@@ -958,6 +1010,19 @@
     if (isTurbo) {
       state.turboTimer = Math.max(0, state.turboTimer - dt);
     }
+    if (state.flyTimer > 0) state.flyTimer = Math.max(0, state.flyTimer - dt);
+    if (state.magnetTimer > 0) state.magnetTimer = Math.max(0, state.magnetTimer - dt);
+    if (state.shieldTimer > 0) state.shieldTimer = Math.max(0, state.shieldTimer - dt);
+    if (state.invulnTimer > 0) state.invulnTimer = Math.max(0, state.invulnTimer - dt);
+    if (state.stageBanner.t > 0) state.stageBanner.t = Math.max(0, state.stageBanner.t - dt);
+
+    // Stage progression: scenery evolves with distance
+    const newStage = Math.floor(state.distance / STAGE_LENGTH) % STAGES.length;
+    if (newStage !== state.stageIdx) {
+      state.stageIdx = newStage;
+      state.stageBanner = { text: STAGES[newStage].name, t: 2.4 };
+      Sound.playStage();
+    }
 
     const effectiveSpeed = state.baseSpeed * (isTurbo ? 1.68 : 1.0);
     state.distance += effectiveSpeed * dt * 42;
@@ -1040,6 +1105,10 @@
       const zDiff = Math.abs(ent.z - PLAYER_Z);
       const laneDiff = Math.abs(ent.laneX - state.playerX);
 
+      if (ent.type === "bone" && state.magnetTimer > 0 && zDiff < 0.4 && laneDiff < 1.8) {
+        ent.laneX += (state.playerX - ent.laneX) * Math.min(1, dt * 7);
+      }
+
       if (ent.type === "bone" && zDiff < 0.065 && laneDiff < 0.48) {
         state.bones += 1;
         Sound.playCollectBone();
@@ -1060,18 +1129,42 @@
         continue;
       }
 
+      if ((ent.type === "fly" || ent.type === "shield" || ent.type === "magnet") && zDiff < 0.07 && laneDiff < 0.52) {
+        const pos = projectRoad(ent.laneX, ent.z);
+        Sound.playPower();
+        spawnConfettiBurst(pos.x, pos.y - 20, 22);
+        if (ent.type === "fly") {
+          state.flyTimer = 4.5;
+          state.bonusPoints += 30;
+          spawnPopup("FLY! 🪽", pos.x, pos.y - 45, "#00f5d4");
+        } else if (ent.type === "shield") {
+          state.shieldTimer = 10;
+          state.bonusPoints += 30;
+          spawnPopup("SHIELD! 🛡️", pos.x, pos.y - 45, "#4cc9f0");
+        } else {
+          state.magnetTimer = 6;
+          state.bonusPoints += 30;
+          spawnPopup("MAGNET! 🧲", pos.x, pos.y - 45, "#ff5d8f");
+        }
+        state.entities.splice(i, 1);
+        continue;
+      }
+
       if (ent.type === "car") {
-        // Collision check
-        if (zDiff < 0.052 && laneDiff < 0.44) {
-          if (isTurbo) {
-            // During turbo star glow, bump the car aside or award smash bonus?
-            // Spec says: "Crash into a car = game over", so let's keep collision fair & strict!
-            triggerGameOver();
-            return;
-          } else {
-            triggerGameOver();
-            return;
+        // Collision check (fly hovers over traffic; shield absorbs one hit)
+        if (zDiff < 0.052 && laneDiff < 0.44 && state.flyTimer <= 0 && state.invulnTimer <= 0) {
+          if (state.shieldTimer > 0) {
+            state.shieldTimer = 0;
+            state.invulnTimer = 1.4;
+            Sound.playShieldPop();
+            const pos = projectRoad(ent.laneX, ent.z);
+            spawnConfettiBurst(pos.x, pos.y - 30, 26);
+            spawnPopup("SHIELD SAVED YOU!", pos.x, pos.y - 60, "#4cc9f0");
+            state.entities.splice(i, 1);
+            continue;
           }
+          triggerGameOver();
+          return;
         }
 
         // Near-miss / overtake check when passing PLAYER_Z
@@ -1104,24 +1197,70 @@
 
   // --- DRAWING HELPERS ---
   function drawSkyAndHills() {
-    // Sunny sky gradient
+    const stg = currentStage();
+    // Stage sky gradient
     const skyGrad = ctx.createLinearGradient(0, 0, 0, HORIZON_Y);
-    skyGrad.addColorStop(0, "#38b6ff");
-    skyGrad.addColorStop(0.65, "#80ffdb");
-    skyGrad.addColorStop(1, "#fff3b0");
+    skyGrad.addColorStop(0, stg.sky[0]);
+    skyGrad.addColorStop(0.65, stg.sky[1]);
+    skyGrad.addColorStop(1, stg.sky[2]);
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, W, HORIZON_Y + 4);
 
-    // Cheerful smiling Sun
+    if (stg.night) {
+      // Twinkling stars
+      const tNow = performance.now() * 0.001;
+      ctx.fillStyle = "#ffffff";
+      for (let i = 0; i < 42; i++) {
+        const sx = (i * 131 + 57) % W;
+        const sy = (i * 89 + 23) % (HORIZON_Y - 30);
+        const tw = 0.4 + 0.6 * Math.abs(Math.sin(tNow * 2 + i));
+        ctx.globalAlpha = tw;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 1.2 + (i % 3) * 0.7, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      // Smiling Moon
+      const sunX = 95 - state.curve * 22;
+      ctx.save();
+      ctx.fillStyle = "rgba(244, 241, 222, 0.25)";
+      ctx.beginPath();
+      ctx.arc(sunX, 82, 52, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#f4f1de";
+      ctx.strokeStyle = "#2b2d42";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(sunX, 82, 36, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "rgba(0,0,0,0.1)";
+      ctx.beginPath();
+      ctx.arc(sunX - 10, 74, 6, 0, Math.PI * 2);
+      ctx.arc(sunX + 12, 90, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#2b2d42";
+      ctx.beginPath();
+      ctx.arc(sunX - 11, 78, 4, 0, Math.PI * 2);
+      ctx.arc(sunX + 11, 78, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(sunX, 86, 9, 0.15 * Math.PI, 0.85 * Math.PI);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Cheerful smiling Sun (day stages)
+    if (!stg.night) {
     const sunX = 95 - state.curve * 22;
-    const sunY = 82;
+    const sunY = stg.name === "SUNSET COAST" ? 150 : 82;
     ctx.save();
     ctx.fillStyle = "rgba(255, 225, 80, 0.35)";
     ctx.beginPath();
     ctx.arc(sunX, sunY, 56, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = "#ffbe0b";
+    ctx.fillStyle = stg.sun;
     ctx.strokeStyle = "#2b2d42";
     ctx.lineWidth = 4;
     ctx.beginPath();
@@ -1139,6 +1278,7 @@
     ctx.arc(sunX, sunY + 4, 10, 0.15 * Math.PI, 0.85 * Math.PI);
     ctx.stroke();
     ctx.restore();
+    }
 
     // Puffy Clouds
     for (const c of state.clouds) {
@@ -1147,7 +1287,7 @@
 
     // Back Hills
     const hillShift1 = state.curve * 45;
-    ctx.fillStyle = "#52b788";
+    ctx.fillStyle = stg.hillBack;
     ctx.strokeStyle = "#2b2d42";
     ctx.lineWidth = 4;
     ctx.beginPath();
@@ -1160,7 +1300,7 @@
 
     // Front Hills
     const hillShift2 = state.curve * 75;
-    ctx.fillStyle = "#74c69d";
+    ctx.fillStyle = stg.hillFront;
     ctx.beginPath();
     ctx.moveTo(-60, HORIZON_Y + 10);
     ctx.quadraticCurveTo(80 - hillShift2, HORIZON_Y - 50, 230 - hillShift2, HORIZON_Y + 10);
@@ -1191,6 +1331,7 @@
   function drawRoad() {
     const strips = 48;
     const distScroll = state.distance * 0.35;
+    const stg = currentStage();
 
     for (let i = 0; i < strips; i++) {
       const z1 = i / strips;
@@ -1198,14 +1339,27 @@
       const p1 = projectRoad(0, z1);
       const p2 = projectRoad(0, z2);
 
-      // Alternating grass stripes
+      // Alternating ground stripes (grass, or water on the bridge stage)
       const band = Math.floor(i * 0.55 - distScroll) % 2 === 0;
-      ctx.fillStyle = band ? "#70e000" : "#38b000";
-      ctx.fillRect(0, p1.y, W, p2.y - p1.y + 1.5);
+      if (stg.water === "full") {
+        ctx.fillStyle = band ? "#48cae4" : "#00b4d8";
+        ctx.fillRect(0, p1.y, W, p2.y - p1.y + 1.5);
+        // Wave dashes
+        if (band) {
+          ctx.fillStyle = "rgba(255,255,255,0.5)";
+          const wy = p1.y + (p2.y - p1.y) * 0.5;
+          for (let wx = ((i * 97) % 80) - 40; wx < W; wx += 110) {
+            ctx.fillRect(wx, wy, 34, Math.max(2, (p2.y - p1.y) * 0.14));
+          }
+        }
+      } else {
+        ctx.fillStyle = band ? stg.grass[0] : stg.grass[1];
+        ctx.fillRect(0, p1.y, W, p2.y - p1.y + 1.5);
+      }
 
-      // Curbs (Red & White)
+      // Curbs
       const curbBand = Math.floor(i * 0.85 - distScroll * 1.5) % 2 === 0;
-      ctx.fillStyle = curbBand ? "#ef233c" : "#ffffff";
+      ctx.fillStyle = curbBand ? stg.curb[0] : stg.curb[1];
       const c1 = p1.roadHalfW * 1.12;
       const c2 = p2.roadHalfW * 1.12;
       ctx.beginPath();
@@ -1216,8 +1370,8 @@
       ctx.closePath();
       ctx.fill();
 
-      // Asphalt surface
-      ctx.fillStyle = band ? "#495057" : "#343a40";
+      // Road surface
+      ctx.fillStyle = band ? stg.road[0] : stg.road[1];
       ctx.beginPath();
       ctx.moveTo(p1.centerX - p1.roadHalfW, p1.y);
       ctx.lineTo(p1.centerX + p1.roadHalfW, p1.y);
@@ -1243,6 +1397,19 @@
           ctx.closePath();
           ctx.fill();
         }
+      }
+    }
+
+    // Lakeside / coast water along the left shoulder
+    if (stg.water === "side") {
+      ctx.fillStyle = "#00b4d8";
+      ctx.beginPath();
+      ctx.ellipse(40, H - 90, 190, 150, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,0.55)";
+      for (let wv = 0; wv < 5; wv++) {
+        const wy = H - 170 + wv * 32;
+        ctx.fillRect(8 + (wv % 2) * 24, wy, 52, 5);
       }
     }
   }
@@ -1298,6 +1465,47 @@
       ctx.arc(0, -18, 8, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
+    } else if (item.type === "reed") {
+      ctx.strokeStyle = "#2b2d42";
+      ctx.lineWidth = 4;
+      ctx.fillStyle = "#38b000";
+      for (const rx of [-12, 0, 12]) {
+        ctx.beginPath();
+        ctx.roundRect(rx - 4, -58, 8, 58, 4);
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.fillStyle = "#9c6644";
+      for (const rx of [-12, 12]) {
+        ctx.beginPath();
+        ctx.ellipse(rx, -62, 7, 14, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+    } else if (item.type === "rock") {
+      ctx.fillStyle = "#adb5bd";
+      ctx.beginPath();
+      ctx.ellipse(0, -18, 30, 20, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#ced4da";
+      ctx.beginPath();
+      ctx.ellipse(-8, -24, 12, 8, -0.3, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (item.type === "pine") {
+      ctx.fillStyle = "#9c6644";
+      ctx.fillRect(-8, -34, 16, 34);
+      ctx.strokeRect(-8, -34, 16, 34);
+      ctx.fillStyle = "#2d6a4f";
+      for (const [ty, tw] of [[-40, 34], [-62, 26], [-82, 18]]) {
+        ctx.beginPath();
+        ctx.moveTo(0, ty - 26);
+        ctx.lineTo(-tw, ty + 10);
+        ctx.lineTo(tw, ty + 10);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
     } else if (item.type === "sign") {
       ctx.fillStyle = "#adb5bd";
       ctx.fillRect(-4, -50, 8, 50);
@@ -1423,6 +1631,63 @@
     ctx.restore();
   }
 
+  function drawPowerPickup(ent) {
+    const pos = projectRoad(ent.laneX, ent.z);
+    const s = pos.scale;
+    const bob = Math.sin(ent.spin * 2) * 10;
+    const conf = {
+      fly: { ring: "#00f5d4", glyph: "🪽" },
+      shield: { ring: "#4cc9f0", glyph: "🛡️" },
+      magnet: { ring: "#ff5d8f", glyph: "🧲" }
+    }[ent.type] || { ring: "#ffffff", glyph: "?" };
+
+    ctx.save();
+    ctx.translate(pos.x, pos.y);
+    ctx.scale(s, s);
+
+    // Shadow
+    ctx.fillStyle = "rgba(0,0,0,0.25)";
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 30, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.translate(0, -36 + bob);
+
+    // Pulsing aura
+    const pulse = 1 + Math.sin(ent.spin * 2.4) * 0.12;
+    const auraGrad = ctx.createRadialGradient(0, 0, 6, 0, 0, 46 * pulse);
+    auraGrad.addColorStop(0, conf.ring);
+    auraGrad.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.globalAlpha = 0.55;
+    ctx.fillStyle = auraGrad;
+    ctx.beginPath();
+    ctx.arc(0, 0, 46 * pulse, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Badge
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "#2b2d42";
+    ctx.lineWidth = 4.5;
+    ctx.beginPath();
+    ctx.arc(0, 0, 30, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.strokeStyle = conf.ring;
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.arc(0, 0, 24, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Glyph
+    ctx.font = "30px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(conf.glyph, 0, 2);
+
+    ctx.restore();
+  }
+
   function drawTrafficCar(ent) {
     const pos = projectRoad(ent.laneX, ent.z);
     const s = pos.scale;
@@ -1510,6 +1775,9 @@
     const bounce = state.mode === "PLAYING" ? Math.sin(state.bouncePhase * 1.4) * 3.5 : 0;
     const tilt = (state.playerVx * 0.065) + (state.steerLeft ? -0.08 : state.steerRight ? 0.08 : 0);
 
+    const isFlying = state.flyTimer > 0;
+    const flyLift = isFlying ? -52 - Math.sin(state.tailPhase * 0.45) * 8 : 0;
+
     ctx.save();
     ctx.translate(pos.x, pos.y);
     ctx.scale(s, s);
@@ -1526,14 +1794,36 @@
       ctx.fill();
     }
 
-    // Soft Ground Shadow
-    ctx.fillStyle = "rgba(0, 0, 0, 0.32)";
+    // Soft Ground Shadow (smaller & fainter while flying)
+    ctx.fillStyle = isFlying ? "rgba(0, 0, 0, 0.15)" : "rgba(0, 0, 0, 0.32)";
     ctx.beginPath();
-    ctx.ellipse(0, 2, 66, 17, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 2, isFlying ? 42 : 66, isFlying ? 11 : 17, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.translate(0, bounce);
+    ctx.translate(0, bounce + flyLift);
     ctx.rotate(tilt);
+
+    if (isFlying) {
+      // Flapping cartoon wings
+      const flap = Math.sin(state.tailPhase * 1.6) * 0.5;
+      ctx.fillStyle = "#ffffff";
+      ctx.strokeStyle = "#2b2d42";
+      ctx.lineWidth = 4;
+      for (const side of [-1, 1]) {
+        ctx.save();
+        ctx.translate(side * 58, -52);
+        ctx.rotate(side * (-0.5 + flap * 0.35));
+        ctx.beginPath();
+        ctx.ellipse(side * 26, 0, 30, 13, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.ellipse(side * 40, 10, 16, 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
 
     ctx.strokeStyle = "#2b2d42";
     ctx.lineWidth = 4.5;
@@ -1664,6 +1954,36 @@
     ctx.fill();
     ctx.stroke();
 
+    // Magnet aura
+    if (state.magnetTimer > 0) {
+      const mp = 0.5 + 0.5 * Math.sin(state.tailPhase * 1.2);
+      ctx.strokeStyle = "rgba(255, 93, 143, " + (0.35 + mp * 0.3) + ")";
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.arc(0, -46, 86 + mp * 10, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // Shield bubble
+    if (state.shieldTimer > 0) {
+      const sp = 0.5 + 0.5 * Math.sin(state.tailPhase * 0.9);
+      ctx.fillStyle = "rgba(76, 201, 240, 0.18)";
+      ctx.strokeStyle = "rgba(76, 201, 240, " + (0.6 + sp * 0.3) + ")";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.arc(0, -46, 92, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    // Invulnerability blink
+    if (state.invulnTimer > 0 && Math.floor(state.invulnTimer * 12) % 2 === 0) {
+      ctx.fillStyle = "rgba(255,255,255,0.35)";
+      ctx.beginPath();
+      ctx.arc(0, -46, 96, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
     ctx.restore();
   }
 
@@ -1749,6 +2069,7 @@
           if (e.type === "car") drawTrafficCar(e);
           else if (e.type === "bone") drawBone(e);
           else if (e.type === "star") drawStar(e);
+          else drawPowerPickup(e);
         }
       });
     }
@@ -1766,6 +2087,51 @@
       ctx.strokeStyle = "rgba(255, 190, 11, 0.75)";
       ctx.lineWidth = 14;
       ctx.strokeRect(0, 0, W, H);
+    }
+
+    // Stage banner
+    if (state.stageBanner.t > 0 && state.mode === "PLAYING") {
+      const a = Math.min(1, state.stageBanner.t / 0.5);
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.font = "900 44px 'Fredoka One', 'Comic Sans MS', sans-serif";
+      ctx.textAlign = "center";
+      ctx.lineWidth = 9;
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = "#2b2d42";
+      ctx.fillStyle = "#ffbe0b";
+      ctx.strokeText(state.stageBanner.text, W / 2, 220);
+      ctx.fillText(state.stageBanner.text, W / 2, 220);
+      ctx.restore();
+    }
+
+    // Active power chips (top center)
+    if (state.mode === "PLAYING") {
+      const chips = [];
+      if (state.flyTimer > 0) chips.push(["🪽", state.flyTimer, "#00f5d4"]);
+      if (state.shieldTimer > 0) chips.push(["🛡️", state.shieldTimer, "#4cc9f0"]);
+      if (state.magnetTimer > 0) chips.push(["🧲", state.magnetTimer, "#ff5d8f"]);
+      if (state.turboTimer > 0) chips.push(["⭐", state.turboTimer, "#ffbe0b"]);
+      let cx = W / 2 - (chips.length - 1) * 34;
+      for (const [glyph, t, color] of chips) {
+        ctx.save();
+        ctx.fillStyle = "rgba(255,255,255,0.92)";
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.roundRect(cx - 28, 118, 56, 40, 12);
+        ctx.fill();
+        ctx.stroke();
+        ctx.font = "20px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(glyph, cx - 10, 139);
+        ctx.fillStyle = "#2b2d42";
+        ctx.font = "900 16px sans-serif";
+        ctx.fillText(Math.ceil(t) + "s", cx + 12, 139);
+        ctx.restore();
+        cx += 68;
+      }
     }
 
     ctx.restore();
