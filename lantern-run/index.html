@@ -1,0 +1,1087 @@
+<!doctype html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lantern Run: Way Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #1a0b2e;
+            font-family: 'Inter', sans-serif, system-ui;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+        .retro-font {
+            font-weight: 800;
+            letter-spacing: 0.05em;
+        }
+        /* Custom animations for UI */
+        @keyframes floatUp {
+            0% { transform: translateY(0px) scale(1); opacity: 1; }
+            100% { transform: translateY(-40px) scale(1.2); opacity: 0; }
+        }
+        .float-score {
+            animation: floatUp 0.8s ease-out forwards;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(74, 222, 128, 0.8)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 16px rgba(74, 222, 128, 1)); }
+        }
+        .leaf-glow {
+            animation: pulseGlow 1.5s infinite ease-in-out;
+        }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.pointer-events-auto{pointer-events:auto}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.bottom-6{bottom:1.5rem}.left-6{left:1.5rem}.right-6{right:1.5rem}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:0.25rem}.mb-16{margin-bottom:4rem}.mb-2{margin-bottom:0.5rem}.flex{display:flex}.hidden{display:none}.h-2\.5{height:0.625rem}.h-3{height:0.75rem}.h-5{height:1.25rem}.h-full{height:100%}.w-48{width:12rem}.w-full{width:100%}.w-px{width:1px}.max-w-md{max-width:28rem}.max-w-sm{max-width:24rem}.max-w-xs{max-width:20rem}.flex-1{flex:1 1 0%}.-translate-y-2{--tw-translate-y:-0.5rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.justify-around{justify-content:space-around}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.space-y-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.375rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-amber-300{--tw-border-opacity:1;border-color:rgb(252 211 77 / var(--tw-border-opacity, 1))}.border-amber-400\/30{border-color:rgb(251 191 36 / 0.3)}.border-emerald-300{--tw-border-opacity:1;border-color:rgb(110 231 183 / var(--tw-border-opacity, 1))}.border-emerald-400{--tw-border-opacity:1;border-color:rgb(52 211 153 / var(--tw-border-opacity, 1))}.border-emerald-500\/30{border-color:rgb(16 185 129 / 0.3)}.border-teal-300{--tw-border-opacity:1;border-color:rgb(94 234 212 / var(--tw-border-opacity, 1))}.border-white\/10{border-color:rgb(255 255 255 / 0.1)}.border-white\/20{border-color:rgb(255 255 255 / 0.2)}.border-white\/5{border-color:rgb(255 255 255 / 0.05)}.bg-black\/30{background-color:rgb(0 0 0 / 0.3)}.bg-black\/40{background-color:rgb(0 0 0 / 0.4)}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.bg-emerald-500\/80{background-color:rgb(16 185 129 / 0.8)}.bg-slate-700{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.bg-slate-800\/90{background-color:rgb(30 41 59 / 0.9)}.bg-slate-800\/95{background-color:rgb(30 41 59 / 0.95)}.bg-slate-900\/80{background-color:rgb(15 23 42 / 0.8)}.bg-slate-900\/90{background-color:rgb(15 23 42 / 0.9)}.bg-teal-500\/80{background-color:rgb(20 184 166 / 0.8)}.bg-white\/10{background-color:rgb(255 255 255 / 0.1)}.bg-white\/20{background-color:rgb(255 255 255 / 0.2)}.bg-white\/90{background-color:rgb(255 255 255 / 0.9)}.bg-gradient-to-b{background-image:linear-gradient(to bottom, var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.from-amber-500{--tw-gradient-from:#f59e0b var(--tw-gradient-from-position);--tw-gradient-to:rgb(245 158 11 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-amber-900\/90{--tw-gradient-from:rgb(120 53 15 / 0.9) var(--tw-gradient-from-position);--tw-gradient-to:rgb(120 53 15 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-emerald-400{--tw-gradient-from:#34d399 var(--tw-gradient-from-position);--tw-gradient-to:rgb(52 211 153 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-emerald-500{--tw-gradient-from:#10b981 var(--tw-gradient-from-position);--tw-gradient-to:rgb(16 185 129 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-red-500{--tw-gradient-from:#ef4444 var(--tw-gradient-from-position);--tw-gradient-to:rgb(239 68 68 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-amber-500{--tw-gradient-to:#f59e0b var(--tw-gradient-to-position)}.to-emerald-500{--tw-gradient-to:#10b981 var(--tw-gradient-to-position)}.to-green-300{--tw-gradient-to:#86efac var(--tw-gradient-to-position)}.to-slate-900\/90{--tw-gradient-to:rgb(15 23 42 / 0.9) var(--tw-gradient-to-position)}.to-teal-300{--tw-gradient-to:#5eead4 var(--tw-gradient-to-position)}.to-teal-500{--tw-gradient-to:#14b8a6 var(--tw-gradient-to-position)}.p-0\.5{padding:0.125rem}.p-2{padding:0.5rem}.p-2\.5{padding:0.625rem}.p-4{padding:1rem}.p-8{padding:2rem}.px-4{padding-left:1rem;padding-right:1rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.px-8{padding-left:2rem;padding-right:2rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.text-left{text-align:left}.text-center{text-align:center}.text-right{text-align:right}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-5xl{font-size:3rem;line-height:1}.text-6xl{font-size:3.75rem;line-height:1}.text-\[10px\]{font-size:10px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-relaxed{line-height:1.625}.tracking-wider{letter-spacing:0.05em}.text-amber-200{--tw-text-opacity:1;color:rgb(253 230 138 / var(--tw-text-opacity, 1))}.text-amber-300{--tw-text-opacity:1;color:rgb(252 211 77 / var(--tw-text-opacity, 1))}.text-emerald-200{--tw-text-opacity:1;color:rgb(167 243 208 / var(--tw-text-opacity, 1))}.text-emerald-300{--tw-text-opacity:1;color:rgb(110 231 183 / var(--tw-text-opacity, 1))}.text-red-400{--tw-text-opacity:1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-white\/70{color:rgb(255 255 255 / 0.7)}.opacity-0{opacity:0}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.backdrop-blur{--tw-backdrop-blur:blur(8px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-opacity{transition-property:opacity;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-100{transition-duration:100ms}.duration-200{transition-duration:200ms}.duration-300{transition-duration:300ms}.hover\:bg-emerald-600:hover{--tw-bg-opacity:1;background-color:rgb(5 150 105 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-600:hover{--tw-bg-opacity:1;background-color:rgb(71 85 105 / var(--tw-bg-opacity, 1))}.hover\:bg-teal-600:hover{--tw-bg-opacity:1;background-color:rgb(13 148 136 / var(--tw-bg-opacity, 1))}.hover\:bg-white\/20:hover{background-color:rgb(255 255 255 / 0.2)}.hover\:from-amber-600:hover{--tw-gradient-from:#d97706 var(--tw-gradient-from-position);--tw-gradient-to:rgb(217 119 6 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:from-emerald-600:hover{--tw-gradient-from:#059669 var(--tw-gradient-from-position);--tw-gradient-to:rgb(5 150 105 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:from-red-600:hover{--tw-gradient-from:#dc2626 var(--tw-gradient-from-position);--tw-gradient-to:rgb(220 38 38 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:to-amber-600:hover{--tw-gradient-to:#d97706 var(--tw-gradient-to-position)}.hover\:to-emerald-600:hover{--tw-gradient-to:#059669 var(--tw-gradient-to-position)}.hover\:to-teal-600:hover{--tw-gradient-to:#0d9488 var(--tw-gradient-to-position)}.active\:scale-95:active{--tw-scale-x:.95;--tw-scale-y:.95;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@media (min-width: 640px){.sm\:mb-4{margin-bottom:1rem}.sm\:w-64{width:16rem}.sm\:p-6{padding:1.5rem}.sm\:text-4xl{font-size:2.25rem;line-height:2.5rem}.sm\:text-xl{font-size:1.25rem;line-height:1.75rem}}@media (min-width: 768px){.md\:hidden{display:none}}</style></head>
+<body>
+
+    <!-- Game Container -->
+    <div id="game-container" class="relative w-full h-full">
+        <canvas id="renderCanvas" width="708" height="828" style="width: 708px; height: 828px;"></canvas>
+
+        <!-- UI Overlay -->
+        <div id="ui-overlay" class="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 sm:p-6">
+            
+            <!-- Top Bar -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pointer-events-auto bg-black/30 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10 text-white shadow-lg">
+                <!-- Hearts & Lanterns -->
+                <div class="flex items-center gap-4">
+                    <div id="hearts-container" class="flex gap-1.5 text-red-400 text-xl">
+                        ❤️ ❤️ ❤️
+                    </div>
+                    <div class="h-5 w-px bg-white/20"></div>
+                    <div class="flex items-center gap-1.5 font-bold text-amber-300">
+                        <span class="text-xl">🏮</span>
+                        <span id="lantern-counter" class="text-lg">0/7</span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar & Score -->
+                <div class="flex items-center gap-4 flex-1 max-w-xs mx-auto">
+                    <div class="flex-1">
+                        <div class="flex justify-between text-xs font-semibold text-emerald-200 mb-1">
+                            <span>Home Journey</span>
+                            <span id="progress-text">0%</span>
+                        </div>
+                        <div class="w-full bg-white/20 h-2.5 rounded-full overflow-hidden p-0.5">
+                            <div id="progress-bar" class="bg-gradient-to-r from-emerald-400 to-teal-300 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[10px] text-white/70 uppercase tracking-wider">Score</div>
+                        <div id="score-display" class="retro-font text-lg sm:text-xl text-amber-200">0</div>
+                    </div>
+                </div>
+
+                <!-- Controls & Audio Buttons -->
+                <div class="flex items-center gap-2">
+                    <button id="audio-btn" class="bg-white/10 hover:bg-white/20 active:scale-95 transition p-2.5 rounded-xl border border-white/10 text-white flex items-center justify-center">
+                        🔊
+                    </button>
+                    <button id="pause-btn" class="bg-white/10 hover:bg-white/20 active:scale-95 transition p-2.5 rounded-xl border border-white/10 text-white flex items-center justify-center">
+                        ⏸️
+                    </button>
+                </div>
+            </div>
+
+            <!-- Leaf Meter Bottom Bar / Hint Bubble -->
+            <div class="flex flex-col items-center pointer-events-none mb-16 sm:mb-4 gap-2">
+                <!-- Hint Speech Bubble -->
+                <div id="hint-bubble" class="opacity-0 transition-opacity duration-300 bg-white/90 backdrop-blur text-slate-800 px-4 py-2 rounded-2xl shadow-xl font-bold text-sm border-2 border-emerald-400 flex items-center gap-2 transform -translate-y-2">
+                    <span class="text-lg">🍃</span> <span id="hint-text">TAP CENTER TO JUMP!</span>
+                </div>
+
+                <!-- Leaf Meter Bar -->
+                <div class="w-48 sm:w-64 bg-black/40 backdrop-blur-md p-2 rounded-2xl border border-emerald-500/30 flex items-center gap-3 shadow-lg pointer-events-auto">
+                    <span class="text-emerald-300 text-sm font-bold">LEAF</span>
+                    <div class="flex-1 bg-white/20 h-3 rounded-full overflow-hidden">
+                        <div id="leaf-bar" class="bg-gradient-to-r from-emerald-500 to-green-300 h-full rounded-full transition-all duration-100" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile On-Screen Action Buttons -->
+            <div id="mobile-controls" class="absolute bottom-6 left-6 right-6 flex justify-between pointer-events-auto md:hidden">
+                <button id="btn-jump" class="bg-emerald-500/80 backdrop-blur-md hover:bg-emerald-600 active:scale-95 text-white font-extrabold px-6 py-4 rounded-3xl shadow-xl border-2 border-emerald-300 flex items-center gap-2 text-lg">
+                    🦘 JUMP
+                </button>
+                <button id="btn-leaf" class="bg-teal-500/80 backdrop-blur-md hover:bg-teal-600 active:scale-95 text-white font-extrabold px-6 py-4 rounded-3xl shadow-xl border-2 border-teal-300 flex items-center gap-2 text-lg leaf-glow">
+                    🍃 LEAF
+                </button>
+            </div>
+        </div>
+
+        <!-- Floating Score FX Layer -->
+        <div id="fx-layer" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+
+        <!-- Start Menu Overlay -->
+        <div id="start-screen" class="absolute inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+            <div class="bg-slate-800/90 border border-white/20 p-8 rounded-3xl shadow-2xl max-w-md w-full text-center text-white flex flex-col items-center gap-6">
+                <div class="text-5xl">🏮🍃</div>
+                <div>
+                    <h1 class="retro-font text-3xl sm:text-4xl text-amber-300 mb-2">Lantern Run</h1>
+                    <p class="text-emerald-300 font-semibold text-sm">Way Home</p>
+                </div>
+                <p class="text-slate-300 text-sm leading-relaxed">
+                    Guide our young hero back to the cozy hilltop home through terraced green hills, bamboo groves, and golden hour light! Collect 7 lanterns to warm the way.
+                </p>
+                <div class="bg-black/30 p-4 rounded-2xl w-full text-left text-xs text-slate-300 space-y-1.5 border border-white/5">
+                    <p class="font-bold text-amber-200 mb-1">🎮 Controls:</p>
+                    <p>• <b>Steer:</b> Touch left/right half or A/D keys.</p>
+                    <p>• <b>Jump:</b> Tap center or Spacebar.</p>
+                    <p>• <b>Wind Leaf (Glide):</b> Double-tap or W key / Leaf button.</p>
+                    <p>• <b>Staff Vault:</b> Tap promptly at Torii gates!</p>
+                </div>
+                <button id="start-btn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-95 text-white font-extrabold py-4 px-8 rounded-2xl shadow-xl text-lg transition duration-200 border-2 border-emerald-300">
+                    START JOURNEY 🌟
+                </button>
+            </div>
+        </div>
+
+        <!-- Pause Menu Overlay -->
+        <div id="pause-screen" class="absolute inset-0 bg-slate-900/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+            <div class="bg-slate-800/90 border border-white/20 p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center text-white flex flex-col gap-4">
+                <h2 class="retro-font text-2xl text-amber-300">Game Paused</h2>
+                <button id="resume-btn" class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold py-3 px-6 rounded-2xl shadow-lg transition">Resume</button>
+                <button id="restart-pause-btn" class="bg-slate-700 hover:bg-slate-600 active:scale-95 text-white font-bold py-3 px-6 rounded-2xl shadow-lg transition">Restart Journey</button>
+            </div>
+        </div>
+
+        <!-- Game Over Overlay -->
+        <div id="gameover-screen" class="absolute inset-0 bg-slate-900/90 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+            <div class="bg-slate-800/90 border border-white/20 p-8 rounded-3xl shadow-2xl max-w-md w-full text-center text-white flex flex-col items-center gap-6">
+                <div class="text-5xl">💔</div>
+                <h2 class="retro-font text-3xl text-red-400">Journey Interrupted</h2>
+                <p id="gameover-msg" class="text-slate-300 text-sm">The path grew too difficult, but your journey isn't over yet!</p>
+                <div class="bg-black/30 p-4 rounded-2xl w-full flex justify-around">
+                    <div>
+                        <div class="text-xs text-slate-400">Final Score</div>
+                        <div id="go-score" class="retro-font text-xl text-amber-300">0</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-slate-400">Lanterns</div>
+                        <div id="go-lanterns" class="retro-font text-xl text-emerald-300">0/7</div>
+                    </div>
+                </div>
+                <button id="restart-go-btn" class="w-full bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 active:scale-95 text-white font-extrabold py-4 rounded-2xl shadow-xl text-lg transition">
+                    TRY AGAIN 🏃
+                </button>
+            </div>
+        </div>
+
+        <!-- Win Screen Overlay -->
+        <div id="win-screen" class="absolute inset-0 bg-gradient-to-b from-amber-900/90 to-slate-900/90 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+            <div class="bg-slate-800/95 border border-amber-400/30 p-8 rounded-3xl shadow-2xl max-w-md w-full text-center text-white flex flex-col items-center gap-6">
+                <div class="text-6xl">🏡🏮✨</div>
+                <div>
+                    <h2 class="retro-font text-3xl sm:text-4xl text-amber-300 mb-1">Welcome Home!</h2>
+                    <p class="text-emerald-300 font-semibold text-sm">The lantern glow guides the way.</p>
+                </div>
+                <div class="bg-black/30 p-4 rounded-2xl w-full space-y-2 border border-white/10">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-400">Final Score:</span>
+                        <span id="win-score" class="retro-font text-amber-300">0</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-400">Lanterns Found:</span>
+                        <span id="win-lanterns" class="retro-font text-emerald-300">7/7</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-400">Hearts Remaining:</span>
+                        <span id="win-hearts" class="retro-font text-red-400">❤️ ❤️ ❤️</span>
+                    </div>
+                </div>
+                <button id="restart-win-btn" class="w-full bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-600 hover:to-emerald-600 active:scale-95 text-white font-extrabold py-4 rounded-2xl shadow-xl text-lg transition border-2 border-amber-300">
+                    PLAY AGAIN 🌟
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Game Logic -->
+    <script>
+        // --- Web Audio Synthesizer (Cheerful Plucked-String Background Music & FX) ---
+        class SoundSystem {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+                this.musicInterval = null;
+                this.notes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25]; // C pentatonic scale
+                this.melodyIndex = 0;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            toggleMute() {
+                this.muted = !this.muted;
+                return this.muted;
+            }
+
+            playPluck(freq, duration = 0.3, type = 'sine', gainVal = 0.15) {
+                if (this.muted || !this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+
+                    gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e) {}
+            }
+
+            playJump() {
+                if (this.muted || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(600, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            }
+
+            playCollect() {
+                this.playPluck(880, 0.2, 'triangle', 0.2);
+                setTimeout(() => this.playPluck(1320, 0.3, 'triangle', 0.2), 80);
+            }
+
+            playHit() {
+                if (this.muted || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(60, now + 0.3);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+
+            startMusic() {
+                if (this.musicInterval) return;
+                // Pentatonic plucked melody generator
+                this.musicInterval = setInterval(() => {
+                    if (this.muted || !this.ctx) return;
+                    // Play cheerful pattern
+                    const pattern = [0, 2, 4, 3, 5, 4, 2, 1];
+                    const noteIdx = pattern[this.melodyIndex % pattern.length];
+                    const freq = this.notes[noteIdx];
+                    this.playPluck(freq, 0.4, 'sine', 0.1);
+
+                    // Optional harmony note
+                    if (this.melodyIndex % 2 === 0) {
+                        setTimeout(() => {
+                            this.playPluck(this.notes[(noteIdx + 2) % this.notes.length] * 0.5, 0.5, 'sine', 0.05);
+                        }, 150);
+                    }
+
+                    this.melodyIndex++;
+                }, 400);
+            }
+
+            stopMusic() {
+                if (this.musicInterval) {
+                    clearInterval(this.musicInterval);
+                    this.musicInterval = null;
+                }
+            }
+        }
+
+        const soundSystem = new SoundSystem();
+
+        // --- Game State & Constants ---
+        const GAME_STATES = { START: 0, PLAYING: 1, PAUSED: 2, GAMEOVER: 3, WIN: 4 };
+        let gameState = GAME_STATES.START;
+
+        let score = 0;
+        let hearts = 3;
+        let lanternsCollected = 0;
+        const totalLanterns = 7;
+        let distanceTraveled = 0;
+        const totalDistance = 500; // Units to home
+
+        let leafMeter = 100; // 0 to 100
+        let isGliding = false;
+        let glideTimer = 0;
+
+        let isInvincible = false;
+        let invincibilityTimer = 0;
+
+        // Player state
+        let playerX = 0; // -3 to 3 lane offset
+        let playerY = 0;
+        let playerZ = 0;
+        let velocityY = 0;
+        let isJumping = false;
+        let isVaulting = false;
+        let vaultProgress = 0;
+        let currentVaultObj = null;
+
+        let steerLeft = false;
+        let steerRight = false;
+
+        // World Objects & Spawning
+        let obstacles = [];
+        let collectibles = [];
+        let scenery = [];
+        let pathSegments = [];
+
+        // --- Three.js Setup ---
+        const container = document.getElementById('game-container');
+        const canvas = document.getElementById('renderCanvas');
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xffedd8); // Warm golden hour sky
+        scene.fog = new THREE.FogExp2(0xffd4b2, 0.008);
+
+        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+        // Lighting (Golden Hour Warmth)
+        const ambientLight = new THREE.AmbientLight(0xfff5ee, 0.7);
+        scene.add(ambientLight);
+
+        const sunLight = new THREE.DirectionalLight(0xffb76b, 1.2);
+        sunLight.position.set(50, 80, 50);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
+        sunLight.shadow.camera.near = 0.5;
+        sunLight.shadow.camera.far = 300;
+        const d = 40;
+        sunLight.shadow.camera.left = -d;
+        sunLight.shadow.camera.right = d;
+        sunLight.shadow.camera.top = d;
+        sunLight.shadow.camera.bottom = -d;
+        sunLight.shadow.bias = -0.0005;
+        scene.add(sunLight);
+
+        // Fill Light
+        const fillLight = new THREE.DirectionalLight(0x7ec8e3, 0.4);
+        fillLight.position.set(-50, 40, -30);
+        scene.add(fillLight);
+
+        // --- Create Hero Model (Chibi Kid in Teal Hood & Mustard Tunic) ---
+        const heroGroup = new THREE.Group();
+
+        // Materials with cel-shaded toon feel (MeshToonMaterial or MeshLambert with flat shading)
+        const skinMat = new THREE.MeshLambertMaterial({ color: 0xffd1b3, flatShading: true });
+        const tealMat = new THREE.MeshLambertMaterial({ color: 0x118ab2, flatShading: true });
+        const mustardMat = new THREE.MeshLambertMaterial({ color: 0xffd166, flatShading: true });
+        const brownMat = new THREE.MeshLambertMaterial({ color: 0x8d5b4c, flatShading: true });
+        const greenLeafMat = new THREE.MeshLambertMaterial({ color: 0x4ade80, flatShading: true, side: THREE.DoubleSide });
+
+        // Head (Round chibi face)
+        const headGeo = new THREE.SphereGeometry(0.5, 12, 12);
+        const head = new THREE.Mesh(headGeo, skinMat);
+        head.position.y = 1.1;
+        head.castShadow = true;
+        heroGroup.add(head);
+
+        // Floppy Teal Hood
+        const hoodGeo = new THREE.ConeGeometry(0.65, 0.9, 12);
+        const hood = new THREE.Mesh(hoodGeo, tealMat);
+        hood.position.set(0, 1.4, -0.1);
+        hood.rotation.x = 0.2;
+        heroGroup.add(hood);
+
+        // Mustard Tunic Body
+        const bodyGeo = new THREE.CylinderGeometry(0.35, 0.45, 0.8, 8);
+        const body = new THREE.Mesh(bodyGeo, mustardMat);
+        body.position.y = 0.5;
+        body.castShadow = true;
+        heroGroup.add(body);
+
+        // Bare Feet
+        const footGeo = new THREE.SphereGeometry(0.18, 8, 8);
+        const leftFoot = new THREE.Mesh(footGeo, skinMat);
+        leftFoot.scale.set(1, 0.6, 1.5);
+        leftFoot.position.set(-0.2, 0.05, 0.1);
+        heroGroup.add(leftFoot);
+
+        const rightFoot = leftFoot.clone();
+        rightFoot.position.set(0.2, 0.05, 0.1);
+        heroGroup.add(rightFoot);
+
+        // Bamboo Shepherd's Crook on back
+        const staffGroup = new THREE.Group();
+        const poleGeo = new THREE.CylinderGeometry(0.04, 0.04, 2.2, 6);
+        const pole = new THREE.Mesh(poleGeo, brownMat);
+        staffGroup.add(pole);
+
+        const crookCurveGeo = new THREE.TorusGeometry(0.2, 0.04, 6, 12, Math.PI);
+        const crookCurve = new THREE.Mesh(crookCurveGeo, brownMat);
+        crookCurve.position.y = 1.1;
+        crookCurve.rotation.z = Math.PI / 2;
+        staffGroup.add(crookCurve);
+
+        staffGroup.position.set(0, 0.8, -0.3);
+        staffGroup.rotation.x = -0.3;
+        staffGroup.rotation.z = 0.2;
+        heroGroup.add(staffGroup);
+
+        // Giant Wind Leaf (hidden until active)
+        const leafGroup = new THREE.Group();
+        const leafBladeGeo = new THREE.ConeGeometry(1.8, 3.5, 5);
+        leafBladeGeo.rotateX(Math.PI / 2);
+        const leafBlade = new THREE.Mesh(leafBladeGeo, greenLeafMat);
+        leafBlade.position.set(0, -0.2, 0);
+        leafGroup.add(leafBlade);
+        leafGroup.position.set(0, -0.2, 0);
+        leafGroup.visible = false;
+        heroGroup.add(leafGroup);
+
+        scene.add(heroGroup);
+
+        // --- Procedural World Generation ---
+        const pathWidth = 6;
+        const segmentLength = 20;
+        const totalSegments = 25; // 500 units total
+
+        function createTerrainWorld() {
+            // Clear existing
+            pathSegments.forEach(s => scene.remove(s));
+            pathSegments = [];
+            scenery.forEach(s => scene.remove(s));
+            scenery = [];
+            obstacles.forEach(o => scene.remove(o));
+            obstacles = [];
+            collectibles.forEach(c => scene.remove(c));
+            collectibles = [];
+
+            // Color palettes for terraced hills
+            const hillColors = [0x52b788, 0x40916c, 0x2d6a4f, 0x74c69d];
+
+            for (let i = 0; i < totalSegments; i++) {
+                const zPos = -i * segmentLength;
+                
+                // Path segment (Dirt path)
+                const pathGeo = new THREE.PlaneGeometry(pathWidth, segmentLength + 0.2);
+                const pathMat = new THREE.MeshLambertMaterial({ 
+                    color: (i === 15) ? 0x7ec8e3 : ((i % 3 === 0) ? 0xd4a373 : 0xc89660), // Turquoise stream at segment 15
+                    flatShading: true 
+                });
+                const pathMesh = new THREE.Mesh(pathGeo, pathMat);
+                pathMesh.rotation.x = -Math.PI / 2;
+                pathMesh.position.set(0, (i === 15) ? -0.2 : 0, zPos - segmentLength/2);
+                pathMesh.receiveShadow = true;
+                scene.add(pathMesh);
+                pathSegments.push(pathMesh);
+
+                // Stream water plane if segment 15
+                if (i === 15) {
+                    const waterGeo = new THREE.PlaneGeometry(pathWidth, segmentLength);
+                    const waterMat = new THREE.MeshLambertMaterial({ color: 0x48cae4, transparent: true, opacity: 0.8 });
+                    const water = new THREE.Mesh(waterGeo, waterMat);
+                    water.rotation.x = -Math.PI / 2;
+                    water.position.set(0, 0.05, zPos - segmentLength/2);
+                    scene.add(water);
+                    scenery.push(water);
+                }
+
+                // Terraced Green Hills on sides
+                for (let side = -1; side <= 1; side += 2) {
+                    const hillGeo = new THREE.BoxGeometry(18, 6, segmentLength);
+                    const hillMat = new THREE.MeshLambertMaterial({ color: hillColors[Math.abs(i + side) % hillColors.length], flatShading: true });
+                    const hill = new THREE.Mesh(hillGeo, hillMat);
+                    hill.position.set(side * 13, -2.5, zPos - segmentLength/2);
+                    hill.receiveShadow = true;
+                    hill.castShadow = true;
+                    scene.add(hill);
+                    scenery.push(hill);
+
+                    // Add Blossom Trees & Bamboo groves on hills
+                    if (i % 2 === 0) {
+                        const treeGroup = createTree((side * (8 + Math.random() * 4)), zPos - Math.random() * segmentLength);
+                        scene.add(treeGroup);
+                        scenery.push(treeGroup);
+                    }
+                }
+
+                // Add Lanterns along path
+                if (i % 2 === 0 && i > 0 && i < totalSegments - 2) {
+                    const side = (i % 4 === 0) ? -3.8 : 3.8;
+                    const lantern = createStoneLantern(side, zPos - 5);
+                    scene.add(lantern);
+                    scenery.push(lantern);
+                }
+
+                // Spawn Obstacles & Collectibles based on distance
+                if (i > 2 && i < totalSegments - 2) {
+                    if (i === 15) {
+                        // Wide gorge / Stream bridge gap
+                        const gapObj = createToriiVaultObstacle(zPos - 10);
+                        obstacles.push(gapObj);
+                    } else if (i % 3 === 0) {
+                        // Moss spirit or Boar
+                        const obs = createMobObstacle((Math.random() - 0.5) * 4, zPos - 10, i % 2 === 0 ? 'boar' : 'spirit');
+                        obstacles.push(obs);
+                    } else {
+                        // Rock pile or broken bridge
+                        const obs = createRockObstacle((Math.random() - 0.5) * 4, zPos - 10);
+                        obstacles.push(obs);
+                    }
+
+                    // Collectible Lanterns (Total 7 distributed)
+                    if (lanternsCollected < totalLanterns && (i % 3 === 1)) {
+                        const lanternItem = createCollectibleLantern((Math.random() - 0.5) * 4, zPos - 12);
+                        collectibles.push(lanternItem);
+                    }
+                }
+            }
+
+            // Final Home at the end (-500 Z)
+            const home = createHilltopHome(0, -totalSegments * segmentLength + 10);
+            scene.add(home);
+            scenery.push(home);
+        }
+
+        // --- Asset Generators ---
+        function createTree(x, z) {
+            const group = new THREE.Group();
+            const trunkMat = new THREE.MeshLambertMaterial({ color: 0x8d5b4c });
+            const blossomMat = new THREE.MeshLambertMaterial({ color: 0xffb5a7 });
+            
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 3, 6), trunkMat);
+            trunk.position.y = 1.5;
+            trunk.castShadow = true;
+            group.add(trunk);
+
+            for (let c = 0; c < 3; c++) {
+                const crown = new THREE.Mesh(new THREE.DodecahedronGeometry(1.5 + Math.random() * 0.5), blossomMat);
+                crown.position.set((Math.random()-0.5)*1.2, 3 + c*0.8, (Math.random()-0.5)*1.2);
+                crown.castShadow = true;
+                group.add(crown);
+            }
+
+            group.position.set(x, 0, z);
+            return group;
+        }
+
+        function createStoneLantern(x, z) {
+            const group = new THREE.Group();
+            const stoneMat = new THREE.MeshLambertMaterial({ color: 0xadb5bd, flatShading: true });
+            const glowMat = new THREE.MeshBasicMaterial({ color: 0xffb703 });
+
+            const base = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.5, 0.8, 6), stoneMat);
+            base.position.y = 0.4;
+            group.add(base);
+
+            const lightBox = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.5), glowMat);
+            lightBox.position.y = 1.1;
+            group.add(lightBox);
+
+            const roof = new THREE.Mesh(new THREE.ConeGeometry(0.7, 0.5, 4), stoneMat);
+            roof.position.y = 1.5;
+            roof.rotation.y = Math.PI / 4;
+            group.add(roof);
+
+            group.position.set(x, 0, z);
+            return group;
+        }
+
+        function createRockObstacle(x, z) {
+            const group = new THREE.Group();
+            const rockMat = new THREE.MeshLambertMaterial({ color: 0x6c757d, flatShading: true });
+            const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.8), rockMat);
+            rock.position.y = 0.4;
+            rock.castShadow = true;
+            group.add(rock);
+
+            group.position.set(x, 0, z);
+            group.userData = { type: 'rock', radius: 1.0, active: true };
+            scene.add(group);
+            return group;
+        }
+
+        function createMobObstacle(x, z, type) {
+            const group = new THREE.Group();
+            if (type === 'boar') {
+                const boarMat = new THREE.MeshLambertMaterial({ color: 0x582f0e, flatShading: true });
+                const body = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.9, 1.8), boarMat);
+                body.position.y = 0.5;
+                body.castShadow = true;
+                group.add(body);
+            } else {
+                // Moss Spirit (cute waddling round spirit)
+                const spiritMat = new THREE.MeshLambertMaterial({ color: 0x2b9348, flatShading: true });
+                const body = new THREE.Mesh(new THREE.SphereGeometry(0.7, 8, 8), spiritMat);
+                body.position.y = 0.7;
+                body.castShadow = true;
+                group.add(body);
+            }
+
+            group.position.set(x, 0, z);
+            group.userData = { type: type, radius: 1.2, active: true, offsetZ: z };
+            scene.add(group);
+            return group;
+        }
+
+        function createToriiVaultObstacle(z) {
+            const group = new THREE.Group();
+            const redMat = new THREE.MeshLambertMaterial({ color: 0xe63946, flatShading: true });
+
+            // Torii Gate
+            const leftPost = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 4, 6), redMat);
+            leftPost.position.set(-3, 2, 0);
+            group.add(leftPost);
+
+            const rightPost = leftPost.clone();
+            rightPost.position.set(3, 2, 0);
+            group.add(rightPost);
+
+            const topBeam = new THREE.Mesh(new THREE.BoxGeometry(7.5, 0.4, 0.6), redMat);
+            topBeam.position.set(0, 3.8, 0);
+            group.add(topBeam);
+
+            // Banners / Prompt
+            group.position.set(0, 0, z);
+            group.userData = { type: 'torii', radius: 2.0, active: true, triggered: false };
+            scene.add(group);
+            return group;
+        }
+
+        function createCollectibleLantern(x, z) {
+            const group = new THREE.Group();
+            const paperMat = new THREE.MeshBasicMaterial({ color: 0xffb703 });
+            const lantern = new THREE.Mesh(new THREE.SphereGeometry(0.5, 10, 10), paperMat);
+            lantern.position.y = 1.2;
+            group.add(lantern);
+
+            // Floating glow light
+            const light = new THREE.PointLight(0xffb703, 1, 4);
+            light.position.y = 1.2;
+            group.add(light);
+
+            group.position.set(x, 0, z);
+            group.userData = { type: 'lantern', radius: 1.2, active: true };
+            scene.add(group);
+            return group;
+        }
+
+        function createHilltopHome(x, z) {
+            const group = new THREE.Group();
+            const woodMat = new THREE.MeshLambertMaterial({ color: 0xa98467, flatShading: true });
+            const roofMat = new THREE.MeshLambertMaterial({ color: 0x656d4a, flatShading: true });
+            const warmGlow = new THREE.MeshBasicMaterial({ color: 0xffb703 });
+
+            // Hill base
+            const hillGeo = new THREE.CylinderGeometry(10, 12, 5, 12);
+            const hill = new THREE.Mesh(hillGeo, new THREE.MeshLambertMaterial({ color: 0x52b788, flatShading: true }));
+            hill.position.y = -2.5;
+            group.add(hill);
+
+            // House Cabin
+            const cabin = new THREE.Mesh(new THREE.BoxGeometry(4, 3, 4), woodMat);
+            cabin.position.set(0, 2, 0);
+            cabin.castShadow = true;
+            group.add(cabin);
+
+            // Roof
+            const roof = new THREE.Mesh(new THREE.ConeGeometry(3.5, 2.5, 4), roofMat);
+            roof.position.set(0, 4.5, 0);
+            roof.rotation.y = Math.PI / 4;
+            group.add(roof);
+
+            // Warm Glowing Window
+            const windowMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 0.1), warmGlow);
+            windowMesh.position.set(0, 2, 2.01);
+            group.add(windowMesh);
+
+            group.position.set(x, 0, z);
+            return group;
+        }
+
+        // --- Game Controls & Input Handling ---
+        const keys = { left: false, right: false, jump: false, leaf: false };
+        let lastTapTime = 0;
+
+        window.addEventListener('keydown', (e) => {
+            soundSystem.init();
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
+            if (e.code === 'Space') {
+                e.preventDefault();
+                triggerJump();
+            }
+            if (e.code === 'KeyW' || e.code === 'ArrowUp') {
+                e.preventDefault();
+                triggerLeaf();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+        });
+
+        // Touch & Mouse screen steering
+        let isTouching = false;
+        let touchX = 0;
+
+        window.addEventListener('pointerdown', (e) => {
+            soundSystem.init();
+            if (gameState !== GAME_STATES.PLAYING) return;
+            
+            // Double tap detection for Wind Leaf
+            const now = Date.now();
+            if (now - lastTapTime < 300) {
+                triggerLeaf();
+            } else {
+                // Check if tap was center screen for jump
+                if (e.clientX > window.innerWidth * 0.3 && e.clientX < window.innerWidth * 0.7) {
+                    triggerJump();
+                }
+            }
+            lastTapTime = now;
+
+            isTouching = true;
+            touchX = e.clientX;
+        });
+
+        window.addEventListener('pointermove', (e) => {
+            if (!isTouching || gameState !== GAME_STATES.PLAYING) return;
+            const deltaX = e.clientX - touchX;
+            if (deltaX > 20) {
+                steerRight = true;
+                steerLeft = false;
+            } else if (deltaX < -20) {
+                steerLeft = true;
+                steerRight = false;
+            }
+        });
+
+        window.addEventListener('pointerup', () => {
+            isTouching = false;
+            steerLeft = false;
+            steerRight = false;
+        });
+
+        // UI Buttons
+        document.getElementById('btn-jump').addEventListener('click', () => triggerJump());
+        document.getElementById('btn-leaf').addEventListener('click', () => triggerLeaf());
+
+        function triggerJump() {
+            if (gameState !== GAME_STATES.PLAYING) return;
+            if (!isJumping && !isVaulting) {
+                velocityY = 0.35;
+                isJumping = true;
+                soundSystem.playJump();
+            }
+        }
+
+        function triggerLeaf() {
+            if (gameState !== GAME_STATES.PLAYING) return;
+            if (leafMeter > 20 && !isGliding) {
+                isGliding = true;
+                glideTimer = 3.0; // 3 seconds glide
+                heroGroup.children.forEach(c => { if(c === heroGroup.children[heroGroup.children.length-1]) c.visible = true; });
+                showHint("WIND LEAF GLIDING!");
+            }
+        }
+
+        function showHint(text) {
+            const bubble = document.getElementById('hint-bubble');
+            const hintText = document.getElementById('hint-text');
+            hintText.innerText = text;
+            bubble.style.opacity = '1';
+            setTimeout(() => {
+                bubble.style.opacity = '0';
+            }, 2500);
+        }
+
+        function showFloatingScore(text, x, y) {
+            const fxLayer = document.getElementById('fx-layer');
+            const el = document.createElement('div');
+            el.className = 'absolute font-extrabold text-amber-300 text-lg float-score';
+            el.style.left = `${x}px`;
+            el.style.top = `${y}px`;
+            el.innerText = text;
+            fxLayer.appendChild(el);
+            setTimeout(() => el.remove(), 800);
+        }
+
+        // --- Game Loop & Physics Update ---
+        const forwardSpeed = 0.6;
+
+        function startGame() {
+            soundSystem.init();
+            soundSystem.startMusic();
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('pause-screen').style.display = 'none';
+            document.getElementById('gameover-screen').style.display = 'none';
+            document.getElementById('win-screen').style.display = 'none';
+            
+            // Reset state
+            score = 0;
+            hearts = 3;
+            lanternsCollected = 0;
+            distanceTraveled = 0;
+            playerX = 0;
+            playerY = 0;
+            playerZ = 0;
+            velocityY = 0;
+            isJumping = false;
+            isVaulting = false;
+            leafMeter = 100;
+            isGliding = false;
+
+            createTerrainWorld();
+            gameState = GAME_STATES.PLAYING;
+            updateHUD();
+            showHint("TAP CENTER TO JUMP!");
+        }
+
+        function pauseGame() {
+            if (gameState === GAME_STATES.PLAYING) {
+                gameState = GAME_STATES.PAUSED;
+                document.getElementById('pause-screen').style.display = 'flex';
+                soundSystem.stopMusic();
+            }
+        }
+
+        function resumeGame() {
+            if (gameState === GAME_STATES.PAUSED) {
+                gameState = GAME_STATES.PLAYING;
+                document.getElementById('pause-screen').style.display = 'none';
+                soundSystem.startMusic();
+            }
+        }
+
+        function gameOver() {
+            gameState = GAME_STATES.GAMEOVER;
+            soundSystem.stopMusic();
+            document.getElementById('go-score').innerText = score;
+            document.getElementById('go-lanterns').innerText = `${lanternsCollected}/7`;
+            document.getElementById('gameover-screen').style.display = 'flex';
+        }
+
+        function winGame() {
+            gameState = GAME_STATES.WIN;
+            soundSystem.stopMusic();
+            document.getElementById('win-score').innerText = score + (lanternsCollected * 100);
+            document.getElementById('win-lanterns').innerText = `${lanternsCollected}/7`;
+            document.getElementById('win-hearts').innerText = '❤️ '.repeat(hearts);
+            document.getElementById('win-screen').style.display = 'flex';
+        }
+
+        function updateHUD() {
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('lantern-counter').innerText = `${lanternsCollected}/7`;
+            
+            const pct = Math.min(100, (distanceTraveled / totalDistance) * 100);
+            document.getElementById('progress-bar').style.width = `${pct}%`;
+            document.getElementById('progress-text').innerText = `${Math.floor(pct)}%`;
+
+            let heartsStr = '';
+            for (let i = 0; i < 3; i++) {
+                heartsStr += (i < hearts) ? '❤️ ' : '🤍 ';
+            }
+            document.getElementById('hearts-container').innerHTML = heartsStr;
+
+            document.getElementById('leaf-bar').style.width = `${leafMeter}%`;
+        }
+
+        // Button Event Listeners for Game Flow
+        document.getElementById('start-btn').addEventListener('click', startGame);
+        document.getElementById('pause-btn').addEventListener('click', pauseGame);
+        document.getElementById('resume-btn').addEventListener('click', resumeGame);
+        document.getElementById('restart-pause-btn').addEventListener('click', startGame);
+        document.getElementById('restart-go-btn').addEventListener('click', startGame);
+        document.getElementById('restart-win-btn').addEventListener('click', startGame);
+        document.getElementById('audio-btn').addEventListener('click', () => {
+            const muted = soundSystem.toggleMute();
+            document.getElementById('audio-btn').innerText = muted ? '🔇' : '🔊';
+        });
+
+        // --- Main Animation & Render Loop ---
+        let clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const dt = clock.getDelta();
+
+            if (gameState === GAME_STATES.PLAYING) {
+                // Forward movement
+                playerZ -= forwardSpeed;
+                distanceTraveled += forwardSpeed;
+
+                // Check Win Condition (Reached -500 Z)
+                if (-playerZ >= totalDistance) {
+                    winGame();
+                }
+
+                // Steering (Keyboard & Touch)
+                if (keys.left || steerLeft) playerX -= 0.1;
+                if (keys.right || steerRight) playerX += 0.1;
+                playerX = Math.max(-2.6, Math.min(2.6, playerX));
+
+                // Jump & Gravity Physics
+                if (isJumping) {
+                    velocityY -= 0.02;
+                    playerY += velocityY;
+                    if (playerY <= 0) {
+                        playerY = 0;
+                        isJumping = false;
+                        velocityY = 0;
+                    }
+                } else if (isGliding) {
+                    velocityY = -0.005; // Slow float
+                    playerY += velocityY;
+                    glideTimer -= dt;
+                    leafMeter -= dt * 35;
+                    if (glideTimer <= 0 || leafMeter <= 0) {
+                        isGliding = false;
+                        heroGroup.children[heroGroup.children.length-1].visible = false;
+                    }
+                } else {
+                    // Recharge leaf meter when running
+                    leafMeter = Math.min(100, leafMeter + dt * 20);
+                }
+
+                // Update Hero Position & Bobbing animation
+                heroGroup.position.set(playerX, playerY, playerZ);
+                if (!isJumping && !isGliding) {
+                    heroGroup.position.y += Math.sin(Date.now() * 0.02) * 0.08;
+                    heroGroup.rotation.z = Math.sin(Date.now() * 0.01) * 0.05;
+                } else {
+                    heroGroup.rotation.z = 0;
+                }
+
+                // Camera follow behind hero
+                camera.position.set(playerX * 0.5, playerY + 3.5, playerZ + 8);
+                camera.lookAt(playerX, playerY + 1, playerZ - 3);
+
+                // Invincibility flashing
+                if (isInvincible) {
+                    invincibilityTimer -= dt;
+                    heroGroup.visible = Math.floor(invincibilityTimer * 10) % 2 === 0;
+                    if (invincibilityTimer <= 0) {
+                        isInvincible = false;
+                        heroGroup.visible = true;
+                    }
+                }
+
+                // Obstacle & Collectible Collision Detection
+                obstacles.forEach(obs => {
+                    if (!obs.userData.active) return;
+                    
+                    // Distance check
+                    const dx = heroGroup.position.x - obs.position.x;
+                    const dz = heroGroup.position.z - obs.position.z;
+                    const dist = Math.sqrt(dx*dx + dz*dz);
+
+                    if (obs.userData.type === 'torii') {
+                        // Torii Gate Vault Check
+                        if (Math.abs(dz) < 1.5 && !obs.userData.triggered) {
+                            obs.userData.triggered = true;
+                            if (isJumping || isGliding || playerY > 1.0) {
+                                score += 250;
+                                soundSystem.playCollect();
+                                showHint("STAFF VAULT SUCCESS! +250");
+                                showFloatingScore("+250", window.innerWidth/2, window.innerHeight/3);
+                            } else {
+                                // Failed vault
+                                takeHit();
+                                showHint("OOF! TIMING MISSED!");
+                            }
+                        }
+                    } else if (dist < 1.2 && Math.abs(playerY - obs.position.y) < 1.5) {
+                        if (!isGliding) {
+                            obs.userData.active = false;
+                            takeHit();
+                        }
+                    }
+                });
+
+                collectibles.forEach(col => {
+                    if (!col.userData.active) return;
+                    const dx = heroGroup.position.x - col.position.x;
+                    const dz = heroGroup.position.z - col.position.z;
+                    const dist = Math.sqrt(dx*dx + dz*dx);
+
+                    if (dist < 1.3 && Math.abs(playerY - col.position.y) < 1.5) {
+                        col.userData.active = false;
+                        col.visible = false;
+                        lanternsCollected++;
+                        score += 100;
+                        soundSystem.playCollect();
+                        showFloatingScore("+100 🏮", window.innerWidth/2, window.innerHeight/3);
+                        if (lanternsCollected === 3) showHint("3 LANTERNS FOUND! WARM GLOW!");
+                        if (lanternsCollected === 7) showHint("ALL LANTERNS FOUND! HEAD HOME!");
+                    }
+                });
+
+                updateHUD();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function takeHit() {
+            if (isInvincible) return;
+            hearts--;
+            soundSystem.playHit();
+            isInvincible = true;
+            invincibilityTimer = 2.0; // 2 seconds invincibility
+
+            if (hearts <= 0) {
+                gameOver();
+            }
+        }
+
+        // Handle Window Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Initialize on load
+        window.onload = function() {
+            createTerrainWorld();
+            animate();
+        };
+    </script>
+
+</body></html>
