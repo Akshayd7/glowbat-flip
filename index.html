@@ -42,26 +42,21 @@
       touch-action: manipulation;
     }
 
-    /* Outer responsive frame locked to mobile-first portrait 390x844 on desktop, fullscreen on mobile */
+    /* Contain-fit frame: always keeps 390/844 aspect and fits any window/iframe (e.g. 800x450) */
     #app-shell {
       position: relative;
-      width: 100vw;
-      height: 100vh;
-      max-width: 440px;
-      max-height: 920px;
-      aspect-ratio: 390 / 844;
+      width: min(100vw, calc(100vh * 390 / 844), 440px);
+      width: min(100vw, calc(100dvh * 390 / 844), 440px);
+      height: min(100vh, calc(100vw * 844 / 390), 920px);
+      height: min(100dvh, calc(100vw * 844 / 390), 920px);
       background: linear-gradient(180deg, #4cc9f0 0%, #a8e6cf 65%, #ffd3b6 100%);
       overflow: hidden;
       box-shadow: 0 22px 60px rgba(0, 0, 0, 0.45), 0 0 0 6px rgba(255, 255, 255, 0.22);
       border-radius: 28px;
     }
 
-    @media (max-width: 500px), (max-height: 860px) {
+    @media (max-width: 500px) {
       #app-shell {
-        width: 100vw;
-        height: 100dvh;
-        max-width: none;
-        max-height: none;
         border-radius: 0;
         box-shadow: none;
       }
