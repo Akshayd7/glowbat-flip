@@ -44,8 +44,9 @@
 
     /* Contain-fit frame: fixed 390x844 design surface, uniformly scaled to fit any window/iframe (e.g. 800x450) so ALL content stays fully visible */
     #app-shell {
-      position: relative;
-      flex: 0 0 auto;
+      position: fixed;
+      left: 50%;
+      top: 50%;
       width: 390px;
       height: 844px;
       transform-origin: center center;
@@ -1063,7 +1064,7 @@
       function fitShell() {
         var shell = document.getElementById('app-shell');
         var s = Math.min(window.innerWidth / VW, window.innerHeight / VH, 1.09);
-        shell.style.transform = 'scale(' + s + ')';
+        shell.style.transform = 'translate(-50%, -50%) scale(' + s + ')';
       }
       window.addEventListener('resize', fitShell);
       fitShell();
